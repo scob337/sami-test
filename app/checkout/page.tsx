@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
@@ -9,33 +10,85 @@ import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Check } from 'lucide-react'
 import { toast } from 'sonner'
 
-const PREMIUM_FEATURES = [
-  'تقرير شامل مفصل عن شخصيتك',
-  'وصول غير محدود إلى مكتبة الكتب',
-  'توصيات تطوير شخصي مخصصة',
-  'إعادة الاختبار بدون حد',
-  'تقارير حول التوافقية مع الآخرين',
-  'دعم فني أولوية',
-]
+type ItemType = 'book' | 'test'
 
 export default function CheckoutPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [item, setItem] = useState<any | null>(null)
+
+  const type = (searchParams?.get('type') || 'book') as ItemType
+  const id = searchParams?.get('id') || null
+
+  useEffect(() => {
+    // Fetch item info depending on type (book details or test attempt/result)
+    const fetchItem = async () => {
+      if (!id) return
+      try {
+        if (type === 'test') {
+          const res = await fetch(`/api/test/report?attemptId=${id}`)
+          if (!res.ok) throw new Error('فشل جلب بيانات الاختبار')
+          const data = await res.json()
+          // Expect report to include related result/attempt info; adapt as needed
+          setItem({
+            kind: 'test',
+            title: `تقرير الاختبار #${id}`,
+            price: 49.0,
+            data,
+          })
+        } else {
+          // For books, call a placeholder API route or static data
+          const res = await fetch(`/api/test-library?id=${id}`)
+          if (!res.ok) throw new Error('فشل جلب بيانات الكتاب')
+          const data = await res.json()
+          setItem({
+            kind: 'book',
+            title: data.title || `كتاب #${id}`,
+            price: data.price || 29.0,
+            data,
+          })
+        }
+      } catch (error) {
+        console.error(error)
+        toast.error('حدث خطأ أثناء جلب بيانات العنصر')
+      }
+    }
+
+    fetchItem()
+  }, [type, id])
+
+  const canPurchase = useMemo(() => {
+    if (!item) return false
+    if (item.kind === 'test') {
+      // Front-end guard: only allow purchasing if report/attempt exists and status is COMPLETED
+      const attempt = item.data?.result ? item.data.result : item.data
+      // attempt may differ shape; check common flags
+      return Boolean(attempt) && (attempt.status === 'COMPLETED' || attempt.completedAt)
+    }
+    return true
+  }, [item])
 
   const handlePayment = async () => {
+    if (!item) return
+    if (!canPurchase) {
+      toast.error('لا يمكنك شراء هذا الاختبار لأنّه لم يكتمل بعد.')
+      return
+    }
+
     try {
       setIsLoading(true)
-
-      // TODO: Integrate Stripe checkout
-      console.log('Processing payment...')
-
-      toast.success('تم توجيهك إلى بوابة الدفع')
-      // In real implementation, this would redirect to Stripe
+      // Placeholder: here you would call your backend to create a Stripe session
+      // const res = await fetch('/api/payments/create-session', { method: 'POST', body: JSON.stringify({ itemId: id, itemType: type }) })
+      // then redirect to Stripe Checkout
+      await new Promise((r) => setTimeout(r, 900))
+      toast.success('سيتم توجيهك إلى بوابة الدفع (تجريبي)')
+      // router.push('/payments/success') // on real flow redirect after payment
     } catch (error) {
-      toast.error('حدث خطأ أثناء معالجة الدفع')
       console.error(error)
+      toast.error('حدث خطأ أثناء معالجة الدفع')
     } finally {
       setIsLoading(false)
     }
@@ -47,139 +100,85 @@ export default function CheckoutPage() {
       <Section size="lg" className="flex-1">
         <Container size="md">
           <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center mb-16"
-            >
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                ترقية للعضوية المميزة
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                احصل على وصول كامل لجميع المميزات والتقارير الشاملة
-              </p>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
+              <h1 className="text-3xl font-bold">بوابة الدفع</h1>
+              <p className="text-muted-foreground">راجع بيانات الشراء ثم تابع إلى الدفع الآمن</p>
             </motion.div>
 
-            {/* Grid */}
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              {/* Features */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-4"
-              >
-                {PREMIUM_FEATURES.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    className="flex items-center gap-3"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                      <Check className="w-4 h-4 text-primary" />
+            <div className="grid md:grid-cols-2 gap-8 items-start">
+              <div className="space-y-4">
+                <Card className="p-6">
+                  <h2 className="text-xl font-semibold mb-2">معلومات الطلب</h2>
+                  {!item ? (
+                    <div className="py-8 flex items-center justify-center">
+                      <LoadingSpinner size="lg" />
                     </div>
-                    <span className="text-foreground">{feature}</span>
-                  </motion.div>
-                ))}
-              </motion.div>
-
-              {/* Payment Card */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <Card className="p-8 border-primary/20 sticky top-20">
-                  {/* Price */}
-                  <div className="mb-8">
-                    <div className="text-4xl font-bold mb-2">
-                      99<span className="text-xl font-semibold"> ر.س</span>
-                    </div>
-                    <p className="text-muted-foreground">
-                      دفعة واحدة مدى الحياة
-                    </p>
-                  </div>
-
-                  {/* Order Summary */}
-                  <div className="space-y-3 pb-8 border-b border-border/40">
-                    <div className="flex justify-between text-sm">
-                      <span>التقرير الشامل</span>
-                      <span>99 ر.س</span>
-                    </div>
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>ضريبة (15%)</span>
-                      <span>14.85 ر.س</span>
-                    </div>
-                  </div>
-
-                  {/* Total */}
-                  <div className="flex justify-between items-center py-8">
-                    <span className="font-semibold">المجموع</span>
-                    <span className="text-2xl font-bold">113.85 ر.س</span>
-                  </div>
-
-                  {/* Payment Button */}
-                  <Button
-                    onClick={handlePayment}
-                    disabled={isLoading}
-                    className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold"
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <LoadingSpinner size="sm" />
-                        جاري المعالجة...
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-bold text-lg">{item.title}</div>
+                          <div className="text-sm text-muted-foreground mt-1">{item.kind === 'test' ? 'تقرير اختبار' : 'كتاب رقمي'}</div>
+                        </div>
+                        <div className="text-lg font-bold">{item.price} ر.س</div>
                       </div>
-                    ) : (
-                      'الدفع الآن'
-                    )}
-                  </Button>
 
-                  {/* Security */}
-                  <p className="text-xs text-muted-foreground text-center mt-4">
-                    🔒 الدفع آمن ومشفر
-                  </p>
-                </Card>
-              </motion.div>
-            </div>
+                      {item.kind === 'test' && (
+                        <div className="text-sm text-muted-foreground">
+                          {item.data?.reportText ? (
+                            <div className="whitespace-pre-wrap">{item.data.reportText.substring(0, 300)}...</div>
+                          ) : (
+                            <div>لا يتوفر نص التقرير الآن.</div>
+                          )}
+                        </div>
+                      )}
 
-            {/* FAQ */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="mt-16 space-y-6"
-            >
-              <h2 className="text-2xl font-bold">أسئلة شائعة</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-2">هل هناك نسخة تجريبية؟</h3>
-                  <p className="text-sm text-muted-foreground">
-                    يمكنك الحصول على النتائج الأساسية مجاناً. العضوية المميزة تشمل التقارير الشاملة والموارد الإضافية.
-                  </p>
+                      {item.kind === 'book' && (
+                        <div className="text-sm text-muted-foreground">وصف الكتاب: {item.data?.description || '—'}</div>
+                      )}
+                    </div>
+                  )}
                 </Card>
+
                 <Card className="p-6">
-                  <h3 className="font-semibold mb-2">هل يوجد ضمان استرجاع؟</h3>
-                  <p className="text-sm text-muted-foreground">
-                    نعم، لديك 30 يوم كامل لاسترجاع أموالك بدون أي أسئلة إذا لم تكن راضياً.
-                  </p>
-                </Card>
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-2">كيف يتم الدفع؟</h3>
-                  <p className="text-sm text-muted-foreground">
-                    نحن نقبل بطاقات الائتمان والخصم من خلال Stripe آمن وموثوق.
-                  </p>
-                </Card>
-                <Card className="p-6">
-                  <h3 className="font-semibold mb-2">هل لديكم دعم عملاء؟</h3>
-                  <p className="text-sm text-muted-foreground">
-                    بالتأكيد! فريقنا متاح 24/7 للإجابة على أي استفسارات لديك.
-                  </p>
+                  <h3 className="font-semibold mb-2">تفاصيل الشحن/الفاتورة</h3>
+                  <p className="text-sm text-muted-foreground">سيُرسل المحتوى الرقمي إلى حسابك بعد اكتمال الدفع.</p>
                 </Card>
               </div>
-            </motion.div>
+
+              <div>
+                <Card className="p-6 sticky top-24">
+                  <h3 className="font-semibold mb-4">ملخص الدفع</h3>
+                  <div className="flex justify-between mb-2">
+                    <span>سعر العنصر</span>
+                    <span className="font-semibold">{item ? `${item.price} ر.س` : '—'}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                    <span>الخصم</span>
+                    <span>0 ر.س</span>
+                  </div>
+                  <div className="flex justify-between items-center py-4 border-t border-border">
+                    <span className="font-semibold">المبلغ الإجمالي</span>
+                    <span className="text-2xl font-bold">{item ? `${item.price} ر.س` : '—'}</span>
+                  </div>
+
+                  <div className="mt-6">
+                    <Button onClick={handlePayment} disabled={isLoading || !canPurchase} className="w-full h-12 bg-primary text-white font-semibold">
+                      {isLoading ? (
+                        <div className="flex items-center gap-2 justify-center">
+                          <LoadingSpinner size="sm" />
+                          جاري التوجيه
+                        </div>
+                      ) : (
+                        canPurchase ? 'الدفع الآن' : 'غير متاح للشراء'
+                      )}
+                    </Button>
+                  </div>
+
+                  <p className="text-xs text-muted-foreground text-center mt-4">🔒 الدفع آمن ومشفر — ربط Stripe لاحقاً</p>
+                </Card>
+              </div>
+            </div>
           </div>
         </Container>
       </Section>

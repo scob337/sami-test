@@ -23,13 +23,13 @@ const PATTERN_LABELS: Record<string, string> = {
 }
 
 const PATTERN_COLORS: Record<string, string> = {
-  ASSERTIVE: 'bg-rose-100 text-rose-700',
-  PRECISE:   'bg-blue-100 text-blue-700',
-  CALM:      'bg-emerald-100 text-emerald-700',
-  WISE:      'bg-amber-100 text-amber-700',
-  THINKER:   'bg-violet-100 text-violet-700',
-  SPONTANEOUS:'bg-orange-100 text-orange-700',
-  OPEN:      'bg-sky-100 text-sky-700',
+  ASSERTIVE: 'bg-rose-500/10 text-rose-600',
+  PRECISE:   'bg-blue-500/10 text-blue-600',
+  CALM:      'bg-emerald-500/10 text-emerald-600',
+  WISE:      'bg-amber-500/10 text-amber-600',
+  THINKER:   'bg-violet-500/10 text-violet-600',
+  SPONTANEOUS:'bg-orange-500/10 text-orange-600',
+  OPEN:      'bg-sky-500/10 text-sky-600',
 }
 
 interface QuestionOption { id: number; optionText: string; sortOrder: number; scores: { pattern: string; score: number }[] }
@@ -97,7 +97,7 @@ export default function QuestionsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900">إدارة الأسئلة</h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">إدارة الأسئلة</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             {questions.length} سؤال • {tests.length} اختبار
           </p>

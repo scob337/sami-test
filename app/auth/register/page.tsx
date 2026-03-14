@@ -46,88 +46,93 @@ export default function RegisterPage() {
       footerText="هل لديك حساب بالفعل؟"
       footerLink={{ text: 'دخول', href: '/auth/login' }}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Full Name */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">الاسم الكامل</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">الاسم الكامل</label>
           <Input
             placeholder="أحمد محمد"
             {...register('fullName')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.fullName && (
-            <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.fullName.message}</p>
           )}
         </div>
 
         {/* Email */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">البريد الإلكتروني</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">البريد الإلكتروني</label>
           <Input
             type="email"
             placeholder="you@example.com"
             {...register('email')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.email.message}</p>
           )}
         </div>
 
         {/* Phone */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">رقم الهاتف</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">رقم الهاتف</label>
           <Input
             placeholder="+966 55 000 0000"
             {...register('phone')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.phone.message}</p>
           )}
         </div>
 
         {/* Password */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">كلمة المرور</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">كلمة المرور</label>
           <Input
             type="password"
             placeholder="••••••••"
             {...register('password')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.password.message}</p>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">تأكيد كلمة المرور</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">تأكيد كلمة المرور</label>
           <Input
             type="password"
             placeholder="••••••••"
             {...register('confirmPassword')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.confirmPassword && (
-            <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.confirmPassword.message}</p>
           )}
         </div>
 
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 h-10"
+          className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
           disabled={isLoading}
         >
           {isLoading ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <LoadingSpinner size="sm" />
-              جاري التسجيل...
+              <span>جاري التسجيل...</span>
             </div>
           ) : (
-            'تسجيل'
+            'إنشاء حساب'
           )}
         </Button>
 

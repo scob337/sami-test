@@ -1,8 +1,28 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (id) {
+      const book = await prisma.book.findUnique({
+        where: { id: parseInt(id), isActive: true },
+        include: {
+          tests: {
+            where: { isActive: true },
+          },
+        },
+      })
+
+      if (!book) {
+        return NextResponse.json({ error: 'Book not found' }, { status: 404 })
+      }
+
+      return NextResponse.json(book)
+    }
+
     const books = await prisma.book.findMany({
       where: { isActive: true },
       include: {

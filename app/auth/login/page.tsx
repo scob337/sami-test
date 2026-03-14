@@ -31,6 +31,7 @@ export default function LoginPage() {
 
       toast.success('تم الدخول بنجاح')
       router.push('/dashboard')
+      router.refresh()
     } catch (error) {
       toast.error('بيانات الدخول غير صحيحة')
       console.error(error)
@@ -46,32 +47,34 @@ export default function LoginPage() {
       footerText="ليس لديك حساب؟"
       footerLink={{ text: 'تسجيل', href: '/auth/register' }}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Email */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">البريد الإلكتروني</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">البريد الإلكتروني</label>
           <Input
             type="email"
             placeholder="you@example.com"
             {...register('email')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.email.message}</p>
           )}
         </div>
 
         {/* Password */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">كلمة المرور</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">كلمة المرور</label>
           <Input
             type="password"
             placeholder="••••••••"
             {...register('password')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.password.message}</p>
           )}
         </div>
 
@@ -79,7 +82,7 @@ export default function LoginPage() {
         <div className="text-right">
           <a
             href="/auth/forgot-password"
-            className="text-sm text-primary hover:underline"
+            className="text-sm font-bold text-primary hover:text-primary/80 transition-colors"
           >
             هل نسيت كلمة المرور؟
           </a>
@@ -88,13 +91,13 @@ export default function LoginPage() {
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 h-10"
+          className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
           disabled={isLoading}
         >
           {isLoading ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <LoadingSpinner size="sm" />
-              جاري الدخول...
+              <span>جاري الدخول...</span>
             </div>
           ) : (
             'دخول'

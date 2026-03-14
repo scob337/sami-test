@@ -66,66 +66,68 @@ export default function OTPPage() {
       footerText="لم تتلق الكود؟"
       footerLink={{ text: 'طلب كود جديد', href: '#' }}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Phone Number */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">رقم الهاتف</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">رقم الهاتف</label>
           <Input
             placeholder="+966 55 000 0000"
             {...register('phone')}
             disabled={isLoading}
+            className="h-14 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold"
           />
           {errors.phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.phone.message}</p>
           )}
         </div>
 
         {/* OTP Code */}
-        <div>
-          <label className="text-sm font-medium mb-2 block">كود التحقق</label>
+        <div className="space-y-2">
+          <label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">كود التحقق</label>
           <Input
             placeholder="000000"
             maxLength={6}
             {...register('code')}
             disabled={isLoading}
-            className="tracking-widest text-center text-lg"
+            className="h-16 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-black text-3xl tracking-[1rem] text-center"
           />
           {errors.code && (
-            <p className="text-red-500 text-sm mt-1">{errors.code.message}</p>
+            <p className="text-red-500 text-sm mt-1 font-bold">{errors.code.message}</p>
           )}
-          <p className="text-xs text-muted-foreground mt-2">
-            أدخل الكود المكون من 6 أرقام
+          <p className="text-xs font-bold text-muted-foreground mt-3 text-center opacity-60">
+            أدخل الكود المكون من 6 أرقام المرسل لهاتفك
           </p>
         </div>
 
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-primary hover:bg-primary/90 h-10"
+          className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
           disabled={isLoading}
         >
           {isLoading ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <LoadingSpinner size="sm" />
-              جاري التحقق...
+              <span>جاري التحقق...</span>
             </div>
           ) : (
-            'تحقق'
+            'تحقق الآن'
           )}
         </Button>
 
-        {/* Resend Button */}
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleResendOTP}
-          disabled={isLoading || resendCooldown > 0}
-        >
-          {resendCooldown > 0
-            ? `إعادة الإرسال خلال ${resendCooldown}ث`
-            : 'إعادة إرسال الكود'}
-        </Button>
+        {/* Resend Section */}
+        <div className="text-center pt-2">
+          <button
+            type="button"
+            onClick={handleResendOTP}
+            disabled={resendCooldown > 0}
+            className="text-sm font-bold text-primary hover:text-primary/80 disabled:opacity-50 transition-all"
+          >
+            {resendCooldown > 0 
+              ? `إعادة الإرسال خلال ${resendCooldown} ثانية` 
+              : 'طلب كود جديد'}
+          </button>
+        </div>
       </form>
     </AuthForm>
   )

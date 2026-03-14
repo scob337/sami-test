@@ -1,7 +1,15 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Geist, Geist_Mono, Cairo } from 'next/font/google'
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  variable: '--font-cairo',
+  display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
+})
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const geist = Geist({ 
@@ -77,30 +85,37 @@ export default function RootLayout({
     <html 
       lang="ar" 
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} dark`}
+      className={`${geist.variable} ${geistMono.variable} ${cairo.variable}`}
       dir="rtl"
     >
       <head>
         <meta charSet="utf-8" />
-        <meta name="theme-color" content="#5B3BA0" />
+        <meta name="theme-color" content="#3B82F6" />
       </head>
       <body 
-        className="font-sans antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden"
+        className="font-cairo antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden selection:bg-primary/30 selection:text-primary-foreground"
         suppressHydrationWarning
       >
-        {/* Ambient Aurora Background */}
-        <div className="aurora-bg">
-          <div className="aurora-dot w-[500px] h-[500px] bg-primary/20 -top-48 -left-48" />
-          <div className="aurora-dot w-[400px] h-[400px] bg-secondary/15 top-1/2 -right-24" />
-          <div className="aurora-dot w-[600px] h-[600px] bg-accent/10 -bottom-48 left-1/2 -translate-x-1/2" />
-        </div>
-        
-        <div className="relative z-10 flex flex-col min-h-screen">
-          {children}
-        </div>
-        
-        <Toaster position="top-center" richColors />
-        <Analytics />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {/* Ambient Aurora Background */}
+          <div className="aurora-bg">
+            <div className="aurora-dot w-[500px] h-[500px] bg-primary/20 -top-48 -left-48" />
+            <div className="aurora-dot w-[400px] h-[400px] bg-secondary/15 top-1/2 -right-24" />
+            <div className="aurora-dot w-[600px] h-[600px] bg-accent/10 -bottom-48 left-1/2 -translate-x-1/2" />
+          </div>
+          
+          <div className="relative z-10 flex flex-col min-h-screen">
+            {children}
+          </div>
+          
+          <Toaster position="top-center" richColors />
+          <Analytics />
+        </ThemeProvider>
       </body>
     </html>
   )

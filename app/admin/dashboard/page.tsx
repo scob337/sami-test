@@ -1,170 +1,118 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
-import { Section } from '@/components/layout/section'
-import { Container } from '@/components/layout/container'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useAuthStore } from '@/lib/store/auth-store'
-import Link from 'next/link'
-import { Download, Share2, BookOpen, Settings } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { 
+  Users, BookOpen, ClipboardList, CreditCard,
+  TrendingUp, Activity, ArrowUpRight, BarChart3
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-export default function DashboardPage() {
-  const { user } = useAuthStore()
-  const [recentTests] = useState([
-    {
-      id: '1',
-      type: 'INFJ',
-      date: '2024-03-11',
-      name: 'المستشار',
-    },
-  ])
+interface DashboardStats {
+  users: number
+  books: number
+  tests: number
+  payments: number
+}
+
+export default function AdminDashboard() {
+  const [stats, setStats] = useState<DashboardStats>({ users: 0, books: 0, tests: 0, payments: 0 })
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const [usersRes, booksRes, testsRes] = await Promise.all([
+          fetch('/api/admin/users'),
+          fetch('/api/admin/books'),
+          fetch('/api/admin/tests'),
+        ])
+        const [users, books, tests] = await Promise.all([
+          usersRes.json(), booksRes.json(), testsRes.json(),
+        ])
+        setStats({
+          users: Array.isArray(users) ? users.length : 0,
+          books: Array.isArray(books) ? books.length : 0,
+          tests: Array.isArray(tests) ? tests.length : 0,
+          payments: Array.isArray(users) ? users.filter((u: any) => u._count?.payments > 0).length : 0,
+        })
+      } catch (error) {
+        console.error('Error fetching stats:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  const statCards = [
+    { label: 'إجمالي المستخدمين', value: stats.users, icon: Users, color: 'text-primary', bg: 'bg-primary/10', trend: '+12%' },
+    { label: 'الكتب المتاحة', value: stats.books, icon: BookOpen, color: 'text-accent-foreground', bg: 'bg-accent/20', trend: '' },
+    { label: 'الاختبارات', value: stats.tests, icon: ClipboardList, color: 'text-primary', bg: 'bg-primary/10', trend: '' },
+    { label: 'عمليات الدفع', value: stats.payments, icon: CreditCard, color: 'text-accent-foreground', bg: 'bg-accent/20', trend: '+8%' },
+  ]
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
 
   return (
-    <main className="min-h-screen flex flex-col">
-      <Header />
-      <Section size="lg" className="flex-1">
-        <Container>
-          <div className="space-y-12">
-            {/* Welcome Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
-            >
-              <h1 className="text-4xl font-bold">
-                مرحباً بك،{' '}
-                <span className="text-primary">
-                  {user?.user_metadata?.fullName || 'المستخدم'}
-                </span>
-              </h1>
-              <p className="text-lg text-muted-foreground">
-                إليك ملخص نشاطك على MindMatch
-              </p>
-            </motion.div>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">نظرة عامة</h2>
+        <p className="text-sm text-muted-foreground mt-1">مرحباً، إليك ملخص أداء المنصة.</p>
+      </div>
 
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="grid md:grid-cols-3 gap-6"
-            >
-              <Card className="p-6">
-                <div className="text-sm text-muted-foreground mb-2">
-                  عدد الاختبارات
+      {/* Stats Grid */}
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {statCards.map((stat) => (
+          <Card key={stat.label} className="border border-border shadow-sm hover:shadow-md transition-all bg-card rounded-2xl overflow-hidden group">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between mb-4">
+                <div className={`w-11 h-11 rounded-xl ${stat.bg} flex items-center justify-center`}>
+                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
-                <div className="text-3xl font-bold">1</div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-sm text-muted-foreground mb-2">
-                  نوع الشخصية الأساسي
-                </div>
-                <div className="text-3xl font-bold text-primary">INFJ</div>
-              </Card>
-              <Card className="p-6">
-                <div className="text-sm text-muted-foreground mb-2">
-                  الحالة
-                </div>
-                <div className="text-3xl font-bold text-accent">نشط</div>
-              </Card>
-            </motion.div>
-
-            {/* Recent Tests */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-6"
-            >
-              <h2 className="text-2xl font-bold">الاختبارات الأخيرة</h2>
-              <div className="space-y-4">
-                {recentTests.length > 0 ? (
-                  recentTests.map((test) => (
-                    <Card key={test.id} className="p-6">
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="space-y-2">
-                          <h3 className="font-semibold text-lg">
-                            {test.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            تم في{' '}
-                            {new Date(test.date).toLocaleDateString('ar-SA')}
-                          </p>
-                        </div>
-                        <div className="flex gap-2 flex-wrap">
-                          <Link href="/results">
-                            <Button size="sm" variant="outline">
-                              <Download className="w-4 h-4 ml-2" />
-                              عرض التقرير
-                            </Button>
-                          </Link>
-                          <Button size="sm" variant="outline">
-                            <Share2 className="w-4 h-4 ml-2" />
-                            مشاركة
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))
-                ) : (
-                  <Card className="p-8 text-center">
-                    <p className="text-muted-foreground mb-4">
-                      لم تأخذ أي اختبارات بعد
-                    </p>
-                    <Link href="/test">
-                      <Button className="bg-primary hover:bg-primary/90">
-                        ابدأ الاختبار الآن
-                      </Button>
-                    </Link>
-                  </Card>
+                {stat.trend && (
+                  <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
+                    <ArrowUpRight className="w-3 h-3" />
+                    {stat.trend}
+                  </span>
                 )}
               </div>
-            </motion.div>
+              <div className="text-3xl font-black text-foreground mb-1">{stat.value.toLocaleString('ar-SA')}</div>
+              <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-            {/* Resources */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="space-y-6"
-            >
-              <h2 className="text-2xl font-bold">الموارد والكتب</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <Card className="p-6 border-primary/20">
-                  <BookOpen className="w-8 h-8 text-primary mb-4" />
-                  <h3 className="font-semibold mb-2">المكتبة</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    وصول إلى مكتبة الكتب المخصصة لشخصيتك
-                  </p>
-                  <Link href="/books">
-                    <Button size="sm" className="w-full">
-                      استكشف الكتب
-                    </Button>
-                  </Link>
-                </Card>
-
-                <Card className="p-6 border-accent/20">
-                  <Settings className="w-8 h-8 text-accent mb-4" />
-                  <h3 className="font-semibold mb-2">الإعدادات</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    إدارة حسابك والتفضيلات الخاصة بك
-                  </p>
-                  <Link href="/settings">
-                    <Button size="sm" className="w-full">
-                      الإعدادات
-                    </Button>
-                  </Link>
-                </Card>
+      {/* Quick Links */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {[
+          { title: 'إدارة الأسئلة', desc: 'أضف أو عدّل أسئلة الاختبارات وربطها بالأنماط', href: '/admin/questions', icon: Activity, color: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
+          { title: 'إدارة البرومبتات', desc: 'تحكم في محتوى التقارير المُولَّدة بالذكاء الاصطناعي', href: '/admin/prompts', icon: BarChart3, color: 'text-accent-foreground', bg: 'bg-accent/5 hover:bg-accent/10' },
+          { title: 'بيانات المستخدمين', desc: 'راقب نشاط المستخدمين وصدّر البيانات للتسويق', href: '/admin/users', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
+        ].map(item => (
+          <a
+            key={item.title}
+            href={item.href}
+            className={`block p-6 rounded-[2rem] bg-card/40 backdrop-blur-sm border border-border/50 hover:border-primary/50 transition-all hover:-translate-y-1 hover:shadow-xl group ${item.bg}`}
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-background border border-border/50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                <item.icon className={`w-6 h-6 ${item.color}`} />
               </div>
-            </motion.div>
-          </div>
-        </Container>
-      </Section>
-      <Footer />
-    </main>
+              <ArrowUpRight className="w-5 h-5 text-muted-foreground/30 mr-auto group-hover:text-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" />
+            </div>
+            <h3 className="font-black text-foreground text-lg tracking-tight">{item.title}</h3>
+            <p className="text-sm font-bold text-muted-foreground mt-2 leading-relaxed opacity-80">{item.desc}</p>
+          </a>
+        ))}
+      </div>
+    </div>
   )
 }

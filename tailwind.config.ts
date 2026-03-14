@@ -58,6 +58,7 @@ const config = {
         sm: 'calc(var(--radius) - 4px)',
       },
       fontFamily: {
+        cairo: ['var(--font-cairo)', ...defaultTheme.fontFamily.sans],
         sans: ['var(--font-sans)', ...defaultTheme.fontFamily.sans],
         mono: ['var(--font-mono)', ...defaultTheme.fontFamily.mono],
       },

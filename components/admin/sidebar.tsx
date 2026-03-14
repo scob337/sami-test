@@ -13,9 +13,10 @@ import {
   LogOut
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 const menuItems = [
-  { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/admin' },
+  { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/admin/dashboard' },
   { icon: BookOpen, label: 'إدارة الكتب', href: '/admin/books' },
   { icon: ClipboardList, label: 'إدارة الاختبارات', href: '/admin/tests' },
   { icon: HelpCircle, label: 'إدارة الأسئلة', href: '/admin/questions' },
@@ -27,31 +28,47 @@ export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-card border-l border-border h-full flex flex-col">
-      <div className="p-6 border-b border-border">
-        <h1 className="text-xl font-bold text-foreground">لوحة الإدارة</h1>
-        <p className="text-xs text-muted-foreground mt-1">إدارة المنصة</p>
+    <aside className="w-72 bg-card/50 backdrop-blur-xl border-l border-border/50 h-full flex flex-col shadow-2xl z-50">
+      <div className="p-8 border-b border-border/50">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-lg shadow-primary/20">
+            M
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors">MindMatch</h1>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Admin Control</p>
+          </div>
+        </Link>
       </div>
       
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-              pathname === item.href && "bg-primary/10 text-primary font-semibold border-r-2 border-primary shadow-sm"
+              "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group relative",
+              pathname === item.href 
+                ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 font-bold" 
+                : "text-muted-foreground hover:bg-primary/5 hover:text-primary font-semibold"
             )}
           >
-            <item.icon className={cn("w-5 h-5", pathname === item.href && "text-primary")} />
-            <span>{item.label}</span>
+            <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", pathname === item.href ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
+            <span className="text-[15px]">{item.label}</span>
+            {pathname === item.href && (
+              <motion.div 
+                layoutId="active-pill"
+                className="absolute right-2 w-1.5 h-6 bg-primary-foreground rounded-full"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              />
+            )}
           </Link>
         ))}
       </nav>
 
-      <div className="p-3 border-t border-border">
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all">
-          <LogOut className="w-5 h-5" />
+      <div className="p-4 border-t border-border/50 bg-background/30 backdrop-blur-md">
+        <button className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive font-bold transition-all duration-300 group">
+          <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
           <span>تسجيل الخروج</span>
         </button>
       </div>

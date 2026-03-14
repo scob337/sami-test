@@ -39,6 +39,23 @@ export async function POST(request: Request) {
     }
 
     const optionIds = answers.map((a: any) => a.answerId)
+    const questionIds = answers.map((a: any) => a.questionId)
+
+    // Verify all questionIds exist in the DB to avoid P2003
+    const dbQuestions = await prisma.question.findMany({
+      where: { id: { in: questionIds } },
+      select: { id: true }
+    })
+    const validQuestionIds = new Set(dbQuestions.map(q => q.id))
+
+    const validAnswers = answers.filter((a: any) => 
+      validQuestionIds.has(a.questionId) && a.answerId && a.questionId
+    )
+
+    if (validAnswers.length === 0) {
+      return NextResponse.json({ error: 'No valid answers provided' }, { status: 400 })
+    }
+
     const scores = await prisma.optionScore.findMany({
       where: {
         optionId: { in: optionIds },
@@ -65,12 +82,6 @@ export async function POST(request: Request) {
         testId: parseInt(testId),
         status: 'COMPLETED',
         completedAt: new Date(),
-        answers: {
-          create: answers.map((a: any) => ({
-            questionId: a.questionId,
-            optionId: a.answerId,
-          })),
-        },
         result: {
           create: {
             primaryPattern,
@@ -82,6 +93,15 @@ export async function POST(request: Request) {
       include: {
         result: true,
       }
+    })
+
+    // 5. Save individual answers linked to the attempt
+    await prisma.answer.createMany({
+      data: validAnswers.map((a: any) => ({
+        attemptId: attempt.id,
+        questionId: a.questionId,
+        optionId: a.answerId,
+      })),
     })
 
     return NextResponse.json({

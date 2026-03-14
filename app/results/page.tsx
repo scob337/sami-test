@@ -263,6 +263,7 @@ export default function ResultsPage() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 }}
+                  onClick={() => router.push('/test-library')}
                   className="bg-card border border-border p-6 sm:p-8 rounded-2xl md:rounded-[3rem] shadow-lg group cursor-pointer hover:bg-secondary transition-colors"
                 >
                   <div className="flex items-center gap-6">
@@ -270,7 +271,7 @@ export default function ResultsPage() {
                       <BookOpen className="w-8 h-8 text-accent-foreground" />
                     </div>
                     <div>
-                      <h4 className="text-xl font-bold text-foreground mb-1">كتب المقترحة</h4>
+                      <h4 className="text-xl font-bold text-foreground mb-1">الكتب المقترحة</h4>
                       <p className="text-sm text-muted-foreground font-medium">موارد مختارة بعناية لنوع شخصيتك</p>
                     </div>
                   </div>

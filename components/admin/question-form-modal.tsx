@@ -155,84 +155,84 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border rounded-3xl" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-foreground">
-            {editQuestion ? 'تعديل السؤال' : 'إضافة سؤال جديد'}
+          <DialogTitle className="text-2xl font-black text-foreground tracking-tight">
+            {editQuestion ? 'تعديل بيانات السؤال' : 'إضافة سؤال جديد للاختبار'}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
+        <div className="space-y-8 py-6">
           {/* Question Text */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-foreground">نص السؤال</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">نص السؤال</Label>
             <Input
               value={questionText}
               onChange={e => setQuestionText(e.target.value)}
-              placeholder="اكتب السؤال هنا..."
-              className="text-right h-12 rounded-xl bg-background border-border/50 focus-visible:ring-primary/50 text-foreground"
+              placeholder="اكتب السؤال هنا بوضوح..."
+              className="text-right h-14 px-6 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold text-lg transition-all"
             />
           </div>
 
           {/* Answers */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label className="text-sm font-bold text-foreground">الإجابات ({answers.length})</Label>
+              <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">الإجابات المتاحة ({answers.length})</Label>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={addAnswer}
-                className="h-8 px-3 text-xs rounded-lg border-dashed border-primary text-primary hover:bg-primary/5"
+                className="h-10 px-4 rounded-xl border-dashed border-primary text-primary hover:bg-primary/5 font-bold transition-all"
               >
-                <Plus className="w-3 h-3 ml-1" />
+                <Plus className="w-4 h-4 ml-2" />
                 إضافة إجابة
               </Button>
             </div>
 
-            <div className="space-y-2">
+            <div className="grid gap-4">
               {answers.map((answer, index) => (
-                <div key={answer.id} className="flex items-center gap-2 p-3 bg-muted/50 rounded-xl border border-border/50">
-                  <span className="text-xs font-bold text-muted-foreground w-5 text-center">{index + 1}</span>
+                <div key={answer.id} className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-secondary/30 rounded-2xl border-2 border-border/5 group transition-all hover:border-primary/20">
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <span className="text-sm font-black text-muted-foreground w-8 h-8 rounded-full bg-background flex items-center justify-center border border-border/50">{index + 1}</span>
+                    <Input
+                      value={answer.optionText}
+                      onChange={e => updateAnswer(answer.id, 'optionText', e.target.value)}
+                      placeholder="نص الإجابة..."
+                      className="flex-1 text-right h-12 rounded-xl border-2 border-border/5 bg-background text-foreground font-bold focus:border-primary/50"
+                    />
+                  </div>
                   
-                  <Input
-                    value={answer.optionText}
-                    onChange={e => updateAnswer(answer.id, 'optionText', e.target.value)}
-                    placeholder="نص الإجابة..."
-                    className="flex-1 text-right h-9 rounded-lg border-border/50 bg-background text-foreground text-sm focus-visible:ring-primary/50"
-                  />
+                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <Select
+                      value={answer.pattern}
+                      onValueChange={val => updateAnswer(answer.id, 'pattern', val)}
+                    >
+                      <SelectTrigger className="h-12 w-full sm:w-[160px] rounded-xl border-2 border-border/5 bg-background font-bold">
+                        <SelectValue placeholder="اختر النمط" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-border bg-card">
+                        {PATTERNS.map(p => (
+                          <SelectItem 
+                            key={p.value} 
+                            value={p.value}
+                            disabled={usedPatterns.has(p.value) && answer.pattern !== p.value}
+                            className="font-bold py-2.5"
+                          >
+                            {p.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                  <Select
-                    value={answer.pattern}
-                    onValueChange={val => updateAnswer(answer.id, 'pattern', val)}
-                  >
-                    <SelectTrigger className="w-36 h-9 text-xs rounded-lg border-border/50 bg-background text-foreground text-right focus-visible:ring-primary/50">
-                      <SelectValue placeholder="النمط..." />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      {PATTERNS.map(p => (
-                        <SelectItem
-                          key={p.value}
-                          value={p.value}
-                          disabled={usedPatterns.has(p.value) && answer.pattern !== p.value}
-                          className="text-right text-sm"
-                        >
-                          {p.label}
-                          {usedPatterns.has(p.value) && answer.pattern !== p.value && (
-                            <span className="text-muted-foreground/70 text-xs mr-1">(مستخدم)</span>
-                          )}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeAnswer(answer.id)}
-                    className="h-8 w-8 p-0 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg shrink-0"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeAnswer(answer.id)}
+                      className="h-12 w-12 rounded-xl text-destructive hover:bg-destructive/10 shrink-0"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -246,15 +246,24 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
           </div>
         </div>
 
-        <DialogFooter className="flex flex-row-reverse gap-2">
+        <DialogFooter className="flex flex-col sm:flex-row-reverse gap-4 pt-6">
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-11 font-bold"
+            className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
           >
-            {isSaving ? <LoadingSpinner size="sm" /> : (editQuestion ? 'حفظ التعديلات' : 'إضافة السؤال')}
+            {isSaving ? (
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>جاري الحفظ...</span>
+              </div>
+            ) : (editQuestion ? 'حفظ التعديلات' : 'إضافة السؤال الآن')}
           </Button>
-          <Button variant="ghost" onClick={onClose} className="rounded-xl h-11 text-muted-foreground hover:bg-accent hover:text-foreground">
+          <Button 
+            variant="ghost" 
+            onClick={onClose} 
+            className="w-full sm:w-auto h-14 px-8 rounded-2xl text-muted-foreground font-bold hover:bg-secondary"
+          >
             إلغاء
           </Button>
         </DialogFooter>

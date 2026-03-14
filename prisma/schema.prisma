@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+}
+
+enum PatternType {
+  ASSERTIVE   // الحازمة
+  PRECISE     // المدققة
+  CALM        // الهادئة
+  WISE        // الحكيمة
+  SPONTANEOUS // العفوية
+  OPEN        // المنفتحة
+  THINKER     // المفكرة
+}
+
+enum AttemptStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  name        String
+  phone       String?    @unique
+  email       String?    @unique
+  isAdmin     Boolean    @default(false)
+  verifiedAt  DateTime?
+  createdAt   DateTime   @default(now())
+
+  otpCodes    OtpCode[]
+  attempts    Attempt[]
+  payments    Payment[]
+}
+
+model Book {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  filePdf     String   // URL to PDF
+  price       Float    @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  tests     Test[]
+  payments  Payment[]
+}
+
+model Test {
+  id        Int      @id @default(autoincrement())
+  name      String
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  questions Question[]
+  attempts  Attempt[]
+  aiPrompts AiPrompt[]
+}
+
+model AiPrompt {
+  id           Int      @id @default(autoincrement())
+  test         Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId       Int
+  systemPrompt String   @db.Text
+  reportRules  String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model OtpCode {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  code       String
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime @default(now())
+}
+
+model Question {
+  id           Int              @id @default(autoincrement())
+  test         Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId       Int
+  questionText String
+  sortOrder    Int              @default(0)
+  isActive     Boolean          @default(true)
+
+  options      QuestionOption[]
+  answers      Answer[]
+}
+
+model QuestionOption {
+  id         Int           @id @default(autoincrement())
+  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  optionText String
+  sortOrder  Int           @default(0)
+
+  scores     OptionScore[]
+  answers    Answer[]
+}
+
+model OptionScore {
+  id        Int         @id @default(autoincrement())
+  option    QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId  Int
+  pattern   PatternType
+  score     Int
+}
+
+model Attempt {
+  id          Int        @id @default(autoincrement())
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  test        Test       @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId      Int
+  startedAt   DateTime   @default(now())
+  completedAt DateTime?
+  status      AttemptStatus @default(IN_PROGRESS)
+
+  answers     Answer[]
+  result      Result?
+}
+
+model Answer {
+  id         Int           @id @default(autoincrement())
+  attempt    Attempt       @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptId  Int
+  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  option     QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId   Int
+}
+
+model Result {
+  id              Int       @id @default(autoincrement())
+  attempt         Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptId       Int       @unique
+  primaryPattern  PatternType
+  secondaryPattern PatternType
+  scoresJson      Json
+  createdAt       DateTime  @default(now())
+
+  report          Report?
+}
+
+model Report {
+  id         Int     @id @default(autoincrement())
+  result     Result  @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  resultId   Int     @unique
+  reportText String  @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int
+  amount    Float
+  status    String   @default("PENDING") // PENDING, COMPLETED, FAILED
+  createdAt DateTime @default(now())
+}
+

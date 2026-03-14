@@ -1,0 +1,280 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { 
+  Plus, Search, MoreVertical, Edit, Trash2, Move, 
+  ChevronDown, Filter, FileQuestion, Tags
+} from 'lucide-react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { 
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { QuestionFormModal } from '@/components/admin/question-form-modal'
+import { ConfirmDeleteDialog } from '@/components/admin/confirm-delete-dialog'
+import { toast } from 'sonner'
+
+const PATTERN_LABELS: Record<string, string> = {
+  ASSERTIVE: 'الحازم', PRECISE: 'المدقق', CALM: 'الهادئ',
+  WISE: 'الحكيم', THINKER: 'المفكر', SPONTANEOUS: 'العفوي', OPEN: 'المنفتح',
+}
+
+const PATTERN_COLORS: Record<string, string> = {
+  ASSERTIVE: 'bg-rose-100 text-rose-700',
+  PRECISE:   'bg-blue-100 text-blue-700',
+  CALM:      'bg-emerald-100 text-emerald-700',
+  WISE:      'bg-amber-100 text-amber-700',
+  THINKER:   'bg-violet-100 text-violet-700',
+  SPONTANEOUS:'bg-orange-100 text-orange-700',
+  OPEN:      'bg-sky-100 text-sky-700',
+}
+
+interface QuestionOption { id: number; optionText: string; sortOrder: number; scores: { pattern: string; score: number }[] }
+interface Question {
+  id: number
+  questionText: string
+  sortOrder: number
+  testId: number
+  test?: { name: string }
+  options: QuestionOption[]
+}
+interface TestOption { id: number; name: string }
+
+export default function QuestionsPage() {
+  const [selectedTest, setSelectedTest] = useState('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [tests, setTests] = useState<TestOption[]>([])
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editQuestion, setEditQuestion] = useState<Question | null>(null)
+  const [deleteId, setDeleteId] = useState<number | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const [testsRes, questionsRes] = await Promise.all([
+        fetch('/api/admin/tests'),
+        fetch(`/api/admin/questions${selectedTest !== 'all' ? `?testId=${selectedTest}` : ''}`),
+      ])
+      const [testsData, questionsData] = await Promise.all([testsRes.json(), questionsRes.json()])
+      setTests(testsData)
+      setQuestions(questionsData)
+    } catch { toast.error('خطأ في تحميل البيانات') }
+    finally { setIsLoading(false) }
+  }, [selectedTest])
+
+  useEffect(() => { fetchData() }, [fetchData])
+
+  const handleDelete = async () => {
+    if (!deleteId) return
+    setIsDeleting(true)
+    try {
+      const res = await fetch(`/api/admin/questions/${deleteId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error()
+      toast.success('تم حذف السؤال بنجاح')
+      setDeleteId(null)
+      fetchData()
+    } catch { toast.error('فشل الحذف') }
+    finally { setIsDeleting(false) }
+  }
+
+  const openAddModal = () => { setEditQuestion(null); setModalOpen(true) }
+  const openEditModal = (q: Question) => { setEditQuestion(q); setModalOpen(true) }
+
+  const currentTestId = selectedTest !== 'all' ? parseInt(selectedTest) : (tests[0]?.id ?? 1)
+
+  const filtered = questions.filter(q =>
+    q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">إدارة الأسئلة</h2>
+          <p className="text-sm text-slate-500 mt-0.5">
+            {questions.length} سؤال • {tests.length} اختبار
+          </p>
+        </div>
+        <Button
+          onClick={openAddModal}
+          className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 px-5 h-11 font-semibold"
+        >
+          <Plus className="w-4 h-4" />
+          إضافة سؤال
+        </Button>
+      </div>
+
+      <div className="grid gap-5 md:grid-cols-4">
+        {/* Sidebar Filter */}
+        <div className="space-y-3">
+          <Card className="border border-border shadow-sm bg-card rounded-2xl overflow-hidden">
+            <CardHeader className="px-4 py-3 border-b border-border flex flex-row items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <span className="font-semibold text-sm text-foreground">تصفية بالاختبار</span>
+            </CardHeader>
+            <CardContent className="p-2 space-y-1">
+              {[{ id: 'all', name: 'جميع الأسئلة' }, ...tests].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTest(t.id.toString())}
+                  className={`w-full text-right px-3 py-2.5 rounded-xl text-sm transition-all font-medium ${
+                    selectedTest === t.id.toString()
+                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
+                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                  }`}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Stats */}
+          <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/15 rounded-2xl border border-primary/15">
+            <div className="flex items-center gap-2 mb-3">
+              <Tags className="w-4 h-4 text-primary" />
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">الأنماط</span>
+            </div>
+            <div className="space-y-1.5">
+              {Object.entries(PATTERN_LABELS).map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">{v}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${PATTERN_COLORS[k]}`}>
+                    {questions.reduce((acc, q) => acc + q.options.filter(o => o.scores.some(s => s.pattern === k)).length, 0)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Questions List */}
+        <div className="md:col-span-3 space-y-3">
+          {/* Search */}
+          <div className="flex items-center gap-3 bg-card px-4 py-2.5 rounded-xl border border-border shadow-sm">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              placeholder="ابحث في نص السؤال..."
+              className="bg-transparent border-none focus:outline-none text-sm w-full text-foreground placeholder:text-muted-foreground"
+            />
+            {searchTerm && (
+              <button onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-600 text-xs">
+                ✕
+              </button>
+            )}
+          </div>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20"><LoadingSpinner size="lg" /></div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+                <FileQuestion className="w-8 h-8 text-slate-300" />
+              </div>
+              <p className="font-bold text-slate-400">
+                {searchTerm ? 'لا توجد نتائج للبحث' : 'لا توجد أسئلة بعد'}
+              </p>
+              {!searchTerm && (
+                <Button onClick={openAddModal} variant="outline" size="sm" className="mt-4 rounded-xl text-primary border-primary/20 hover:bg-primary/5">
+                  <Plus className="w-4 h-4 ml-1" /> أضف أول سؤال
+                </Button>
+              )}
+            </div>
+          ) : (
+            <Card className="border border-border shadow-sm bg-card rounded-2xl overflow-hidden">
+              <div className="divide-y divide-border">
+                {filtered.map((q, index) => (
+                  <div
+                    key={q.id}
+                    className="group flex items-start gap-4 px-5 py-4 hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 shrink-0 pt-1">
+                      <span className="text-xs font-bold text-slate-300 w-6 text-center">{index + 1}</span>
+                      <Move className="w-4 h-4 text-slate-200 group-hover:text-slate-400 transition-colors cursor-move" />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start gap-2 mb-2">
+                        {q.test && (
+                          <span className="shrink-0 text-xs font-semibold text-primary bg-primary/8 px-2.5 py-1 rounded-lg">
+                            {q.test.name}
+                          </span>
+                        )}
+                      </div>
+                      <p className="font-semibold text-slate-800 leading-snug mb-3">{q.questionText}</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {q.options.map(opt => (
+                          <span key={opt.id} className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">
+                            {opt.optionText.length > 25 ? opt.optionText.slice(0, 25) + '…' : opt.optionText}
+                            {opt.scores[0] && (
+                              <span className={`mr-1.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold ${PATTERN_COLORS[opt.scores[0].pattern] ?? 'bg-slate-200 text-slate-600'}`}>
+                                {PATTERN_LABELS[opt.scores[0].pattern] ?? opt.scores[0].pattern}
+                              </span>
+                            )}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200"
+                        >
+                          <MoreVertical className="h-4 w-4 text-slate-500" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-slate-100 min-w-[140px]">
+                        <DropdownMenuItem
+                          onClick={() => openEditModal(q)}
+                          className="flex items-center gap-2.5 cursor-pointer py-2.5 text-slate-700"
+                        >
+                          <Edit className="w-4 h-4" /> تعديل
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setDeleteId(q.id)}
+                          className="flex items-center gap-2.5 cursor-pointer py-2.5 text-red-600 hover:bg-red-50 focus:bg-red-50 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" /> حذف
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      <QuestionFormModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={fetchData}
+        testId={currentTestId}
+        editQuestion={editQuestion}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+        title="حذف السؤال"
+        description="سيتم حذف هذا السؤال وجميع إجاباته نهائياً. لا يمكن التراجع عن هذا الإجراء."
+      />
+    </div>
+  )
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
@@ -9,6 +9,7 @@ import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 import {
   CreditCard,
@@ -27,10 +28,22 @@ interface CheckoutItem {
   title: string
   price: number
   description: string
-  data?: any
+  data?: any | string
 }
 
 export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner size="lg" />
+      </div>
+    }>
+      <CheckoutContent />
+    </Suspense>
+  )
+}
+
+function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -74,7 +87,6 @@ export default function CheckoutPage() {
           })
         } else {
           const res = await fetch(`/api/test-library?id=${id}`)
-
           if (!res.ok) throw new Error()
 
           const data = await res.json()

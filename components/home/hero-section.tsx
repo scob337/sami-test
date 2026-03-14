@@ -1,164 +1,107 @@
 'use client'
 
-import { motion, Variants } from 'framer-motion'
-import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
 import { Container } from '@/components/layout/container'
 import Link from 'next/link'
-import { Sparkles, ArrowRight, UserCheck, Zap, Target } from 'lucide-react'
+import { Wand2, PlayCircle, ShieldCheck, Star, User, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react'
 
 export function HeroSection() {
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.2,
-      },
-    },
-  }
+    return (
+        <>
+            {/* Hero Section */}
+            <section className="pt-20 pb-16 sm:pt-32 sm:pb-32 overflow-hidden relative" dir="rtl">
+                <div className="absolute inset-x-0 top-0 h-[40rem] bg-gradient-to-b from-background via-background to-transparent -z-10"></div>
+                {/* Subtle Grid Background */}
+                <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:2rem_2rem] -z-10"></div>
 
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-    },
-  }
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-  const floatingVariants: Variants = {
-    animate: {
-      y: [0, -12, 0],
-      transition: {
-        duration: 5,
-        repeat: Infinity,
-        ease: "easeInOut"
-      }
-    }
-  }
+                        {/* Hero Content */}
+                        <div className="relative z-10 text-center lg:text-right">
+                            {/* Badge */}
+                            <div className="inline-flex items-center gap-2 bg-white backdrop-blur-sm border border-border rounded-full px-4 py-1.5 mb-8 shadow-sm">
+                                <Wand2 className="text-accent w-4 h-4" />
+                                <span className="text-xs text-primary font-bold tracking-widest">منصة الذكاء الشخصي</span>
+                            </div>
 
-  return (
-    <section className="relative min-h-screen flex items-center  pb-16 overflow-hidden bg-background">
-      {/* Dynamic Background Elements */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute top-1/2 -left-24 w-72 h-72 bg-accent/10 blur-[100px] rounded-full" />
-        <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 blur-[150px] rounded-full" />
-      </div>
+                            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-primary mb-6 leading-[1.1]">
+                                اعرف نفسك. <br/>افهم الآخرين.
+                            </h1>
+                            <p className="mt-4 text-lg sm:text-xl text-slate-500 mb-10 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
+                                في عصر الذكاء الاصطناعي، فهم الأشخاص هو قوتك الخارقة. اكتشف شخصيتك وتعلم كيف تعمل بشكل أفضل مع كل من حولك.
+                            </p>
 
-      <Container className="relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left Column: Text Content */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="flex flex-col space-y-10 text-center lg:text-right items-center lg:items-end"
-          >
-            <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 w-fit text-primary border border-primary/20 backdrop-blur-md">
-              <Sparkles className="w-4 h-4 animate-pulse" />
-              <span className="text-sm font-bold tracking-wide">الجيل القادم من اختبارات تحليل الشخصية</span>
-            </motion.div>
+                            <div className="flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4">
+                                <Link href="/test" className="w-full sm:w-auto">
+                                    <div className="w-full sm:w-auto text-white font-bold bg-blue-500  px-8 py-4 rounded-full hover:-translate-y-0.5 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                                        ابدأ مجاناً
+                                    </div>
+                                </Link>
 
-            <motion.div variants={itemVariants} className="space-y-8">
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tight text-foreground">
-                اكتشف جوهر{' '}
-                <span className="bg-gradient-to-l from-primary via-accent-foreground to-primary bg-clip-text text-transparent italic drop-shadow-sm">
-                  شخصيتك
-                </span>
-                {' '}بعمق
-              </h1>
-              <p className="text-lg md:text-xl lg:text-2xl text-foreground font-bold opacity-80 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                تجربة فريدة تعتمد على أحدث المناهج العلمية لتحليل أنماط سلوكك وتقديم رؤى عميقة لمستقبلك الشخصي والمهني بإشراف الخبراء.
-              </p>
-            </motion.div>
+                            </div>
 
-            <motion.div variants={itemVariants} className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-6">
-              <Link href="/test">
-                <Button 
-                  size="lg"
-                  className="h-14 md:h-16 px-8 md:px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl shadow-primary/30 group text-lg md:text-xl font-black cursor-pointer transition-all hover:scale-105 active:scale-95"
-                >
-                  ابدأ رحلة الاكتشاف
-                  <ArrowRight className="mr-3 w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-2 transition-transform" />
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className="h-14 md:h-16 px-8 md:px-10 rounded-2xl bg-background/50 backdrop-blur-md text-foreground text-lg md:text-xl border-2 border-border hover:bg-secondary/50 hover:border-primary/40 font-bold cursor-pointer transition-all"
-                >
-                  كيف يعمل النظام؟
-                </Button>
-              </Link>
-            </motion.div>
 
-            <motion.div 
-              variants={itemVariants} 
-              className="flex flex-wrap justify-center lg:justify-end items-center gap-6 sm:gap-8 md:gap-16 pt-8 md:pt-12 w-full"
-            >
-              {[
-                { label: 'مستخدم نشط', value: '50K+' },
-                { label: 'دقة التحليل', value: '99.2%' },
-                { label: 'نمط شخصية', value: '16' }
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center lg:items-end group min-w-[100px]">
-                  <span className="text-3xl md:text-4xl font-black text-foreground group-hover:text-primary transition-colors">{stat.value}</span>
-                  <span className="text-sm md:text-base font-bold text-muted-foreground">{stat.label}</span>
+                        </div>
+
+                        {/* Hero Visual / Mockup */}
+                        <div className="relative mx-auto w-full max-w-lg lg:max-w-none" dir="ltr">
+                            {/* Decorative glow */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-accent/5 blur-3xl rounded-full -z-10"></div>
+
+                            <div className="bg-white border text-foreground border-border rounded-xl shadow-2xl p-6 sm:p-8 relative overflow-hidden backdrop-blur-xl">
+                                {/* Browser Chrome */}
+                                <div className="flex items-center gap-2 mb-6 border-b border-border/50 pb-4">
+                                    <div className="w-3 h-3 rounded-full bg-red-400/20 border border-red-400/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-amber-400/20 border border-amber-400/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-emerald-400/20 border border-emerald-400/50"></div>
+                                    <div className="ml-4 flex-1 h-6 bg-muted rounded-md border border-border/50 flex items-center px-3">
+                                        <span className="text-xs text-muted-foreground font-medium">linkedin.com/in/saeed-almahdi</span>
+                                    </div>
+                                </div>
+
+                                {/* Fake Profile Area */}
+                                <div className="flex items-start gap-4 mb-8">
+                                    <div className="w-16 h-16 rounded-full bg-muted border border-border flex-shrink-0 flex items-center justify-center">
+                                        <User className="text-2xl text-muted-foreground w-8 h-8" />
+                                    </div>
+                                    <div className="flex-1 space-y-2 pt-1">
+                                        <div className="h-5 w-1/2 bg-primary/80 rounded-md"></div>
+                                        <div className="h-3 w-3/4 bg-muted-foreground/30 rounded-md"></div>
+                                        <div className="h-3 w-1/3 bg-muted-foreground/30 rounded-md"></div>
+                                    </div>
+                                </div>
+
+                                {/* Crystal Floating Extension Mockup */}
+                                <div className="absolute top-20 right-4 sm:right-6 w-72 bg-white border-t-8 border-t-accent shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1)] border-x border-b border-border rounded-xl p-5 transform translate-x-2 translate-y-4" dir="rtl">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-primary">سعيد المهدي</h3>
+                                            <p className="text-sm text-muted-foreground font-medium">المحلل الاستراتيجي</p>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-full bg-accent flex justify-center items-center text-white font-bold shadow-sm">
+                                            I
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        <span className="text-[10px] font-bold text-accent-foreground bg-accent/90 px-2 py-1 rounded">منطقي</span>
+                                        <span className="text-[10px] font-bold text-accent-foreground bg-accent/90 px-2 py-1 rounded">مستقل</span>
+                                        <span className="text-[10px] font-bold text-accent-foreground bg-accent/90 px-2 py-1 rounded">مفكر حرج</span>
+                                    </div>
+                                    
+                                    <div className="bg-[#F3F6FA] rounded-lg p-3 border border-[#E1E5EA]">
+                                        <span className="text-[10px] text-accent font-bold uppercase tracking-widest mb-1 block">كيفية التواصل</span>
+                                        <p className="text-xs font-medium text-slate-700 leading-relaxed">
+                                            ركز على البيانات والأهداف الطويلة المدى. يفضل سعيد الأحاديث المباشرة وتجنب المقدمات الطويلة.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Right Column: Visual Elements */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-            className="relative hidden lg:block"
-          >
-            <div className="relative z-10 w-full aspect-square max-w-[600px] mx-auto">
-              {/* Main Illustration Placeholder with Glassmorphism Effect */}
-              <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-primary/20 to-indigo-500/10 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden group">
-                <div className="absolute inset-0 bg-[url('/placeholder.jpg')] bg-cover bg-center opacity-40 group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-                
-                {/* Floating Elements */}
-                <motion.div 
-                  variants={floatingVariants}
-                  animate="animate"
-                  className="absolute top-10 right-10 p-6 rounded-3xl bg-white/10 backdrop-blur-2xl border border-white/20 shadow-xl"
-                >
-                  <UserCheck className="w-10 h-10 text-primary" />
-                </motion.div>
-                
-                <motion.div 
-                  variants={floatingVariants}
-                  animate="animate"
-                  className="absolute bottom-20 left-10 p-6 rounded-3xl bg-white/10 backdrop-blur-2xl border border-white/20 shadow-xl"
-                  style={{ transitionDelay: '1s' }}
-                >
-                  <Zap className="w-10 h-10 text-amber-400" />
-                </motion.div>
-
-                <motion.div 
-                  variants={floatingVariants}
-                  animate="animate"
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-8 rounded-[2.5rem] bg-primary/20 backdrop-blur-3xl border border-primary/30 shadow-2xl"
-                >
-                  <Target className="w-16 h-16 text-white animate-pulse" />
-                </motion.div>
-              </div>
-
-              {/* Decorative Rings */}
-              <div className="absolute -inset-10 border-2 border-primary/10 rounded-full animate-[spin_20s_linear_infinite]" />
-              <div className="absolute -inset-20 border border-primary/5 rounded-full animate-[spin_30s_linear_infinite_reverse]" />
-            </div>
-          </motion.div>
-        </div>
-      </Container>
-    </section>
-  )
+            </section>
+        </>
+    )
 }

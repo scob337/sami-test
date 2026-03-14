@@ -1,8 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { fadeInUp } from '@/lib/animations'
 import { useTheme } from 'next-themes'
 import { cn } from '@/lib/utils'
 
@@ -36,90 +34,90 @@ export function QuestionCard({
   onAnswerSelect,
   isLoading = false,
 }: QuestionCardProps) {
-  const { theme } = useTheme()
   const isEnglish = false // TODO: Get from i18n context
-  
+
+  if (!question.options || question.options.length < 2) return null;
+
+  const firstOption = question.options[0];
+  const lastOption = question.options[question.options.length - 1];
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="space-y-12"
+      className="space-y-16 w-full max-w-4xl mx-auto"
     >
       {/* Question Header */}
-      <div className={cn("space-y-6 text-center", isEnglish ? "lg:text-left" : "lg:text-right")}>
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-sm font-black uppercase tracking-widest"
-        >
-          {isEnglish ? `Question ${question.sortOrder || 1}` : `السؤال رقم ${question.sortOrder || 1}`}
-        </motion.div>
-        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[1.15] text-foreground tracking-tight">
+      <div className="text-center space-y-4">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-slate-800 leading-tight">
           {question.questionText}
         </h2>
       </div>
 
-      {/* Options Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {(question.options || []).map((option, index) => (
-          <motion.button
-            key={option.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            onClick={() => onAnswerSelect(option.id)}
-            disabled={isLoading}
-            className={cn(
-              "group relative w-full p-8 rounded-[2rem] border-2 transition-all duration-500 overflow-hidden",
-              isEnglish ? "text-left" : "text-right",
-              selectedAnswerId === option.id
-                ? "border-primary bg-primary/10 shadow-2xl shadow-primary/20 scale-[1.02]"
-                : "border-border/60 hover:border-primary/40 bg-card/40 backdrop-blur-xl hover:bg-card/80 hover:shadow-xl"
-            )}
-          >
-            {/* Background Accent */}
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500",
-              selectedAnswerId === option.id && "opacity-100"
-            )} />
-            
-            <div className={cn("relative flex items-center justify-between gap-6", isEnglish && "flex-row-reverse")}>
-              <div className="flex-1 space-y-1">
-                <span className={cn(
-                  "block text-xl md:text-2xl font-black transition-all duration-300",
-                  selectedAnswerId === option.id ? "text-primary translate-x-1" : "text-foreground"
-                )}>
-                  {option.optionText}
-                </span>
-              </div>
-              
-              {/* Radio-style indicator */}
-              <div className={cn(
-                "w-12 h-12 rounded-full border-4 flex items-center justify-center transition-all duration-500 shrink-0",
-                selectedAnswerId === option.id 
-                  ? "border-primary bg-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.4)] scale-110" 
-                  : "border-border/80 bg-background/50 group-hover:border-primary/50 group-hover:scale-105"
-              )}>
-                <div className={cn(
-                  "w-4 h-4 rounded-full transition-all duration-500",
-                  selectedAnswerId === option.id 
-                    ? "bg-primary scale-100 shadow-[0_0_10px_rgba(var(--primary),0.8)]" 
-                    : "bg-transparent scale-0"
-                )} />
-              </div>
-            </div>
+      {/* Answer Model (Horizontal Scale) */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8 w-full">
 
-            {/* Selection highlight bar */}
-            {selectedAnswerId === option.id && (
-              <motion.div 
-                layoutId="answer-active-bar"
-                className={cn("absolute top-0 bottom-0 w-2 bg-primary", isEnglish ? "left-0" : "right-0")}
-              />
-            )}
-          </motion.button>
-        ))}
+        {/* First Option Box (Right side in Arabic context, but we will render Left-to-Right layout visually and flex-row-reverse if needed, but let's just stick to default visual order) */}
+        <div className={cn(
+          "w-full md:flex-1 min-h-[100px] p-6 bg-white border border-slate-200 rounded text-center flex items-center justify-center transition-all duration-300",
+          selectedAnswerId === firstOption.id ? "ring-2 ring-primary border-primary shadow-sm" : "hover:border-slate-300 shadow-sm"
+        )}>
+          <span className="text-lg md:text-xl font-medium text-slate-700">{firstOption.optionText}</span>
+        </div>
+
+        {/* The Scale */}
+        <div className="relative flex flex-col md:flex-row items-center justify-between w-full max-w-xs md:max-w-[400px] px-2 py-8 gap-6 md:gap-0">
+          {/* Connector Line (Horizontal for Desktop) */}
+          <div className="hidden md:block absolute left-6 right-6 h-[2px] bg-slate-200 top-1/2 -translate-y-1/2 z-0"></div>
+
+          {/* Connector Line (Vertical for Mobile) */}
+          <div className="md:hidden absolute top-6 bottom-6 w-[2px] bg-slate-200 left-1/2 -translate-x-1/2 z-0"></div>
+
+          {/* Circles */}
+          {question.options.map((option, idx) => {
+            const isSelected = selectedAnswerId === option.id;
+            return (
+              <button
+                key={option.id}
+                onClick={() => onAnswerSelect(option.id)}
+                disabled={isLoading}
+                className="relative z-20 group focus:outline-none flex flex-col items-center justify-center"
+                aria-label={`Select option ${idx + 1}`}
+              >
+                {/* Tooltip */}
+                <div className="absolute bottom-[calc(100%+12px)] left-1/2 -translate-x-1/2 px-3 py-2 bg-slate-900 text-white text-xs md:text-sm md:font-medium rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-[100] pointer-events-none shadow-xl">
+                  {option.optionText}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                </div>
+
+                <div className={cn(
+                  "w-8 h-8 md:w-10 md:h-10 rounded-full border-2 bg-white flex items-center justify-center transition-all duration-300",
+                  isSelected
+                    ? "border-accent scale-110 shadow-md"
+                    : "border-slate-200 group-hover:border-slate-400 group-hover:scale-105"
+                )}>
+                  {isSelected && (
+                    <motion.div
+                      layoutId="selected-dot"
+                      className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-accent "
+                    />
+                  )}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Last Option Box */}
+        <div className={cn(
+          "w-full md:flex-1 min-h-[100px] p-6 bg-white border border-slate-200 rounded text-center flex items-center justify-center transition-all duration-300",
+          selectedAnswerId === lastOption.id ? "ring-2 ring-primary border-primary shadow-sm" : "hover:border-slate-300 shadow-sm"
+        )}>
+          <span className="text-lg md:text-xl font-medium text-slate-700">{lastOption.optionText}</span>
+        </div>
+
       </div>
     </motion.div>
   )

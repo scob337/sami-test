@@ -54,6 +54,7 @@ function TestPageContent() {
     setCurrentStep,
     addAnswer,
     setResult,
+    setIsFinished,
   } = useTestStore()
 
   const submitResults = async (finalUserData: any) => {
@@ -208,39 +209,13 @@ function TestPageContent() {
     setIsCompleted(true)
 
     if (!isRegistered) {
-      toast.info('يرجى التسجيل لحفظ نتائجك')
+      toast.info('يرجى تسجيل الدخول أو إنشاء حساب لحفظ وعرض نتائجك')
+      setIsFinished(true)
+      router.push('/auth/login')
       return
     }
 
     await submitResults(userData)
-  }
-
-  if (isCompleted && !isRegistered) {
-    return (
-      <main className="min-h-screen flex flex-col pt-32">
-        <Header />
-
-        <div className="flex-1 flex items-center justify-center px-4">
-          <div className="max-w-md w-full space-y-8">
-
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold">
-                انتهيت من الاختبار
-              </h2>
-
-              <p className="text-muted-foreground">
-                سجل بياناتك لعرض النتائج
-              </p>
-            </div>
-
-            <PreTestForm onComplete={handleRegistrationComplete} />
-
-          </div>
-        </div>
-
-        <Footer />
-      </main>
-    )
   }
 
   return (
@@ -257,6 +232,29 @@ function TestPageContent() {
               max={questions.length}
             />
 
+            <div className="flex items-center justify-between w-full max-w-4xl mx-auto mt-12 mb-4 text-slate-400 font-medium text-sm md:text-base">
+              <button 
+                onClick={handlePrevious} 
+                disabled={currentStep === 0}
+                className="hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors flex items-center gap-1"
+              >
+                <ChevronRight className="w-4 h-4" />
+                السابق
+              </button>
+              <span className="text-center hidden md:inline-block">اختر الدائرة الأقرب للعبارة التي تشبهك أكثر.</span>
+              <button 
+                onClick={handleNext} 
+                className={cn("hover:text-slate-700 transition-colors flex items-center gap-1", !selectedAnswer && "opacity-50 hover:text-slate-400")}
+              >
+                {currentStep === questions.length - 1 ? 'إنهاء الاختبار' : 'التالي'}
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="text-center md:hidden mb-8 text-slate-400 font-medium text-sm">
+               اختر الدائرة الأقرب للعبارة التي تشبهك أكثر.
+            </div>
+
             <AnimatePresence mode="wait">
               <QuestionCard
                 key={currentQuestion.id}
@@ -265,45 +263,6 @@ function TestPageContent() {
                 onAnswerSelect={handleAnswerSelect}
               />
             </AnimatePresence>
-
-            <div className="flex justify-between items-center gap-6">
-
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className="h-14 px-8 rounded-2xl border-2 border-border bg-card/40 backdrop-blur-md text-foreground font-bold hover:bg-secondary hover:border-primary/50 hover:text-primary transition-all active:scale-95 disabled:opacity-30"
-              >
-                <ChevronRight className="w-5 h-5 ml-2" />
-                السابق
-              </Button>
-
-              <Button 
-                onClick={handleNext}
-                className="h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xl shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95 group"
-              >
-                {currentStep === questions.length - 1
-                  ? 'إنهاء الاختبار'
-                  : 'التالي'}
-
-                <ChevronLeft className="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" />
-              </Button>
-
-            </div>
-
-            <div className="flex justify-center gap-2">
-              {questions.map((_, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "w-2 h-2 rounded-full",
-                    i === currentStep
-                      ? "bg-primary w-6"
-                      : "bg-border"
-                  )}
-                />
-              ))}
-            </div>
 
           </div>
 

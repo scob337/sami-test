@@ -19,10 +19,12 @@ interface TestStore {
     reportText?: string // Added report text
     hasPaid?: boolean // Added payment status
   } | null
+  isFinished: boolean
   setCurrentStep: (step: number) => void
   addAnswer: (questionId: number, answerId: number) => void
   removeAnswer: (questionId: number) => void
   setResult: (result: TestStore['result']) => void
+  setIsFinished: (isFinished: boolean) => void
   resetTest: () => void
   getProgress: (totalQuestions: number) => number
 }
@@ -33,6 +35,7 @@ export const useTestStore = create<TestStore>()(
       currentStep: 0,
       answers: [],
       result: null,
+      isFinished: false,
       setCurrentStep: (step) => set({ currentStep: step }),
       addAnswer: (questionId, answerId) => {
         const { answers } = get()
@@ -51,7 +54,8 @@ export const useTestStore = create<TestStore>()(
         set({ answers: answers.filter((a) => a.questionId !== questionId) })
       },
       setResult: (result) => set({ result }),
-      resetTest: () => set({ currentStep: 0, answers: [], result: null }),
+      setIsFinished: (isFinished) => set({ isFinished }),
+      resetTest: () => set({ currentStep: 0, answers: [], result: null, isFinished: false }),
       getProgress: (totalQuestions: number) => {
         const { answers } = get()
         if (totalQuestions === 0) return 0

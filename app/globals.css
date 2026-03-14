@@ -8,73 +8,83 @@
 
 :root {
 
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  /* Crystal Off-White BG */
+  --background: 216 28% 97%;
+  /* #F3F6FA */
+  --foreground: 200 97% 12%;
+  /* #01293D */
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 200 97% 12%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+  --popover-foreground: 200 97% 12%;
 
-  /* Raycast Blue */
-  --primary: 212 100% 56%;
+  /* Crystal Deep Navy */
+  --primary: 200 97% 12%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 210 30% 96%;
-  --secondary-foreground: 222 47% 11%;
+  /* Crystal Navy (Secondary) */
+  --secondary: 200 97% 12%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 210 30% 96%;
-  --muted-foreground: 215 16% 45%;
+  /* Crystal Light Gray */
+  --muted: 213 13% 93%;
+  --muted-foreground: 212 11% 47%;
+  /* #6B7785 */
 
-  /* subtle blue tint */
-  --accent: 214 100% 97%;
-  --accent-foreground: 212 100% 45%;
+  /* Crystal Golden blue-500CTA */
+  --accent: 216.23,100%,58.43%;
+  /* #F5C542 */
+  --accent-foreground: 160,100%,99.41%;
+  /* #01293D */
 
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
 
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 212 100% 56%;
+  /* Crystal Border Gray */
+  --border: 213 18% 90%;
+  /* #E1E5EA */
+  --input: 213 18% 90%;
+  --ring: 200 97% 12%;
 
-  --radius: 1.25rem;
+  --radius: 0.75rem;
 }
 
 /* ---------------- DARK MODE (Raycast style) ---------------- */
 
 .dark {
 
-  /* black with blue tint */
-  --background: 222 47% 6%;
-  --foreground: 210 20% 92%;
+  --background: 200 97% 9%;
+  --foreground: 0 0% 98%;
 
-  --card: 222 47% 8%;
-  --card-foreground: 210 20% 92%;
+  --card: 200 97% 9%;
+  --card-foreground: 0 0% 98%;
 
-  --popover: 222 47% 8%;
-  --popover-foreground: 210 20% 92%;
+  --popover: 200 97% 9%;
+  --popover-foreground: 0 0% 98%;
 
-  /* Raycast blue */
-  --primary: 212 100% 64%;
-  --primary-foreground: 222 47% 6%;
+  /* Crystal Deep Navy */
+  --primary: 200 97% 12%;
+  --primary-foreground: 0 0% 98%;
 
-  --secondary: 222 30% 12%;
-  --secondary-foreground: 210 20% 92%;
+  --secondary: 216 100% 58%;
+  --secondary-foreground: 0 0% 100%;
 
-  --muted: 222 30% 12%;
-  --muted-foreground: 215 20% 65%;
 
-  /* subtle glow */
-  --accent: 214 40% 18%;
-  --accent-foreground: 212 100% 70%;
+  --muted: 200 30% 15%;
+  --muted-foreground: 212 11% 60%;
 
-  --destructive: 0 70% 55%;
-  --destructive-foreground: 0 0% 100%;
+  /* Crystal Golden blue-500 CTA */
+  --accent: 216 100% 58%;
+  --accent-foreground: 200 97% 12%;
 
-  --border: 222 25% 18%;
-  --input: 222 25% 18%;
-  --ring: 212 100% 64%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 200 30% 15%;
+  --input: 200 30% 15%;
+  --ring: 200 97% 12%;
 }
 
 /* ---------------- THEME ---------------- */
@@ -129,7 +139,7 @@
   }
 
   body {
-    @apply bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground ;
+    @apply bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -147,19 +157,19 @@
 @layer components {
 
   .glass-card {
-    @apply bg-card border border-border shadow-lg rounded-2xl backdrop-blur-xl;
+    @apply bg-card border shadow-sm rounded-lg;
   }
 
   .glass-nav {
-    @apply bg-card/80 backdrop-blur-xl border-b border-border sticky top-0 z-50;
+    @apply bg-background border-b sticky top-0 z-50;
   }
 
   .aurora-bg {
-    @apply absolute inset-0 -z-10 overflow-hidden bg-background;
+    @apply hidden;
   }
 
   .aurora-dot {
-    @apply absolute rounded-full blur-[120px] opacity-20;
+    @apply hidden;
   }
 
   .text-gradient {

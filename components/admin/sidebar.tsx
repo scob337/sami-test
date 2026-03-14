@@ -24,13 +24,13 @@ const menuItems = [
   { icon: Users, label: 'إدارة المستخدمين', href: '/admin/users' },
 ]
 
-export function Sidebar() {
+export function Sidebar({ className, onItemClick }: { className?: string; onItemClick?: () => void }) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-72 bg-card/50 backdrop-blur-xl border-l border-border/50 h-full flex flex-col shadow-2xl z-50">
+    <aside className={cn("w-72 bg-card/50 backdrop-blur-xl border-l border-border/50 h-full flex flex-col shadow-2xl z-50", className)}>
       <div className="p-8 border-b border-border/50">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-3 group" onClick={onItemClick}>
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-lg shadow-primary/20">
             M
           </div>
@@ -46,6 +46,7 @@ export function Sidebar() {
           <Link
             key={item.href}
             href={item.href}
+            onClick={onItemClick}
             className={cn(
               "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group relative",
               pathname === item.href 

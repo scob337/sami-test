@@ -1,0 +1,102 @@
+﻿[dotenv@17.3.1] injecting env (16) from .env -- tip: ≡ƒ¢í∩╕Å auth for agents: https://vestauth.com
+node.exe : E:\FreeLance
+\sami-test\node_modules
+\.pnpm\@prisma+client@7
+.5.0_prisma_6be28b78163
+2663dc6f09cc71a9cefc5\n
+ode_modules\@prisma\cli
+ent\src\runtime\getPris
+maClient.ts:320
+At C:\Program Files\nod
+ejs\npx.ps1:29 char:3
++   & $NODE_EXE 
+$NPX_CLI_JS $args
++   ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~
+    + CategoryInfo     
+         : 
+NotSpecified: (E:\    
+FreeLance\sa...maClien 
+   t.ts:320:String) 
+[], R    emoteException
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+        throw new Prism
+aClientInitializationEr
+ror(
+              ^
+
+
+PrismaClientInitializat
+ionError: 
+`PrismaClient` needs 
+to be constructed with 
+a non-empty, valid 
+`PrismaClientOptions`:
+
+```
+new PrismaClient({
+  ...
+})
+```
+
+or
+
+```
+constructor() {
+  super({ ... });
+}
+```
+          
+    at new t (E:\FreeLa
+nce\sami-test\node_modu
+les\.pnpm\@prisma+clien
+t@7.5.0_prisma_6be28b78
+1632663dc6f09cc71a9cefc
+5\node_modules\@prisma\
+client\src\runtime\getP
+rismaClient.ts:320:15)
+    at 
+createSupabaseAdmin (E:
+\FreeLance\sami-test\sc
+ripts\create-admin.ts:7
+:16)
+    at 
+Object.<anonymous> (E:\
+FreeLance\sami-test\scr
+ipts\create-admin.ts:74
+:6)
+    at Module._compile 
+(node:internal/modules/
+cjs/loader:1554:14)
+    at 
+Object.transformer (C:\
+Users\scob1\AppData\Loc
+al\npm-cache\_npx\fd45a
+72a545557e9\node_module
+s\tsx\dist\register-D46
+fvsV_.cjs:3:1104)
+    at Module.load (nod
+e:internal/modules/cjs/
+loader:1289:32)
+    at Function._load (
+node:internal/modules/c
+js/loader:1108:12)
+    at TracingChannel.t
+raceSync (node:diagnost
+ics_channel:322:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:220:24)
+    at cjsLoader (node:
+internal/modules/esm/tr
+anslators:262:5) {
+  clientVersion: 
+'7.5.0',
+  errorCode: undefined,
+  retryable: undefined
+}
+
+Node.js v22.14.0

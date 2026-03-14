@@ -68,30 +68,29 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {statCards.map((stat) => (
-          <Card key={stat.label} className="border border-border shadow-sm hover:shadow-md transition-all bg-card rounded-2xl overflow-hidden group">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-4">
-                <div className={`w-11 h-11 rounded-xl ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
+          <Card key={stat.label} className="p-1 border-none bg-card/40 backdrop-blur-xl shadow-xl hover:bg-card/60 transition-all group overflow-hidden">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-2xl shadow-inner group-hover:scale-110 transition-transform ${stat.bg}`}>
+                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 {stat.trend && (
-                  <span className="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
-                    <ArrowUpRight className="w-3 h-3" />
+                  <div className="text-[10px] font-black px-2 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                     {stat.trend}
-                  </span>
+                  </div>
                 )}
               </div>
-              <div className="text-3xl font-black text-foreground mb-1">{stat.value.toLocaleString('ar-SA')}</div>
-              <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
+              <div className="text-2xl md:text-3xl font-black text-foreground mb-1">{stat.value.toLocaleString('ar-SA')}</div>
+              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{stat.label}</div>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Quick Links */}
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {[
           { title: 'إدارة الأسئلة', desc: 'أضف أو عدّل أسئلة الاختبارات وربطها بالأنماط', href: '/admin/questions', icon: Activity, color: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
           { title: 'إدارة البرومبتات', desc: 'تحكم في محتوى التقارير المُولَّدة بالذكاء الاصطناعي', href: '/admin/prompts', icon: BarChart3, color: 'text-accent-foreground', bg: 'bg-accent/5 hover:bg-accent/10' },

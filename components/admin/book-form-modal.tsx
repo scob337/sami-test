@@ -79,7 +79,7 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
 
   return (
     <Dialog open={open} onOpenChange={val => !val && onClose()}>
-      <DialogContent className="max-w-lg bg-card border-border rounded-3xl" dir="rtl">
+      <DialogContent className="max-w-2xl bg-card border-border rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-foreground tracking-tight">
             {editBook ? 'تعديل بيانات الكتاب' : 'إضافة كتاب جديد للمتجر'}

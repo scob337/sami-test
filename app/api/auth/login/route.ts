@@ -19,16 +19,27 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
+      console.error('Supabase auth error:', error)
       return NextResponse.json(
-        { error: 'بيانات الدخول غير صحيحة' },
+        { error: error.message || 'بيانات الدخول غير صحيحة', code: (error as any)?.status || null },
         { status: 401 }
       )
     }
 
+    // Get user from Prisma to check admin status
+    const prisma = (await import('@/lib/prisma')).default
+    const dbUser = await prisma.user.findUnique({
+      where: { email: validatedData.email },
+      select: { isAdmin: true }
+    })
+
     return NextResponse.json(
       {
         message: 'تم الدخول بنجاح',
-        user: data.user,
+        user: {
+          ...data.user,
+          isAdmin: dbUser?.isAdmin || false
+        },
         session: data.session,
       },
       { status: 200 }

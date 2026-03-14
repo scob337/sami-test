@@ -1,23 +1,44 @@
-    import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
+  
+  // Debug: log pathname and cookie keys
+  try {
+    const cookieNames = request.cookies.getAll().map((c) => c.name)
+    console.log('[proxy] pathname=', pathname, 'cookies=', cookieNames)
+  } catch (e) {
+    console.log('[proxy] pathname=', pathname, 'cookies=unavailable')
+  }
+
+  // Check for auth cookie (Supabase tokens)
+  const cookieNames = request.cookies.getAll().map((c) => c.name)
+  const hasSupabaseCookie = cookieNames.some((name) => {
+    // supabase uses project-specific cookie names like sb-<project-ref>-auth-token.0
+    return name === 'sb-access-token' || name === 'supabase-auth-token' || /sb-.*-auth-token/.test(name)
+  })
+  const hasSession = Boolean(hasSupabaseCookie)
+  console.log('[proxy] hasSession=', hasSession)
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/checkout', '/results']
+  const protectedRoutes = ['/dashboard', '/checkout', '/results', '/admin']
+  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
-  // Check if the current path is protected
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  )
+  // Auth pages (should only be accessible when logged out)
+  const authRoutes = ['/auth/login', '/auth/register']
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route))
 
-  if (isProtectedRoute) {
-    // TODO: Check for valid session/token
-    // For now, allow all requests to pass through
-    // In production, you would verify the session here
+  // 1. If user is logged in and trying to access auth pages, redirect to dashboard
+  if (hasSession && isAuthRoute) {
+    console.log('[proxy] redirecting auth route -> /dashboard')
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
 
-    const response = NextResponse.next()
-    return response
+  // 2. If user is NOT logged in and trying to access protected pages, redirect to login
+  if (!hasSession && isProtectedRoute) {
+    console.log('[proxy] redirecting protected route -> /')
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return NextResponse.next()
@@ -26,5 +47,14 @@ export async function proxy(request: NextRequest) {
 export default proxy
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 }

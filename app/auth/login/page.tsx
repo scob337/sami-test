@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { useAuthStore } from '@/lib/store/auth-store'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,18 +23,49 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
+  const { setUser, user } = useAuthStore()
+
+  // If already logged in on client, redirect based on role
+  useEffect(() => {
+    if (user) {
+      if (user.isAdmin) {
+        router.push('/admin')
+      } else {
+        router.push('/dashboard')
+      }
+    }
+  }, [user, router])
+
   const onSubmit = async (data: LoginInput) => {
     try {
       setIsLoading(true)
 
-      // TODO: Implement Supabase login
-      console.log('Login data:', data)
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
 
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'فشل تسجيل الدخول')
+      }
+
+      setUser(result.user)
       toast.success('تم الدخول بنجاح')
-      router.push('/dashboard')
-      router.refresh()
-    } catch (error) {
-      toast.error('بيانات الدخول غير صحيحة')
+      
+      // Delay redirect slightly to show success toast
+      setTimeout(() => {
+        if (result.user.isAdmin) {
+          router.push('/admin')
+        } else {
+          router.push('/dashboard')
+        }
+        router.refresh()
+      }, 500)
+    } catch (error: any) {
+      toast.error(error.message || 'بيانات الدخول غير صحيحة')
       console.error(error)
     } finally {
       setIsLoading(false)

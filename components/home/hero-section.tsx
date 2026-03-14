@@ -39,7 +39,7 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden bg-background">
+    <section className="relative min-h-screen flex items-center  pb-16 overflow-hidden bg-background">
       {/* Dynamic Background Elements */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 blur-[120px] rounded-full animate-pulse" />
@@ -48,13 +48,13 @@ export function HeroSection() {
       </div>
 
       <Container className="relative z-10">
-        <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           {/* Left Column: Text Content */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="flex flex-col space-y-10 text-right"
+            className="flex flex-col space-y-10 text-center lg:text-right items-center lg:items-end"
           >
             <motion.div variants={itemVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 w-fit text-primary border border-primary/20 backdrop-blur-md">
               <Sparkles className="w-4 h-4 animate-pulse" />
@@ -62,33 +62,33 @@ export function HeroSection() {
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-8">
-              <h1 className="text-6xl md:text-8xl font-black leading-[1.1] tracking-tight text-foreground">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-black leading-[1.1] tracking-tight text-foreground">
                 اكتشف جوهر{' '}
                 <span className="bg-gradient-to-l from-primary via-accent-foreground to-primary bg-clip-text text-transparent italic drop-shadow-sm">
                   شخصيتك
                 </span>
                 {' '}بعمق
               </h1>
-              <p className="text-xl md:text-2xl text-foreground font-bold opacity-80 leading-relaxed max-w-2xl">
+              <p className="text-lg md:text-xl lg:text-2xl text-foreground font-bold opacity-80 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 تجربة فريدة تعتمد على أحدث المناهج العلمية لتحليل أنماط سلوكك وتقديم رؤى عميقة لمستقبلك الشخصي والمهني بإشراف الخبراء.
               </p>
             </motion.div>
 
-            <motion.div variants={itemVariants} className="flex flex-wrap gap-6">
+            <motion.div variants={itemVariants} className="flex flex-wrap justify-center lg:justify-start gap-4 md:gap-6">
               <Link href="/test">
                 <Button 
                   size="lg"
-                  className="h-16 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl shadow-primary/30 group text-xl font-black cursor-pointer transition-all hover:scale-105 active:scale-95"
+                  className="h-14 md:h-16 px-8 md:px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl shadow-primary/30 group text-lg md:text-xl font-black cursor-pointer transition-all hover:scale-105 active:scale-95"
                 >
                   ابدأ رحلة الاكتشاف
-                  <ArrowRight className="mr-3 w-6 h-6 group-hover:-translate-x-2 transition-transform" />
+                  <ArrowRight className="mr-3 w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-2 transition-transform" />
                 </Button>
               </Link>
               <Link href="#features">
                 <Button 
                   size="lg"
                   variant="outline"
-                  className="h-16 px-10 rounded-2xl bg-background/50 backdrop-blur-md text-foreground text-xl border-2 border-border hover:bg-secondary/50 hover:border-primary/40 font-bold cursor-pointer transition-all"
+                  className="h-14 md:h-16 px-8 md:px-10 rounded-2xl bg-background/50 backdrop-blur-md text-foreground text-lg md:text-xl border-2 border-border hover:bg-secondary/50 hover:border-primary/40 font-bold cursor-pointer transition-all"
                 >
                   كيف يعمل النظام؟
                 </Button>
@@ -97,15 +97,16 @@ export function HeroSection() {
 
             <motion.div 
               variants={itemVariants} 
-              className="flex items-center gap-16 pt-12"
+              className="flex flex-wrap justify-center lg:justify-end items-center gap-6 sm:gap-8 md:gap-16 pt-8 md:pt-12 w-full"
             >
               {[
                 { label: 'مستخدم نشط', value: '50K+' },
                 { label: 'دقة التحليل', value: '99.2%' },
                 { label: 'نمط شخصية', value: '16' }
-              ].map((stat, i) => (                <div key={i} className="flex flex-col group">
-                  <span className="text-4xl font-black text-foreground group-hover:text-primary transition-colors">{stat.value}</span>
-                  <span className="text-base font-bold text-muted-foreground">{stat.label}</span>
+              ].map((stat, i) => (
+                <div key={i} className="flex flex-col items-center lg:items-end group min-w-[100px]">
+                  <span className="text-3xl md:text-4xl font-black text-foreground group-hover:text-primary transition-colors">{stat.value}</span>
+                  <span className="text-sm md:text-base font-bold text-muted-foreground">{stat.label}</span>
                 </div>
               ))}
             </motion.div>

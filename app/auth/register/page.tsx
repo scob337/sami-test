@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { useAuthStore } from '@/lib/store/auth-store'
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -22,17 +23,36 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   })
 
+  const { setUser, user } = useAuthStore()
+
+  // If already logged in on client, redirect to dashboard
+  useEffect(() => {
+    if (user) router.push('/dashboard')
+  }, [user, router])
+
   const onSubmit = async (data: RegisterInput) => {
     try {
       setIsLoading(true)
 
-      // TODO: Implement Supabase registration
-      console.log('Registration data:', data)
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
 
-      toast.success('تم التسجيل بنجاح! يرجى تأكيد رقم الهاتف')
-      router.push('/auth/otp')
-    } catch (error) {
-      toast.error('حدث خطأ أثناء التسجيل')
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'فشل التسجيل')
+      }
+
+      setUser(result.user)
+      toast.success('تم التسجيل بنجاح!')
+      
+      router.push('/dashboard')
+      router.refresh()
+    } catch (error: any) {
+      toast.error(error.message || 'حدث خطأ أثناء التسجيل')
       console.error(error)
     } finally {
       setIsLoading(false)

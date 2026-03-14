@@ -80,7 +80,7 @@ export function FeaturesSection() {
           </motion.div>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (
@@ -93,14 +93,14 @@ export function FeaturesSection() {
                 whileHover={{ y: -10, scale: 1.02 }}
                 className="group cursor-pointer"
               >
-                <div className="bg-card/40 backdrop-blur-xl border border-border/50 relative h-full p-10 rounded-[2.5rem] transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 group-hover:bg-card/60">
-                  <div className={`w-16 h-16 rounded-2xl ${feature.iconBg} flex items-center justify-center mb-8 shadow-inner transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110`}>
-                    <Icon className={`w-8 h-8 ${feature.iconColor}`} />
+                <div className="bg-card/40 backdrop-blur-xl border border-border/50 relative h-full p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] transition-all duration-500 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 group-hover:bg-card/60">
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl ${feature.iconBg} flex items-center justify-center mb-6 md:mb-8 shadow-inner transition-transform duration-500 group-hover:rotate-6 group-hover:scale-110`}>
+                    <Icon className={`w-7 h-7 md:w-8 md:h-8 ${feature.iconColor}`} />
                   </div>
-                  <h3 className="text-2xl font-black mb-4 text-foreground group-hover:text-primary transition-colors tracking-tight">
+                  <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 text-foreground group-hover:text-primary transition-colors tracking-tight">
                     {feature.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed text-lg font-bold opacity-80 group-hover:opacity-100 transition-opacity">
+                  <p className="text-muted-foreground leading-relaxed text-base md:text-lg font-bold opacity-80 group-hover:opacity-100 transition-opacity">
                     {feature.description}
                   </p>
                   

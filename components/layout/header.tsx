@@ -5,19 +5,24 @@ import { useAuthStore } from '@/lib/store/auth-store'
 import { Button } from '@/components/ui/button'
 import { LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
   const { user, logout } = useAuthStore()
+  const router = useRouter()
 
   const handleLogout = async () => {
-    logout()
+    await logout()
+    try {
+      router.replace('/')
+    } catch {}
   }
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
+    <div className="sticky top-6 m-auto z-50 w-[95%] max-w-7xl">
       <header className="bg-background/80 backdrop-blur-2xl border border-border/50 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] transition-all duration-300">
         <nav className="container flex h-20 items-center justify-between px-8">
           {/* Logo */}
@@ -54,12 +59,12 @@ export function Header() {
             <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-3">
-                <Link href="/dashboard">
+                <Link href="/dashboard" className="hidden sm:block">
                   <Button variant="ghost" className="text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-2xl">
                     لوحة التحكم
                   </Button>
                 </Link>
-                <div className="h-8 w-px bg-border/50 mx-1" />
+                <div className="hidden sm:block h-8 w-px bg-border/50 mx-1" />
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -71,7 +76,7 @@ export function Header() {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
+              <div className="hidden lg:flex items-center gap-3">
                 <Link href="/auth/login">
                   <Button variant="ghost" className="text-sm font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 rounded-2xl cursor-pointer">
                     دخول
@@ -120,12 +125,21 @@ export function Header() {
                     {link.name}
                   </Link>
                 ))}
+                {user && (
+                  <Link 
+                    href="/dashboard" 
+                    className="text-lg font-bold text-muted-foreground hover:text-primary hover:bg-primary/5 p-4 rounded-2xl transition-all"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    لوحة التحكم
+                  </Link>
+                )}
                 {!user && (
                   <div className="grid grid-cols-2 gap-4 mt-4 pt-6 border-t border-border/50">
-                    <Link href="/auth/login" className="w-full">
+                    <Link href="/auth/login" className="w-full" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full h-14 rounded-2xl font-bold border-2">دخول</Button>
                     </Link>
-                    <Link href="/auth/register" className="w-full">
+                    <Link href="/auth/register" className="w-full" onClick={() => setIsOpen(false)}>
                       <Button className="w-full h-14 rounded-2xl font-black bg-primary">سجل الآن</Button>
                     </Link>
                   </div>

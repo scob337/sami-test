@@ -1,14 +1,18 @@
 import { create } from 'zustand'
 import type { User } from '@supabase/supabase-js'
 
+export interface AuthUser extends User {
+  isAdmin?: boolean
+}
+
 interface AuthStore {
-  user: User | null
+  user: AuthUser | null
   loading: boolean
   error: string | null
-  setUser: (user: User | null) => void
+  setUser: (user: AuthUser | null) => void
   setLoading: (loading: boolean) => void
   setError: (error: string | null) => void
-  logout: () => void
+  logout: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -18,5 +22,19 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setUser: (user) => set({ user }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
-  logout: () => set({ user: null, loading: false }),
+  logout: async () => {
+    try {
+      // Call server logout to clear Supabase server cookies
+      await fetch('/api/auth/logout', { method: 'POST' })
+
+      // Clear client-side storages
+      try { localStorage.clear() } catch {}
+      try { sessionStorage.clear() } catch {}
+
+      set({ user: null, loading: false })
+    } catch (err) {
+      console.error('Error during logout:', err)
+      set({ user: null, loading: false })
+    }
+  },
 }))

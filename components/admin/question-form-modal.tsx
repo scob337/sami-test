@@ -153,7 +153,7 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-card border-border rounded-3xl" dir="rtl">
+      <DialogContent className="max-w-2xl bg-card border-border rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-foreground tracking-tight">
             {editQuestion ? 'تعديل بيانات السؤال' : 'إضافة سؤال جديد للاختبار'}

@@ -45,7 +45,7 @@ export function Header() {
               <Link
                 key={link.name}
                 href={link.href}
-                className="text-sm font-bold text-black hover:bg-background px-5 py-2.5 rounded-xl transition-all relative group cursor-pointer"
+                className="text-sm font-bold text-black dark:text-white hover:bg-background px-5 py-2.5 rounded-xl transition-all relative group cursor-pointer"
               >
                 {link.name}
               </Link>
@@ -58,7 +58,7 @@ export function Header() {
             {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden sm:block">
-                  <Button className="text-sm font-bold text-black hover:bg-secondary/10 rounded-full">
+                  <Button className="text-sm font-bold text-black dark:text-white hover:bg-secondary/10 rounded-full">
                     لوحة التحكم
                   </Button>
                 </Link>
@@ -120,7 +120,7 @@ export function Header() {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-bold text-black hover:bg-secondary/10 p-4 rounded-xl transition-all"
+                  className="text-lg font-bold text-black dark:text-white hover:bg-secondary/10 p-4 rounded-xl transition-all"
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}

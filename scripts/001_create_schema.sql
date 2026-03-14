@@ -1,5 +1,5 @@
 -- ============================================
--- MindMatch - Database Schema
+-- Sami-Test - Database Schema
 -- ============================================
 
 -- Enable required extensions

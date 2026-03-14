@@ -27,6 +27,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if phone already exists in Prisma to prevent conflicts
+    const prisma = (await import('@/lib/prisma')).default
+    if (validatedData.phone) {
+       const phoneExists = await prisma.user.findFirst({
+          where: { phone: validatedData.phone }
+       })
+       if (phoneExists) {
+         return NextResponse.json(
+           { error: 'رقم الهاتف مستخدم بالفعل' },
+           { status: 409 }
+         )
+       }
+    }
+
     // If a service role key is available, create the user as confirmed via admin API
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tfurofrwzwbdkivtkbee.supabase.co'
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -60,6 +74,16 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'تم إنشاء الحساب بنجاح', userId: adminUser.user?.id }, { status: 201 })
       }
 
+      // Ensure phone is saved in Prisma
+      try {
+        await prisma.user.updateMany({
+           where: { email: validatedData.email },
+           data: { phone: validatedData.phone }
+        })
+      } catch (e) {
+        console.error("Failed to sync phone to Prisma:", e)
+      }
+
       return NextResponse.json(
         {
           message: 'تم التسجيل وتفعيل الحساب بنجاح',
@@ -87,6 +111,15 @@ export async function POST(request: NextRequest) {
         { error: authError.message },
         { status: 400 }
       )
+    }
+
+    try {
+       await prisma.user.updateMany({
+          where: { email: validatedData.email },
+          data: { phone: validatedData.phone }
+       })
+    } catch (e) {
+       console.error("Failed to sync phone to Prisma:", e)
     }
 
     return NextResponse.json(

@@ -254,7 +254,7 @@ function Header() {
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                     className: "text-2xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors",
-                                    children: "MindMatch"
+                                    children: "Sami-Test"
                                 }, void 0, false, {
                                     fileName: "[project]/components/layout/header.tsx",
                                     lineNumber: 31,
@@ -596,7 +596,7 @@ function Footer() {
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                             className: "text-3xl font-black tracking-tighter text-foreground transition-colors group-hover:text-primary",
-                                            children: "MindMatch"
+                                            children: "Sami-Test"
                                         }, void 0, false, {
                                             fileName: "[project]/components/layout/footer.tsx",
                                             lineNumber: 20,
@@ -864,7 +864,7 @@ function Footer() {
                                 children: [
                                     "© ",
                                     currentYear,
-                                    " MindMatch. جميع الحقوق محفوظة."
+                                    " Sami-Test. جميع الحقوق محفوظة."
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/layout/footer.tsx",

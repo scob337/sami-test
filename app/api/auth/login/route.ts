@@ -9,12 +9,32 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = loginSchema.parse(body)
 
+    const prisma = (await import('@/lib/prisma')).default
+    let emailForAuth = validatedData.identifier
+
+    // If identifier doesn't look like an email, assume it's a phone number and look up the email
+    if (!emailForAuth.includes('@')) {
+      const dbUser = await prisma.user.findFirst({
+        where: { phone: validatedData.identifier },
+        select: { email: true }
+      })
+
+      if (dbUser && dbUser.email) {
+        emailForAuth = dbUser.email
+      } else {
+        return NextResponse.json(
+          { error: 'لم يتم العثور على حساب بهذا الرقم', code: 'user_not_found' },
+          { status: 404 }
+        )
+      }
+    }
+
     // Initialize Supabase
     const supabase = await createClient()
 
     // Sign in with Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: validatedData.email,
+      email: emailForAuth,
       password: validatedData.password,
     })
 
@@ -27,9 +47,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user from Prisma to check admin status
-    const prisma = (await import('@/lib/prisma')).default
     const dbUser = await prisma.user.findUnique({
-      where: { email: validatedData.email },
+      where: { email: emailForAuth },
       select: { isAdmin: true }
     })
 

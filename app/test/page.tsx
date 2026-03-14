@@ -42,6 +42,7 @@ function TestPageContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [questions, setQuestions] = useState<Question[]>([])
+  const [testName, setTestName] = useState<string>('')
   const [isRegistered, setIsRegistered] = useState(false)
   const [userData, setUserData] = useState<any>(null)
   const [isCompleted, setIsCompleted] = useState(false)
@@ -107,23 +108,32 @@ function TestPageContent() {
       setUserData(user)
     }
 
-    async function fetchQuestions() {
+    async function fetchData() {
       try {
-        const res = await fetch(`/api/questions?testId=${testId}`)
-        if (!res.ok) throw new Error()
-
-        const data = await res.json()
-        setQuestions(data)
+        const [questionsRes, testInfoRes] = await Promise.all([
+          fetch(`/api/questions?testId=${testId}`),
+          fetch(`/api/test/info?testId=${testId}`)
+        ])
+        
+        if (!questionsRes.ok) throw new Error('Failed to fetch questions')
+        
+        const questionsData = await questionsRes.json()
+        setQuestions(questionsData)
+        
+        if (testInfoRes.ok) {
+          const testInfoData = await testInfoRes.json()
+          setTestName(testInfoData.name)
+        }
 
       } catch (error) {
-        toast.error('حدث خطأ أثناء تحميل الأسئلة')
+        toast.error('حدث خطأ أثناء إعداد الاختبار')
         console.error(error)
       } finally {
         setTimeout(() => setIsLoading(false), 800)
       }
     }
 
-    fetchQuestions()
+    fetchData()
   }, [user, testId])
 
   const handleRegistrationComplete = (data: any) => {
@@ -226,6 +236,11 @@ function TestPageContent() {
         <Container size="lg">
 
           <div className="max-w-4xl mx-auto space-y-10">
+            {testName && (
+              <h1 className="text-2xl md:text-3xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2">
+                {testName}
+              </h1>
+            )}
 
             <ProgressBar
               value={currentStep + 1}
@@ -236,7 +251,7 @@ function TestPageContent() {
               <button 
                 onClick={handlePrevious} 
                 disabled={currentStep === 0}
-                className="hover:text-slate-700 disabled:opacity-30 disabled:hover:text-slate-400 transition-colors flex items-center gap-1"
+                className="hover:text-slate-700 dark:hover:text-slate-200 disabled:opacity-30 disabled:hover:text-slate-400 dark:disabled:hover:text-slate-600 transition-colors flex items-center gap-1"
               >
                 <ChevronRight className="w-4 h-4" />
                 السابق
@@ -244,7 +259,7 @@ function TestPageContent() {
               <span className="text-center hidden md:inline-block">اختر الدائرة الأقرب للعبارة التي تشبهك أكثر.</span>
               <button 
                 onClick={handleNext} 
-                className={cn("hover:text-slate-700 transition-colors flex items-center gap-1", !selectedAnswer && "opacity-50 hover:text-slate-400")}
+                className={cn("hover:text-slate-700 dark:hover:text-slate-200 transition-colors flex items-center gap-1", !selectedAnswer && "opacity-50 hover:text-slate-400 dark:hover:text-slate-600")}
               >
                 {currentStep === questions.length - 1 ? 'إنهاء الاختبار' : 'التالي'}
                 <ChevronLeft className="w-4 h-4" />

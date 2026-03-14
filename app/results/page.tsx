@@ -8,7 +8,7 @@ import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { useTestStore } from '@/lib/store/test-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-      import Link from 'next/link'
+import Link from 'next/link'
 import { Share2, Download, ArrowRight, Zap, Shield, Brain, BookOpen, BarChart3, UserCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -72,12 +72,12 @@ export default function ResultsPage() {
       if (navigator.share) {
         await navigator.share({
           title: 'نتائج اختبار شخصيتي',
-          text: `أنا من نوع ${currentType.name}! اكتشف نوع شخصيتك على MindMatch`,
+          text: `أنا من نوع ${currentType.name}! اكتشف نوع شخصيتك على Sami-Test`,
           url: window.location.href,
         })
       } else {
         await navigator.clipboard.writeText(
-          `أنا من نوع ${currentType.name}! اكتشف نوع شخصيتك على MindMatch\n${window.location.href}`
+          `أنا من نوع ${currentType.name}! اكتشف نوع شخصيتك على Sami-Test\n${window.location.href}`
         )
         toast.success('تم نسخ الرابط')
       }
@@ -89,7 +89,7 @@ export default function ResultsPage() {
   return (
     <main className="min-h-screen flex flex-col relative pt-20">
       <Header />
-      
+
       <Section size="lg" className="flex-1 overflow-hidden relative">
         {/* Ambient background glows */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2" />
@@ -114,7 +114,7 @@ export default function ResultsPage() {
               </div>
 
               <div className="space-y-4">
-                <motion.h1 
+                <motion.h1
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
@@ -122,7 +122,7 @@ export default function ResultsPage() {
                 >
                   أنت <span className="primary-gradient bg-clip-text text-transparent">{currentType.name}</span>
                 </motion.h1>
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
@@ -157,7 +157,7 @@ export default function ResultsPage() {
                   </div>
                   <h2 className="text-2xl font-bold text-foreground">تحليل الأنماط التفصيلي</h2>
                 </div>
-                
+
                 <div className={`space-y-8 ${!result.hasPaid ? 'blur-md select-none pointer-events-none' : ''}`}>
                   {(result.hasPaid ? sortedScores : sortedScores.slice(0, 3)).map(([type, score], index) => {
                     const typeInfo = PERSONALITY_TYPES.find(t => t.code === type) || { name: type, icon: Brain }
@@ -220,8 +220,8 @@ export default function ResultsPage() {
                       التقرير الشامل
                     </h3>
                     <p className="text-muted-foreground leading-relaxed font-medium">
-                      {result.hasPaid 
-                        ? 'شكراً لثقتك! يمكنك الآن قراءة التحليل المفصل الذي أعده الخبراء بناءً على إجاباتك.' 
+                      {result.hasPaid
+                        ? 'شكراً لثقتك! يمكنك الآن قراءة التحليل المفصل الذي أعده الخبراء بناءً على إجاباتك.'
                         : 'احصل على التقرير الكامل المكون من 20 صفحة لتحليل عميق لكل جوانب حياتك وتوصيات عملية من الخبراء.'}
                     </p>
                     {result.hasPaid ? (
@@ -276,7 +276,7 @@ export default function ResultsPage() {
                     </div>
                   </div>
                 </motion.div>
-                
+
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -296,8 +296,8 @@ export default function ResultsPage() {
                     variant="ghost"
                     size="lg"
                     onClick={() => {
-                        resetTest();
-                        router.push('/');
+                      resetTest();
+                      router.push('/');
                     }}
                     className="h-14 rounded-2xl text-muted-foreground hover:text-foreground transition-all font-bold"
                   >
@@ -317,7 +317,7 @@ export default function ResultsPage() {
               <div className="bg-background rounded-[2.9rem] p-10 md:p-16 text-center space-y-8 overflow-hidden relative">
                 {/* Decorative mesh */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary),0.1),transparent)] opacity-50" />
-                
+
                 <div className="relative z-10 space-y-6">
                   <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary font-bold text-sm tracking-widest uppercase">
                     باقة النخبة

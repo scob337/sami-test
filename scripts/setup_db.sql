@@ -1,5 +1,5 @@
 -- ============================================
--- MindMatch - Simplified Database Schema Setup
+-- Sami-Test - Simplified Database Schema Setup
 -- ============================================
 
 -- Enable extensions

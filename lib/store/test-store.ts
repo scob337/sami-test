@@ -40,7 +40,7 @@ export const useTestStore = create<TestStore>()(
       addAnswer: (questionId, answerId) => {
         const { answers } = get()
         const existingIndex = answers.findIndex((a) => a.questionId === questionId)
-        
+
         if (existingIndex >= 0) {
           const newAnswers = [...answers]
           newAnswers[existingIndex] = { questionId, answerId }
@@ -63,7 +63,7 @@ export const useTestStore = create<TestStore>()(
       },
     }),
     {
-      name: 'mindmatch-test-storage',
+      name: 'Sami-Test-test-storage',
       storage: createJSONStorage(() => localStorage),
     }
   )

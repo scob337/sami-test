@@ -11,7 +11,7 @@ export function Footer() {
     <footer className="relative bg-[#01293D] text-white pt-20 pb-12 overflow-hidden">
       <div className="container relative z-10 max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-12 gap-x-8 mb-16">
-          
+
           {/* Column 1 */}
           <div className="space-y-6">
             <ul className="space-y-4">
@@ -63,7 +63,7 @@ export function Footer() {
               ))}
             </ul>
           </div>
-          
+
           {/* Column 5 */}
           <div className="space-y-6">
             <ul className="space-y-4">
@@ -98,10 +98,10 @@ export function Footer() {
               </svg>
             </Link>
           </div>
-          
+
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
             <p className="text-white/60 text-xs font-semibold tracking-wider">
-              {currentYear} MINDMATCH
+              {currentYear} Sami-Test
             </p>
             <div className="flex gap-6 text-white/60 text-xs font-semibold tracking-wider">
               <Link href="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>

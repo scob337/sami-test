@@ -12,26 +12,26 @@ import { Toaster } from 'sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
-const geist = Geist({ 
+const geist = Geist({
   subsets: ["latin"],
   variable: '--font-sans',
   display: 'swap',
 })
 
-const geistMono = Geist_Mono({ 
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: '--font-mono',
   display: 'swap',
 })
 
 export const metadata: Metadata = {
-  title: 'MindMatch - اختبر شخصيتك الآن',
+  title: 'Sami-Test - اختبر شخصيتك الآن',
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي. احصل على تقرير شامل وتوصيات مخصصة.',
   generator: 'Next.js 16',
   keywords: ['اختبار الشخصية', 'تحليل الشخصية', 'AI', 'الذكاء الاصطناعي', 'personality test'],
-  authors: [{ name: 'MindMatch Team' }],
-  creator: 'MindMatch',
-  publisher: 'MindMatch',
+  authors: [{ name: 'Sami-Test Team' }],
+  creator: 'Sami-Test',
+  publisher: 'Sami-Test',
   robots: 'index, follow',
   icons: {
     icon: [
@@ -53,14 +53,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://mindmatch.app',
-    siteName: 'MindMatch',
-    title: 'MindMatch - اختبر شخصيتك الآن',
+    url: 'https://Sami-Test.app',
+    siteName: 'Sami-Test',
+    title: 'Sami-Test - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'MindMatch - اختبر شخصيتك الآن',
+    title: 'Sami-Test - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
   },
 }
@@ -82,8 +82,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html 
-      lang="ar" 
+    <html
+      lang="ar"
       suppressHydrationWarning
       className={`${geist.variable} ${geistMono.variable} ${cairo.variable}`}
       dir="rtl"
@@ -92,7 +92,7 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#3B82F6" />
       </head>
-      <body 
+      <body
         className="font-cairo antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden selection:bg-primary/30 selection:text-primary-foreground"
         suppressHydrationWarning
       >
@@ -108,11 +108,11 @@ export default function RootLayout({
             <div className="aurora-dot w-[400px] h-[400px] bg-secondary/15 top-1/2 -right-24" />
             <div className="aurora-dot w-[600px] h-[600px] bg-accent/10 -bottom-48 left-1/2 -translate-x-1/2" />
           </div>
-          
+
           <div className="relative z-10 flex flex-col min-h-screen">
             {children}
           </div>
-          
+
           <Toaster position="top-center" richColors />
           <Analytics />
         </ThemeProvider>

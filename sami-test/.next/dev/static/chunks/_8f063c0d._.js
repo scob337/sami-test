@@ -165,7 +165,7 @@ function Header() {
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 className: "text-xl font-bold tracking-tight text-foreground transition-colors",
-                                children: "MindMatch"
+                                children: "Sami-Test"
                             }, void 0, false, {
                                 fileName: "[project]/components/layout/header.tsx",
                                 lineNumber: 29,
@@ -456,7 +456,7 @@ function Footer() {
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                 className: "text-xl font-bold tracking-tight text-foreground transition-colors",
-                                                children: "MindMatch"
+                                                children: "Sami-Test"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/layout/footer.tsx",
                                                 lineNumber: 22,
@@ -637,7 +637,7 @@ function Footer() {
                                                         columnNumber: 17
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                        children: "support@mindmatch.app"
+                                                        children: "support@Sami-Test.app"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/layout/footer.tsx",
                                                         lineNumber: 82,
@@ -705,7 +705,7 @@ function Footer() {
                                 children: [
                                     "© ",
                                     currentYear,
-                                    " MindMatch. جميع الحقوق محفوظة لمحبي الابتكار."
+                                    " Sami-Test. جميع الحقوق محفوظة لمحبي الابتكار."
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/layout/footer.tsx",
@@ -910,7 +910,7 @@ const useTestStore = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_mo
             return Math.min(Math.round(answers.length / totalQuestions * 100), 100);
         }
     }), {
-    name: 'mindmatch-test-storage',
+    name: 'Sami-Test-test-storage',
     storage: (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$zustand$2f$esm$2f$middleware$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createJSONStorage"])(()=>localStorage)
 }));
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {

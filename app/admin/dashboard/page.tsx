@@ -63,27 +63,27 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-800">نظرة عامة</h2>
-        <p className="text-sm text-slate-500 mt-1">مرحباً، إليك ملخص أداء المنصة.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">نظرة عامة</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">مرحباً، إليك ملخص أداء المنصة.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {statCards.map((stat) => (
-          <Card key={stat.label} className="p-1 border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all group overflow-hidden rounded-xl">
+          <Card key={stat.label} className="p-1 border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all group overflow-hidden rounded-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl shadow-sm border border-gray-100 group-hover:scale-110 transition-transform ${stat.bg}`}>
+                <div className={`p-3 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 group-hover:scale-110 transition-transform ${stat.bg}`}>
                   <stat.icon className={`w-6 h-6 ${stat.color}`} />
                 </div>
                 {stat.trend && (
-                  <div className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
+                  <div className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
                     {stat.trend}
                   </div>
                 )}
               </div>
-              <div className="text-2xl md:text-3xl font-black text-slate-900 mb-1">{stat.value.toLocaleString('ar-SA')}</div>
-              <div className="text-xs text-slate-500 font-medium uppercase tracking-wider">{stat.label}</div>
+              <div className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 mb-1">{stat.value.toLocaleString('ar-SA')}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{stat.label}</div>
             </CardContent>
           </Card>
         ))}
@@ -99,16 +99,16 @@ export default function AdminDashboard() {
           <a
             key={item.title}
             href={item.href}
-            className={`block p-6 rounded-xl bg-white border border-gray-200 shadow-sm hover:border-blue-400 transition-all hover:-translate-y-1 hover:shadow-md group`}
+            className={`block p-6 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-sm hover:border-blue-400 transition-all hover:-translate-y-1 hover:shadow-md group`}
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-lg border border-gray-100 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${item.bg}`}>
+              <div className={`w-12 h-12 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${item.bg}`}>
                 <item.icon className={`w-6 h-6 ${item.color}`} />
               </div>
-              <ArrowUpRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-all" />
+              <ArrowUpRight className="w-5 h-5 text-gray-300 dark:text-slate-600 group-hover:text-blue-500 transition-all" />
             </div>
-            <h3 className="font-bold text-slate-800 text-lg tracking-tight">{item.title}</h3>
-            <p className="text-sm text-slate-500 mt-2 leading-relaxed">{item.desc}</p>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">{item.title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">{item.desc}</p>
           </a>
         ))}
       </div>

@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  ClipboardList, 
-  HelpCircle, 
-  MessageSquare, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  ClipboardList,
+  HelpCircle,
+  MessageSquare,
   Users,
   Settings,
   LogOut
@@ -35,12 +35,12 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
             M
           </div>
           <div>
-            <h1 className="text-xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors">MindMatch</h1>
+            <h1 className="text-xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors">Sami-Test</h1>
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Admin Control</p>
           </div>
         </Link>
       </div>
-      
+
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => (
           <Link
@@ -49,15 +49,15 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
             onClick={onItemClick}
             className={cn(
               "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group relative",
-              pathname === item.href 
-                ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 font-bold" 
+              pathname === item.href
+                ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 font-bold"
                 : "text-muted-foreground hover:bg-primary/5 hover:text-primary font-semibold"
             )}
           >
             <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", pathname === item.href ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
             <span className="text-[15px]">{item.label}</span>
             {pathname === item.href && (
-              <motion.div 
+              <motion.div
                 layoutId="active-pill"
                 className="absolute right-2 w-1.5 h-6 bg-primary-foreground rounded-full"
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}

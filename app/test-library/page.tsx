@@ -49,34 +49,34 @@ export default function TestLibraryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen flex flex-col relative bg-white text-slate-900 overflow-x-hidden">
+    <main className="min-h-screen flex flex-col relative bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden">
       <Header />
 
       {/* Hero Section (from HTML) */}
-      <section className="pt-20 pb-16 sm:pt-32 sm:pb-24 overflow-hidden relative border-b border-slate-100" dir="rtl">
-          <div className="absolute inset-x-0 top-0 h-[30rem] bg-gradient-to-b from-blue-50/40 via-purple-50/20 to-transparent -z-10"></div>
+      <section className="pt-20 pb-16 sm:pt-32 sm:pb-24 overflow-hidden relative border-b border-slate-100 dark:border-slate-800" dir="rtl">
+          <div className="absolute inset-x-0 top-0 h-[30rem] bg-gradient-to-b from-blue-50/40 dark:from-blue-900/10 via-purple-50/20 dark:via-purple-900/5 to-transparent -z-10"></div>
           {/* Subtle Grid Background */}
-          <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:2rem_2rem] -z-10"></div>
+          <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:2rem_2rem] -z-10"></div>
           
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 bg-accent/80 backdrop-blur-sm border border-slate-200 rounded-full px-3 py-1 mb-8 shadow-sm">
+              <div className="inline-flex items-center gap-2 bg-accent/80 backdrop-blur-sm border border-slate-200 dark:border-slate-800/50 rounded-full px-3 py-1 mb-8 shadow-sm">
                   <BookMarked className="text-white w-4 h-4" />
                   <span className="text-sm text-white font-bold">دليل الاختبارات</span>
               </div>
 
               {/* Headlines */}
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 mb-6 leading-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-6 leading-tight">
                   مكتبة الاختبارات الشخصية.
               </h1>
-              <p className="mt-4 text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+              <p className="mt-4 text-lg sm:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
                   استكشف الدليل الشامل لاختبارات تحليل الشخصية. افهم كيف يوجه الأشخاص المختلفون طاقتهم، ويعالجون المعلومات، ويتخذون القرارات، وينظمون حياتهم.
               </p>
 
@@ -91,13 +91,13 @@ export default function TestLibraryPage() {
       </section>
 
       {/* The Grid Section (adapted for active tests) */}
-      <section id="types-grid" className="py-24 bg-slate-50/30 flex-1" dir="rtl">
+      <section id="types-grid" className="py-24 bg-slate-50/30 dark:bg-slate-900/50 flex-1" dir="rtl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               
-              <div className="mb-12 flex flex-col sm:flex-row justify-between items-end gap-6 border-b border-slate-200 pb-6">
+              <div className="mb-12 flex flex-col sm:flex-row justify-between items-end gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
                   <div>
-                      <h2 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">الكتب والاختبارات المتاحة</h2>
-                      <p className="text-base text-slate-500 font-medium">اختر نموذجًا أدناه لبدء الاختبار وعرض السمات الشاملة ونقاط القوة وأساليب التواصل.</p>
+                      <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 mb-2">الكتب والاختبارات المتاحة</h2>
+                      <p className="text-base text-slate-500 dark:text-slate-400 font-medium">اختر نموذجًا أدناه لبدء الاختبار وعرض السمات الشاملة ونقاط القوة وأساليب التواصل.</p>
                   </div>
               </div>
 
@@ -132,17 +132,17 @@ export default function TestLibraryPage() {
                     >
                       <Link 
                         href={hasTests ? `/test?testId=${firstTestId}` : '#'} 
-                        className={`group bg-white border border-slate-200 rounded-2xl p-6 hover:shadow-xl ${activeStyle.hoverShadow} ${activeStyle.hoverBorder} transition-all duration-300 relative overflow-hidden flex flex-col h-full`}
+                        className={`group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-xl ${activeStyle.hoverShadow} ${activeStyle.hoverBorder} transition-all duration-300 relative overflow-hidden flex flex-col h-full`}
                       >
                           <div className={`absolute top-0 left-0 w-full h-1 ${activeStyle.bgHeader} opacity-80 group-hover:opacity-100 transition-opacity`}></div>
                           <div className="flex items-center justify-between mb-5">
-                              <span className={`text-xl font-bold tracking-tight ${activeStyle.textHex} ${activeStyle.bgHex} border ${activeStyle.borderHex} px-3 py-1 rounded-lg`}>
+                              <span className={`text-xl font-bold tracking-tight ${activeStyle.textHex} dark:${activeStyle.textHex} ${activeStyle.bgHex} dark:bg-slate-800 border ${activeStyle.borderHex} dark:border-slate-700 px-3 py-1 rounded-lg`}>
                                  {hasTests ? 'متاح الآن' : 'قريباً'}
                               </span>
-                              {hasTests && <ArrowUpLeft className={`text-slate-300 ${activeStyle.hoverGroupText} transition-colors w-5 h-5`} />}
+                              {hasTests && <ArrowUpLeft className={`text-slate-300 dark:text-slate-600 ${activeStyle.hoverGroupText} transition-colors w-5 h-5`} />}
                           </div>
-                          <h3 className="text-lg font-bold text-slate-900 mb-2">{book.title}</h3>
-                          <p className="text-sm text-slate-500 font-medium mb-6 flex-grow line-clamp-3">
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{book.title}</h3>
+                          <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6 flex-grow line-clamp-3">
                               {book.description || 'كتاب متخصص يقدم لك رؤى عميقة واختبارات متقدمة لتحليل شخصيتك وفهم أنماط سلوكك المختلفة.'}
                           </p>
                           <div className={`text-xs font-bold ${activeStyle.textHex} uppercase tracking-widest mt-auto`}>

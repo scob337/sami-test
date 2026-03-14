@@ -4,15 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* ---------------- LIGHT MODE ---------------- */
 
 :root {
 
-  /* Crystal Off-White BG */
   --background: 216 28% 97%;
-  /* #F3F6FA */
   --foreground: 200 97% 12%;
-  /* #01293D */
 
   --card: 0 0% 100%;
   --card-foreground: 200 97% 12%;
@@ -20,38 +16,28 @@
   --popover: 0 0% 100%;
   --popover-foreground: 200 97% 12%;
 
-  /* Crystal Deep Navy */
   --primary: 200 97% 12%;
   --primary-foreground: 0 0% 100%;
 
-  /* Crystal Navy (Secondary) */
   --secondary: 200 97% 12%;
   --secondary-foreground: 0 0% 100%;
 
-  /* Crystal Light Gray */
   --muted: 213 13% 93%;
   --muted-foreground: 212 11% 47%;
-  /* #6B7785 */
 
-  /* Crystal Golden blue-500CTA */
   --accent: 216.23,100%,58.43%;
-  /* #F5C542 */
   --accent-foreground: 160,100%,99.41%;
-  /* #01293D */
 
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
 
-  /* Crystal Border Gray */
   --border: 213 18% 90%;
-  /* #E1E5EA */
   --input: 213 18% 90%;
   --ring: 200 97% 12%;
 
   --radius: 0.75rem;
 }
 
-/* ---------------- DARK MODE (Raycast style) ---------------- */
 
 .dark {
 
@@ -64,9 +50,8 @@
   --popover: 200 97% 9%;
   --popover-foreground: 0 0% 98%;
 
-  /* Crystal Deep Navy */
-  --primary: 200 97% 12%;
-  --primary-foreground: 0 0% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 200 97% 12%;
 
   --secondary: 216 100% 58%;
   --secondary-foreground: 0 0% 100%;
@@ -75,7 +60,6 @@
   --muted: 200 30% 15%;
   --muted-foreground: 212 11% 60%;
 
-  /* Crystal Golden blue-500 CTA */
   --accent: 216 100% 58%;
   --accent-foreground: 200 97% 12%;
 
@@ -87,7 +71,6 @@
   --ring: 200 97% 12%;
 }
 
-/* ---------------- THEME ---------------- */
 
 @theme inline {
 
@@ -131,7 +114,6 @@
   --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--primary)) 100%);
 }
 
-/* ---------------- BASE ---------------- */
 
 @layer base {
   * {
@@ -152,7 +134,6 @@
   }
 }
 
-/* ---------------- COMPONENTS ---------------- */
 
 @layer components {
 
@@ -181,7 +162,6 @@
   }
 }
 
-/* ---------------- PAGE TRANSITIONS ---------------- */
 
 .page-transition-enter {
   opacity: 0;
@@ -194,7 +174,6 @@
   transition: opacity 400ms, transform 400ms;
 }
 
-/* ---------------- SCROLLBAR ---------------- */
 
 ::-webkit-scrollbar {
   width: 8px;

@@ -6,13 +6,13 @@ import { FeaturesSection } from '@/components/home/features-section'
 import { AboutSection } from '@/components/home/about-section'
 
 export const metadata: Metadata = {
-  title: 'MindMatch - اكتشف نمط شخصيتك بعمق',
+  title: 'Sami-Test - اكتشف نمط شخصيتك بعمق',
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على أحدث المناهج العلمية. احصل على تقرير شامل وتوصيات مخصصة من الخبراء.',
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://mindmatch.app',
-    title: 'MindMatch - اكتشف نمط شخصيتك بعمق',
+    url: 'https://Sami-Test.app',
+    title: 'Sami-Test - اكتشف نمط شخصيتك بعمق',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم بإشراف الخبراء',
   },
 }

@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useAuthStore } from '@/lib/store/auth-store'
+import { cn } from '@/lib/utils'
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)

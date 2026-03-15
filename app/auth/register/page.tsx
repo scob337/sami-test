@@ -25,11 +25,6 @@ export default function RegisterPage() {
 
   const { setUser, user } = useAuthStore()
 
-  // If already logged in on client, redirect to dashboard
-  useEffect(() => {
-    if (user) router.push('/dashboard')
-  }, [user, router])
-
   const onSubmit = async (data: RegisterInput) => {
     try {
       setIsLoading(true)
@@ -177,12 +172,17 @@ export default function RegisterPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 mt-2 bg-[#f8f9fa] dark:bg-slate-800 hover:bg-[#e9ecef] dark:hover:bg-slate-700 text-[#a0aab2] dark:text-slate-400 hover:text-[#495057] dark:hover:text-slate-200 font-bold text-[13px] tracking-wide rounded-[4px] border border-transparent uppercase transition-colors"
+              className={cn(
+                "w-full h-12 mt-2 font-bold text-[13px] tracking-wide rounded-[4px] border border-transparent uppercase transition-all",
+                isLoading 
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed" 
+                  : "bg-[#002f5d] dark:bg-blue-600 hover:bg-[#003f7d] dark:hover:bg-blue-500 text-white shadow-md active:scale-[0.98]"
+              )}
             >
               {isLoading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <LoadingSpinner size="sm" />
-                  <span>SIGNING UP...</span>
+                <div className="flex items-center justify-center gap-3">
+                  <LoadingSpinner size="sm" className="text-blue-600 dark:text-blue-400" />
+                  <span className="animate-pulse">SIGNING UP...</span>
                 </div>
               ) : (
                 'SIGN UP'
@@ -193,7 +193,7 @@ export default function RegisterPage() {
           <hr className="border-gray-200 dark:border-slate-800" />
 
           {/* Social Login Buttons */}
-          <div className="space-y-3">
+          {/* <div className="space-y-3">
             <Button
               variant="outline"
               className="w-full h-[46px] border border-gray-300 dark:border-slate-700 text-gray-600 dark:text-slate-300 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 uppercase text-[13px] font-bold tracking-wide rounded-[4px] flex items-center justify-center gap-3 relative"
@@ -215,7 +215,7 @@ export default function RegisterPage() {
               </svg>
               SIGN UP WITH GITHUB
             </Button>
-          </div>
+          </div> */}
 
           <div className="mt-8 text-center pb-8">
             <a

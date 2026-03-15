@@ -1,11 +1,31 @@
 import { Sidebar } from '@/components/admin/sidebar'
 import { Header } from '@/components/admin/header'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import prisma from '@/lib/prisma'
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    redirect('/auth/login')
+  }
+
+  // Check admin status in DB
+  const dbUser = await prisma.user.findUnique({
+    where: { email: user.email! },
+    select: { isAdmin: true }
+  })
+
+  if (!dbUser?.isAdmin) {
+    redirect('/dashboard')
+  }
+
   return (
     <div className="flex h-screen bg-background text-foreground" dir="rtl">
       <Sidebar className="hidden lg:flex" />

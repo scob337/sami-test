@@ -36,8 +36,8 @@ export async function proxy(request: NextRequest) {
 
   // 2. If user is NOT logged in and trying to access protected pages, redirect to login
   if (!hasSession && isProtectedRoute) {
-    console.log('[proxy] redirecting protected route -> /')
-    return NextResponse.redirect(new URL('/', request.url))
+    console.log('[proxy] redirecting protected route -> /auth/login')
+    return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
   return NextResponse.next()

@@ -52,12 +52,6 @@ export default function DashboardPage() {
   const { user: authUser } = useAuthStore()
   const router = useRouter()
 
-  useEffect(() => {
-    // If no auth user in client store, treat as unauthenticated and redirect to homepage
-    if (!authUser) {
-      router.replace('/')
-    }
-  }, [authUser, router])
   const [dbUser, setDbUser] = useState<any>(null)
   const [attempts, setAttempts] = useState<any[]>([])
   const [books, setBooks] = useState<any[]>([])

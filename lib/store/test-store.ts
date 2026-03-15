@@ -29,42 +29,34 @@ interface TestStore {
   getProgress: (totalQuestions: number) => number
 }
 
-export const useTestStore = create<TestStore>()(
-  persist(
-    (set, get) => ({
-      currentStep: 0,
-      answers: [],
-      result: null,
-      isFinished: false,
-      setCurrentStep: (step) => set({ currentStep: step }),
-      addAnswer: (questionId, answerId) => {
-        const { answers } = get()
-        const existingIndex = answers.findIndex((a) => a.questionId === questionId)
+export const useTestStore = create<TestStore>((set, get) => ({
+  currentStep: 0,
+  answers: [],
+  result: null,
+  isFinished: false,
+  setCurrentStep: (step) => set({ currentStep: step }),
+  addAnswer: (questionId, answerId) => {
+    const { answers } = get()
+    const existingIndex = answers.findIndex((a) => a.questionId === questionId)
 
-        if (existingIndex >= 0) {
-          const newAnswers = [...answers]
-          newAnswers[existingIndex] = { questionId, answerId }
-          set({ answers: newAnswers })
-        } else {
-          set({ answers: [...answers, { questionId, answerId }] })
-        }
-      },
-      removeAnswer: (questionId) => {
-        const { answers } = get()
-        set({ answers: answers.filter((a) => a.questionId !== questionId) })
-      },
-      setResult: (result) => set({ result }),
-      setIsFinished: (isFinished) => set({ isFinished }),
-      resetTest: () => set({ currentStep: 0, answers: [], result: null, isFinished: false }),
-      getProgress: (totalQuestions: number) => {
-        const { answers } = get()
-        if (totalQuestions === 0) return 0
-        return Math.min(Math.round((answers.length / totalQuestions) * 100), 100)
-      },
-    }),
-    {
-      name: 'Sami-Test-test-storage',
-      storage: createJSONStorage(() => localStorage),
+    if (existingIndex >= 0) {
+      const newAnswers = [...answers]
+      newAnswers[existingIndex] = { questionId, answerId }
+      set({ answers: newAnswers })
+    } else {
+      set({ answers: [...answers, { questionId, answerId }] })
     }
-  )
-)
+  },
+  removeAnswer: (questionId) => {
+    const { answers } = get()
+    set({ answers: answers.filter((a) => a.questionId !== questionId) })
+  },
+  setResult: (result) => set({ result }),
+  setIsFinished: (isFinished) => set({ isFinished }),
+  resetTest: () => set({ currentStep: 0, answers: [], result: null, isFinished: false }),
+  getProgress: (totalQuestions: number) => {
+    const { answers } = get()
+    if (totalQuestions === 0) return 0
+    return Math.min(Math.round((answers.length / totalQuestions) * 100), 100)
+  },
+}))

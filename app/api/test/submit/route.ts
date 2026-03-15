@@ -4,7 +4,7 @@ import { PatternType } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
-    const { answers, userId, testId } = await request.json()
+    const { answers, userId, testId, guestData } = await request.json()
     // answers is an array of { questionId: number, answerId: number }
 
     if (!answers || !Array.isArray(answers) || !testId) {
@@ -15,13 +15,22 @@ export async function POST(request: Request) {
     let validUserId = parseInt(userId) || 0
     let user = validUserId > 0 ? await prisma.user.findUnique({ where: { id: validUserId } }) : null
 
+    if (!user && guestData?.emailOrPhone) {
+      // Check if user already exists by email or phone
+      const isEmail = guestData.emailOrPhone.includes('@');
+      user = await prisma.user.findFirst({
+        where: isEmail ? { email: guestData.emailOrPhone } : { phone: guestData.emailOrPhone }
+      });
+    }
+
     if (!user) {
       // Create a guest user so the foreign key constraint is satisfied
+      // Use guestData from the pre-test form if available
       user = await prisma.user.create({
         data: {
-          name: 'زائر',
-          email: null,
-          phone: null,
+          name: guestData?.name || 'زائر',
+          email: guestData?.emailOrPhone?.includes('@') ? guestData.emailOrPhone : null,
+          phone: guestData?.emailOrPhone && !guestData?.emailOrPhone?.includes('@') ? guestData.emailOrPhone : null,
         },
       })
     }

@@ -1,26 +1,21 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { User, Phone, ShieldCheck, ArrowRight, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
-import { Phone, Mail, User, ArrowLeft, CheckCircle2, ShieldCheck } from 'lucide-react'
 import { 
   InputOTP, 
   InputOTPGroup, 
   InputOTPSlot, 
-  InputOTPSeparator 
 } from '@/components/ui/input-otp'
-import { AnimatePresence } from 'framer-motion'
 
 interface PreTestFormProps {
   onComplete: (userData: any) => void
+  onBack?: () => void
 }
 
-export function PreTestForm({ onComplete }: PreTestFormProps) {
+export function PreTestForm({ onComplete, onBack }: PreTestFormProps) {
   const [step, setStep] = useState<'info' | 'otp'>('info')
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -28,6 +23,20 @@ export function PreTestForm({ onComplete }: PreTestFormProps) {
     emailOrPhone: '',
   })
   const [otp, setOtp] = useState('')
+  const [timeLeft, setTimeLeft] = useState(291) // 4:51
+
+  useEffect(() => {
+    if (step === 'otp' && timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [step, timeLeft])
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,10 +44,10 @@ export function PreTestForm({ onComplete }: PreTestFormProps) {
       toast.error('يرجى ملء جميع البيانات')
       return
     }
-
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
       setStep('otp')
       toast.success('تم إرسال رمز التحقق بنجاح')
     } catch (error) {
@@ -54,10 +63,10 @@ export function PreTestForm({ onComplete }: PreTestFormProps) {
       toast.error('يرجى إدخال رمز التحقق كاملاً')
       return
     }
-
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800))
       toast.success('تم التحقق بنجاح!')
       onComplete({ ...formData, verified: true })
     } catch (error) {
@@ -68,162 +77,139 @@ export function PreTestForm({ onComplete }: PreTestFormProps) {
   }
 
   return (
-    <div className="max-w-xl mx-auto w-full">
-      <motion.div
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <Card className="bg-card/40 backdrop-blur-2xl border-2 border-border/50 shadow-2xl shadow-black/5 overflow-hidden rounded-[3rem] relative">
-          {/* Progress Indicator */}
-          <div className="absolute top-0 left-0 w-full h-2 bg-secondary/50">
-            <motion.div 
-              className="h-full bg-primary shadow-[0_0_15px_rgba(79,70,229,0.4)]"
-              initial={{ width: "0%" }}
-              animate={{ width: step === 'info' ? "50%" : "100%" }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-            />
-          </div>
+    <div className="w-full max-w-lg mx-auto bg-slate-50 min-h-[500px] flex flex-col pt-8" dir="rtl">
+      
+      {/* Top Bar with Back Button */}
+      <div className="flex justify-end mb-8 px-4">
+        <button 
+          onClick={() => step === 'otp' ? setStep('info') : (onBack && onBack())}
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition-colors bg-transparent border-none cursor-pointer"
+        >
+          <span className="font-medium text-sm">رجوع</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
 
-          <CardHeader className="pt-16 pb-8 text-center px-10">
-            <motion.div 
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8 text-primary border border-primary/20 shadow-inner"
-            >
-              {step === 'info' ? <User className="w-10 h-10" /> : <ShieldCheck className="w-10 h-10" />}
-            </motion.div>
-            <CardTitle className="text-4xl font-black text-foreground tracking-tight">
-              {step === 'info' ? 'ابدأ رحلة الاكتشاف' : 'تأكيد الهوية'}
-            </CardTitle>
-            <CardDescription className="text-xl font-bold text-muted-foreground mt-4 opacity-80 leading-relaxed">
-              {step === 'info' 
-                ? 'أدخل بياناتك لحفظ تقدمك والحصول على تقريرك الشخصي المطور.' 
-                : 'أدخل الرمز المكون من 6 أرقام المرسل إلى هاتفك/بريدك.'}
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent className="px-10 pb-16">
-            <AnimatePresence mode="wait">
-              {step === 'info' ? (
-                <motion.form
-                  key="info-form"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  onSubmit={handleSendOtp}
-                  className="space-y-8"
-                >
-                  <div className="space-y-6">
-                    <div className="space-y-3">
-                      <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">الاسم بالكامل</Label>
-                      <div className="relative group">
-                        <Input 
-                          placeholder="أدخل اسمك الثلاثي" 
-                          className="h-16 px-6 rounded-2xl bg-secondary/50 border-2 border-border/50 focus:border-primary/50 focus:outline-none transition-all font-bold text-lg pr-12"
-                          value={formData.name}
-                          onChange={(e) => setFormData({...formData, name: e.target.value})}
-                        />
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">البريد أو رقم الجوال</Label>
-                      <div className="relative group">
-                        <Input 
-                          placeholder="example@mail.com" 
-                          className="h-16 px-6 rounded-2xl bg-secondary/50 border-2 border-border/50 focus:border-primary/50 focus:outline-none transition-all font-bold text-lg pr-12 text-left dir-ltr"
-                          value={formData.emailOrPhone}
-                          onChange={(e) => setFormData({...formData, emailOrPhone: e.target.value})}
-                        />
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <Button 
-                    className="w-full h-18 rounded-[1.5rem] bg-primary hover:bg-primary/90 text-primary-foreground font-black text-2xl shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>جاري الإرسال...</span>
-                      </div>
-                    ) : (
-                      'متابعة للاختبار'
-                    )}
-                  </Button>
-                </motion.form>
-              ) : (
-                <motion.form
-                  key="otp-form"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  onSubmit={handleVerifyOtp}
-                  className="space-y-10"
-                >
-                  <div className="flex flex-col items-center space-y-8">
-                    <InputOTP
-                      maxLength={6}
-                      value={otp}
-                      onChange={setOtp}
-                      className="gap-4"
-                    >
-                      <InputOTPGroup className="gap-3">
-                        {[0, 1, 2, 3, 4, 5].map((i) => (
-                          <InputOTPSlot 
-                            key={i} 
-                            index={i} 
-                            className="w-14 h-18 text-3xl font-black rounded-2xl border-2 border-border/50 bg-secondary/50 focus:border-primary/50 transition-all shadow-inner" 
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
-
-                    <button 
-                      type="button"
-                      onClick={() => setStep('info')}
-                      className="text-primary font-black flex items-center gap-2 hover:opacity-80 transition-opacity"
-                    >
-                      <ArrowLeft className="w-5 h-5" />
-                      تغيير البيانات المدخلة
-                    </button>
-                  </div>
-
-                  <Button 
-                    className="w-full h-18 rounded-[1.5rem] bg-primary hover:bg-primary/90 text-primary-foreground font-black text-2xl shadow-2xl shadow-primary/30 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
-                    disabled={isLoading || otp.length < 6}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>جاري التحقق...</span>
-                      </div>
-                    ) : (
-                      'تحقق وابدأ الآن'
-                    )}
-                  </Button>
-                </motion.form>
-              )}
-            </AnimatePresence>
-
-            <div className="mt-10 pt-8 border-t border-border/50 flex items-center justify-center gap-6 opacity-60">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                <span className="text-sm font-bold">تشفير آمن</span>
-              </div>
-              <div className="w-px h-4 bg-border/50" />
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                <span className="text-sm font-bold">خصوصية تامة</span>
-              </div>
+      <AnimatePresence mode="wait">
+        {step === 'info' ? (
+          <motion.div
+            key="info-step"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="flex-1 flex flex-col items-center w-full px-6 md:px-8"
+          >
+            <div className="text-center space-y-2 mb-10">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]">التسجيل</h1>
+              <p className="text-slate-500 text-sm md:text-base">أدخل بياناتك للبدء في الاختبار</p>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+
+            <form onSubmit={handleSendOtp} className="w-full space-y-6">
+              
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[#0f172a] block text-right">الاسم</label>
+                <div className="relative">
+                  <input 
+                    type="text"
+                    required
+                    placeholder="أدخل اسمك الكامل"
+                    className="w-full h-12 md:h-14 px-4 pl-12 rounded-xl border border-slate-200 outline-none focus:border-[#1A56DB] focus:ring-1 focus:ring-[#1A56DB] transition-all bg-white"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-[#0f172a] block text-right">رقم الجوال أو البريد الإلكتروني</label>
+                <div className="relative">
+                  <input 
+                    type="text"
+                    required
+                    placeholder="05xxxxxxx أو email@example.com"
+                    className="w-full h-12 md:h-14 px-4 pl-12 rounded-xl border border-slate-200 outline-none focus:border-[#1A56DB] focus:ring-1 focus:ring-[#1A56DB] transition-all bg-white"
+                    value={formData.emailOrPhone}
+                    onChange={(e) => setFormData({...formData, emailOrPhone: e.target.value})}
+                    dir="auto"
+                  />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 md:h-14 mt-4 bg-[#1A56DB] hover:bg-blue-700 text-white rounded-xl font-bold text-base transition-colors flex items-center justify-center cursor-pointer"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'إرسال رمز التحقق'
+                )}
+              </button>
+
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="otp-step"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="flex-1 flex flex-col items-center w-full px-6 md:px-8"
+          >
+            <div className="w-16 h-16 bg-[#EEF2FF] rounded-full flex items-center justify-center mb-6">
+              <ShieldCheck className="w-8 h-8 text-[#1A56DB]" />
+            </div>
+
+            <div className="text-center space-y-2 mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#0f172a]">التحقق من الهوية</h1>
+              <p className="text-slate-500 text-sm md:text-base" dir="rtl">
+                تم إرسال رمز التحقق إلى <span className="dir-ltr inline-block">{formData.emailOrPhone || '966508865634'}</span>
+              </p>
+            </div>
+
+            <div className="w-full bg-[#f8fafc] border border-slate-100 rounded-lg p-3 flex items-center justify-center gap-2 mb-8">
+              <Lightbulb className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-medium text-slate-600">للتجربة: استخدم الرمز <span className="font-bold text-[#1A56DB]">123456</span></span>
+            </div>
+
+            <form onSubmit={handleVerifyOtp} className="w-full flex flex-col items-center space-y-8">
+              
+              <div className="dir-ltr w-full flex justify-center">
+                <InputOTP maxLength={6} value={otp} onChange={setOtp} className="gap-2 md:gap-3">
+                  <InputOTPGroup className="gap-2 md:gap-3 flex justify-center w-full">
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
+                      <InputOTPSlot 
+                        key={i} 
+                        index={i} 
+                        className="w-10 h-12 md:w-12 md:h-14 text-xl md:text-2xl font-bold rounded-xl border border-slate-200 bg-white focus:border-[#1A56DB] focus:ring-1 focus:ring-[#1A56DB]"
+                      />
+                    ))}
+                  </InputOTPGroup>
+                </InputOTP>
+              </div>
+
+              <div className="text-slate-500 text-sm font-medium">
+                ينتهي خلال {formatTime(timeLeft)}
+              </div>
+
+              <button 
+                type="submit"
+                disabled={isLoading || otp.length < 6}
+                className="w-full h-12 md:h-14 bg-[#1A56DB] hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-xl font-bold text-base transition-colors flex items-center justify-center cursor-pointer"
+              >
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  'تأكيد'
+                )}
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -8,8 +8,6 @@ import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { Button } from '@/components/ui/button'
-import { QuestionCard } from '@/components/test/question-card'
-import { useTestStore } from '@/lib/store/test-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
 import { ChevronLeft, ChevronRight, Brain } from 'lucide-react'
@@ -18,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { PreTestForm } from '@/components/test/pre-test-form'
 import { useAuthStore } from '@/lib/store/auth-store'
 import Link from 'next/link'
+import { useTestStore } from '@/lib/store/test-store'
 
 type Question = {
   id: number
@@ -66,21 +65,34 @@ function TestPageContent() {
       const currentQuestionIds = questions.map(q => q.id)
       const filteredAnswers = answers.filter(a => currentQuestionIds.includes(a.questionId))
 
+      const requestBody = {
+        answers: filteredAnswers,
+        userId: finalUserData?.id || 0, // 0 will trigger guest creation in API
+        testId: parseInt(testId),
+        guestData: {
+          name: finalUserData?.name || 'زائر',
+          emailOrPhone: finalUserData?.emailOrPhone || ''
+        }
+      }
+
+      console.log('Submitting test payload:', requestBody)
+
       const response = await fetch('/api/test/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          answers: filteredAnswers,
-          userId: finalUserData?.id || 1,
-          testId: parseInt(testId)
-        }),
+        body: JSON.stringify(requestBody),
       })
 
-      if (!response.ok) throw new Error('Submission failed')
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Submission error response:', errorText)
+        throw new Error('Submission failed')
+      }
 
       const resultData = await response.json()
       setResult(resultData)
 
+      // Trigger report generation in background usually, but here we just call it
       fetch('/api/test/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,14 +102,14 @@ function TestPageContent() {
           userData: finalUserData,
           answers
         })
-      })
+      }).catch(e => console.error('Background report failure (ignored):', e))
 
       toast.success('تم إكمال الاختبار بنجاح!')
       setTimeout(() => router.push('/results'), 1500)
 
     } catch (error) {
-      toast.error('حدث خطأ أثناء معالجة النتائج')
-      console.error(error)
+      toast.error('حدث خطأ أثناء حفظ النتائج، يرجى المحاولة مرة أخرى')
+      console.error('Submit Results Exception:', error)
       setIsSubmitting(false)
     }
   }
@@ -129,7 +141,7 @@ function TestPageContent() {
         toast.error('حدث خطأ أثناء إعداد الاختبار')
         console.error(error)
       } finally {
-        setTimeout(() => setIsLoading(false), 800)
+        setIsLoading(false)
       }
     }
 
@@ -139,16 +151,69 @@ function TestPageContent() {
   const handleRegistrationComplete = (data: any) => {
     setUserData(data)
     setIsRegistered(true)
-
-    if (isCompleted) {
-      submitResults(data)
-    }
   }
 
-  if (isLoading || isSubmitting) {
+  if (!isRegistered && !user) {
+    return (
+      <main className="min-h-screen flex flex-col bg-slate-50 overflow-x-hidden">
+        <Header />
+        <div className="flex-1 flex flex-col">
+          <PreTestForm onComplete={handleRegistrationComplete} />
+        </div>
+      </main>
+    )
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (isSubmitting) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#0A1A3B]" dir="rtl">
+        {/* Deep Blue Background Gradient Match */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(25,75,155,0.2)_0%,transparent_60%)]" />
+        
+        <div className="relative z-10 flex flex-col items-center space-y-8 p-4">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-24 h-24 mb-6 rounded-full bg-[#10B981] flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+          >
+            <Brain className="w-12 h-12 text-white" />
+          </motion.div>
+
+          <div className="space-y-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              جاري صياغة تقرير شخصيتك...
+            </h2>
+            <p className="text-blue-200/80 font-medium text-sm md:text-base">
+              يتم تحليل إجاباتك وإعداد تقريرك الشخصي
+            </p>
+          </div>
+
+          <div className="flex gap-2 pt-8">
+            <motion.div
+              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0 }}
+              className="w-4 h-4 bg-white/50 rounded-full"
+            />
+            <motion.div
+              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+              className="w-4 h-4 bg-white/50 rounded-full"
+            />
+            <motion.div
+              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.6 }}
+              className="w-4 h-4 bg-white/50 rounded-full"
+            />
+          </div>
+        </div>
       </div>
     )
   }
@@ -188,11 +253,24 @@ function TestPageContent() {
     (a) => a.questionId === currentQuestion.id
   )
 
+  const handleCompleteTest = async (answerId?: number) => {
+    setIsCompleted(true)
+    
+    // If answerId provided (from auto-submit), we may need to make sure state reflects it
+    // But store `addAnswer` is synchronous so submitResults should just read it or we
+    // could wait a tick. `answers` state might be slightly delayed in React render cycle,
+    // so we pass the latest data if needed. Actually submitResults(userData) uses `answers` from store
+    // which is immediately updated in zustand.
+    await submitResults(userData)
+  }
+
   const handleAnswerSelect = (answerId: number) => {
     addAnswer(currentQuestion.id, answerId)
 
     if (currentStep < questions.length - 1) {
       setTimeout(() => setCurrentStep(currentStep + 1), 400)
+    } else {
+      setTimeout(() => handleCompleteTest(answerId), 400)
     }
   }
 
@@ -215,27 +293,14 @@ function TestPageContent() {
     }
   }
 
-  const handleCompleteTest = async () => {
-    setIsCompleted(true)
-
-    if (!isRegistered) {
-      toast.info('يرجى تسجيل الدخول أو إنشاء حساب لحفظ وعرض نتائجك')
-      setIsFinished(true)
-      router.push('/auth/login')
-      return
-    }
-
-    await submitResults(userData)
-  }
-
   return (
-    <main className="min-h-screen flex flex-col bg-background">
+    <main className="min-h-screen flex flex-col bg-slate-50" dir="rtl">
       <Header />
 
-      <div className="flex-1 pt-32 pb-16">
-        <Container size="lg">
+      <div className="flex-1 pt-24 md:pt-32 pb-16 px-4">
+        <Container size="md">
 
-          <div className="max-w-4xl mx-auto space-y-10">
+          <div className="max-w-3xl mx-auto space-y-12">
             {testName && (
               <h1 className="text-2xl md:text-3xl font-bold text-center text-slate-800 dark:text-slate-100 mb-2">
                 {testName}
@@ -271,12 +336,51 @@ function TestPageContent() {
             </div>
 
             <AnimatePresence mode="wait">
-              <QuestionCard
+              <motion.div
                 key={currentQuestion.id}
-                question={currentQuestion}
-                selectedAnswerId={selectedAnswer?.answerId}
-                onAnswerSelect={handleAnswerSelect}
-              />
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="relative mt-16"
+              >
+                <div className="text-center mb-10">
+                  <h2 className="text-2xl md:text-3xl font-black text-slate-900 leading-relaxed tracking-tight">
+                    {currentQuestion.questionText}
+                  </h2>
+                </div>
+                
+                <div className="space-y-4">
+                  {currentQuestion.options.map((option, index) => {
+                    const isSelected = selectedAnswer?.answerId === option.id;
+                    return (
+                      <motion.div
+                        key={option.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 + 0.1 }}
+                        onClick={() => handleAnswerSelect(option.id)}
+                        className={`
+                          group flex items-center justify-between p-5 md:p-6 rounded-2xl border transition-all duration-300 cursor-pointer bg-white
+                          ${isSelected 
+                            ? 'border-[#1A56DB] bg-[#F0F5FF] shadow-sm' 
+                            : 'border-slate-200 hover:border-[#1A56DB]/40 hover:bg-slate-50'}
+                        `}
+                      >
+                        <span className={`text-lg md:text-xl flex-1 text-right transition-colors font-medium ${isSelected ? 'text-[#1A56DB]' : 'text-slate-700 group-hover:text-slate-900'}`}>
+                          {option.optionText}
+                        </span>
+                        
+                        <div className="flex-shrink-0 mr-4 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center">
+                          <span className="text-slate-600 font-bold text-sm">
+                            {index + 1}
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </motion.div>
             </AnimatePresence>
 
           </div>

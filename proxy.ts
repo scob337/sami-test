@@ -21,8 +21,7 @@ export async function proxy(request: NextRequest) {
   const hasSession = Boolean(hasSupabaseCookie)
   console.log('[proxy] hasSession=', hasSession)
 
-  // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/checkout', '/results', '/admin']
+  const protectedRoutes = ['/dashboard', '/checkout', '/admin']
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
   // Auth pages (should only be accessible when logged out)

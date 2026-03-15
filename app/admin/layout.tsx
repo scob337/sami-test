@@ -16,13 +16,24 @@ export default async function AdminLayout({
     redirect('/auth/login')
   }
 
-  // Check admin status in DB
-  const dbUser = await prisma.user.findUnique({
-    where: { email: user.email! },
-    select: { isAdmin: true }
-  })
+  let isAdmin = false
+  try {
+    if (user.email) {
+      // Check admin status in DB
+      const dbUser = await prisma.user.findUnique({
+        where: { email: user.email },
+        select: { isAdmin: true }
+      })
+      isAdmin = dbUser?.isAdmin || false
+    }
+  } catch (error) {
+    console.error('Database connection error in AdminLayout:', error)
+    // If DB check fails in production (e.g. env vars issue), 
+    // we fallback to false to avoid crashing the entire server side render.
+    isAdmin = false
+  }
 
-  if (!dbUser?.isAdmin) {
+  if (!isAdmin) {
     redirect('/dashboard')
   }
 

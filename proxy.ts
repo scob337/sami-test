@@ -26,21 +26,21 @@ export async function proxy(request: NextRequest) {
     
     const hasSession = Boolean(hasSupabaseCookie)
 
-    const protectedRoutes = ['/dashboard', '/checkout', '/admin']
-    const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-    const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')
+    // const protectedRoutes = ['/dashboard', '/checkout', '/admin']
+    // const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+    // const isAuthRoute = pathname.startsWith('/auth/login') || pathname.startsWith('/auth/register')
 
     // 1. If user is logged in and trying to access auth pages, redirect to dashboard
-    if (hasSession && isAuthRoute) {
-      console.log(`[proxy] Auth redirect: ${pathname} -> /dashboard`)
-      return NextResponse.redirect(new URL('/dashboard', request.url))
-    }
+    // if (hasSession && isAuthRoute) {
+    //   console.log(`[proxy] Auth redirect: ${pathname} -> /dashboard`)
+    //   return NextResponse.redirect(new URL('/dashboard', request.url))
+    // }
 
     // 2. If user is NOT logged in and trying to access protected pages, redirect to login
-    if (!hasSession && isProtectedRoute) {
-      console.log(`[proxy] Protected redirect: ${pathname} -> /auth/login`)
-      return NextResponse.redirect(new URL('/auth/login', request.url))
-    }
+    // if (!hasSession && isProtectedRoute) {
+    //   console.log(`[proxy] Protected redirect: ${pathname} -> /auth/login`)
+    //   return NextResponse.redirect(new URL('/auth/login', request.url))
+    // }
 
     return NextResponse.next()
   } catch (error) {

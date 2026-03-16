@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { Search, Mail, Phone, Calendar, Download, Users, CreditCard, CheckCircle2, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,23 +30,21 @@ function getUserStatus(user: User): { label: string; class: string; icon: React.
 
 export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  
+  const { data: usersData, isLoading } = useSWR<User[]>(
+    `/api/admin/users${searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : ''}`,
+    fetcher,
+    { keepPreviousData: true }
+  )
 
-  const fetchUsers = useCallback(async (search = '') => {
-    setIsLoading(true)
-    try {
-      const res = await fetch(`/api/admin/users${search ? `?search=${encodeURIComponent(search)}` : ''}`)
-      if (!res.ok) throw new Error()
-      setUsers(await res.json())
-    } catch { toast.error('خطأ في تحميل المستخدمين') }
-    finally { setIsLoading(false) }
-  }, [])
+  const users = usersData || []
 
-  useEffect(() => {
-    const timer = setTimeout(() => fetchUsers(searchTerm), 300)
-    return () => clearTimeout(timer)
-  }, [searchTerm, fetchUsers])
+  const stats = useMemo(() => {
+    const paid = users.filter(u => u._count?.payments > 0).length
+    const completed = users.filter(u => u.attempts?.[0]?.status === 'COMPLETED' && u._count?.payments === 0).length
+    const inProgress = users.filter(u => u.attempts?.[0]?.status === 'IN_PROGRESS').length
+    return { paid, completed, inProgress, total: users.length }
+  }, [users])
 
   const handleExportCSV = () => {
     if (!users.length) { toast.error('لا توجد بيانات للتصدير'); return }
@@ -97,10 +97,10 @@ export default function UsersPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'إجمالي المستخدمين', value: users.length, icon: Users, color: 'text-primary', bg: 'bg-primary/15' },
-          { label: 'دفعوا', value: paid, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-100/80' },
-          { label: 'أكملوا الاختبار', value: completed, icon: CheckCircle2, color: 'text-blue-600', bg: 'bg-blue-100/80' },
-          { label: 'في منتصف الطريق', value: inProgress, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100/80' },
+          { label: 'إجمالي المستخدمين', value: stats.total, icon: Users, color: 'text-primary', bg: 'bg-primary/15' },
+          { label: 'دفعوا', value: stats.paid, icon: CreditCard, color: 'text-emerald-600', bg: 'bg-emerald-100/80' },
+          { label: 'أكملوا الاختبار', value: stats.completed, icon: CheckCircle2, color: 'text-blue-600', bg: 'bg-blue-100/80' },
+          { label: 'في منتصف الطريق', value: stats.inProgress, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-100/80' },
         ].map(stat => (
           <Card key={stat.label} className="border border-border/50 shadow-sm bg-card rounded-2xl">
             <CardContent className="p-4 flex items-center gap-3">

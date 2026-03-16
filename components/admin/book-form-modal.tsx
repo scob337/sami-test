@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Book, Check, X, CreditCard, Link as LinkIcon, FileText } from 'lucide-react'
 
 interface BookFormModalProps {
   open: boolean
@@ -79,87 +80,121 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
 
   return (
     <Dialog open={open} onOpenChange={val => !val && onClose()}>
-      <DialogContent className="max-w-2xl bg-card border-border rounded-3xl" dir="rtl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-black text-foreground tracking-tight">
-            {editBook ? 'تعديل بيانات الكتاب' : 'إضافة كتاب جديد للمتجر'}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-none rounded-[32px] overflow-hidden p-0 shadow-2xl" dir="rtl">
+        {/* Header with Background */}
+        <div className="bg-[#15283c] p-8 text-white">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+              <Book className="w-6 h-6 text-[#ff5722]" />
+            </div>
+            <div>
+              <DialogTitle className="text-2xl font-black tracking-tight">
+                {editBook ? 'تعديل بيانات الكتاب' : 'إضافة كتاب جديد'}
+              </DialogTitle>
+              <p className="text-white/60 text-sm font-medium mt-1">
+                {editBook ? 'قم بتحديث المعلومات أدناه' : 'املأ البيانات لرفع كتاب جديد للمتجر'}
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <div className="space-y-6 py-6">
-          <div className="space-y-3">
-            <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">عنوان الكتاب *</Label>
-            <Input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder="مثال: دليل فهم الشخصية القيادية"
-              className="text-right h-14 px-6 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold text-lg transition-all"
-            />
+        <div className="p-8 space-y-6">
+          <div className="space-y-2.5">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">عنوان الكتاب *</Label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-[#ff5722] text-slate-300 transition-colors">
+                <FileText className="w-5 h-5" />
+              </div>
+              <Input
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="أدخل عنوان الكتاب هنا"
+                className="text-right h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all"
+              />
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">وصف مختصر</Label>
+          <div className="space-y-2.5">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">وصف مختصر</Label>
             <Textarea
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="اكتب وصفاً جذاباً للكتاب..."
-              className="text-right resize-none rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold text-lg transition-all p-6"
-              rows={4}
+              placeholder="اكتب وصفاً جذاباً للقراء..."
+              className="text-right resize-none rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all p-6"
+              rows={3}
             />
           </div>
 
           <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">السعر (ر.س)</Label>
-              <Input
-                type="number"
-                value={price}
-                onChange={e => setPrice(e.target.value)}
-                placeholder="0"
-                min={0}
-                className="text-right h-14 px-6 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold text-lg transition-all"
-              />
+            <div className="space-y-2.5">
+              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">السعر (ر.س)</Label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-[#ff5722] text-slate-300 transition-colors">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <Input
+                  type="number"
+                  value={price}
+                  onChange={e => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  min={0}
+                  className="text-right h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all"
+                />
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">حالة الكتاب</Label>
-              <div className="flex items-center justify-between h-14 px-6 bg-secondary/50 border-2 border-border/5 rounded-2xl transition-all">
-                <span className="text-sm font-bold text-muted-foreground">{isActive ? 'نشط حالياً' : 'معطل مؤقتاً'}</span>
-                <Switch checked={isActive} onCheckedChange={setIsActive} />
+            <div className="space-y-2.5">
+              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">حالة الكتاب</Label>
+              <div className="flex items-center justify-between h-14 px-6 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 rounded-2xl transition-all">
+                <span className={`text-sm font-black ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                  {isActive ? 'نشط حالياً' : 'معطّل'}
+                </span>
+                <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <Label className="text-sm font-black text-foreground uppercase tracking-widest mr-2">رابط ملف PDF</Label>
-            <Input
-              value={filePdf}
-              onChange={e => setFilePdf(e.target.value)}
-              placeholder="https://storage.com/book.pdf"
-              dir="ltr"
-              className="h-14 px-6 rounded-2xl bg-secondary/50 border-2 border-border/5 focus:border-primary/50 font-bold text-lg transition-all"
-            />
+          <div className="space-y-2.5">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">رابط ملف PDF</Label>
+            <div className="relative group">
+              <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-[#03a9f4] text-slate-300 transition-colors">
+                <LinkIcon className="w-5 h-5" />
+              </div>
+              <Input
+                value={filePdf}
+                onChange={e => setFilePdf(e.target.value)}
+                placeholder="https://example.com/file.pdf"
+                dir="ltr"
+                className="h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#03a9f4]/50 font-bold text-lg transition-all"
+              />
+            </div>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row-reverse gap-4 pt-4">
+        <DialogFooter className="p-8 pt-0 flex flex-col sm:flex-row-reverse gap-4">
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black text-lg shadow-xl shadow-primary/20 transition-all active:scale-95"
+            className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-[#ff5722] hover:bg-[#e64a19] text-white font-black text-lg shadow-xl shadow-orange-500/20 transition-all active:scale-95"
           >
             {isSaving ? (
               <div className="flex items-center gap-3">
-                <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                <LoadingSpinner size="sm" className="text-white" />
                 <span>جاري الحفظ...</span>
               </div>
-            ) : (editBook ? 'حفظ التعديلات' : 'إضافة الكتاب الآن')}
+            ) : (
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5" />
+                <span>{editBook ? 'حفظ التعديلات' : 'إضافة الكتاب'}</span>
+              </div>
+            )}
           </Button>
           <Button 
             variant="ghost" 
             onClick={onClose} 
-            className="w-full sm:w-auto h-14 px-8 rounded-2xl text-muted-foreground font-bold hover:bg-secondary"
+            className="w-full sm:w-auto h-14 px-8 rounded-2xl text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800"
           >
+            <X className="w-5 h-5 ml-2" />
             إلغاء
           </Button>
         </DialogFooter>

@@ -1,56 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { 
-  Users, BookOpen, ClipboardList, CreditCard,
-  TrendingUp, Activity, ArrowUpRight, BarChart3
+  Users, BookOpen, ClipboardList, CreditCard
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-
-interface DashboardStats {
-  users: number
-  books: number
-  tests: number
-  payments: number
-}
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+  Tooltip, ResponsiveContainer 
+} from 'recharts'
+import { format } from 'date-fns'
+import { ar } from 'date-fns/locale'
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({ users: 0, books: 0, tests: 0, payments: 0 })
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchStats() {
-      try {
-        const [usersRes, booksRes, testsRes] = await Promise.all([
-          fetch('/api/admin/users'),
-          fetch('/api/admin/books'),
-          fetch('/api/admin/tests'),
-        ])
-        const [users, books, tests] = await Promise.all([
-          usersRes.json(), booksRes.json(), testsRes.json(),
-        ])
-        setStats({
-          users: Array.isArray(users) ? users.length : 0,
-          books: Array.isArray(books) ? books.length : 0,
-          tests: Array.isArray(tests) ? tests.length : 0,
-          payments: Array.isArray(users) ? users.filter((u: any) => u._count?.payments > 0).length : 0,
-        })
-      } catch (error) {
-        console.error('Error fetching stats:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchStats()
-  }, [])
-
-  const statCards = [
-    { label: 'إجمالي المستخدمين', value: stats.users, icon: Users, color: 'text-primary', bg: 'bg-primary/10', trend: '+12%' },
-    { label: 'الكتب المتاحة', value: stats.books, icon: BookOpen, color: 'text-accent-foreground', bg: 'bg-accent/20', trend: '' },
-    { label: 'الاختبارات', value: stats.tests, icon: ClipboardList, color: 'text-primary', bg: 'bg-primary/10', trend: '' },
-    { label: 'عمليات الدفع', value: stats.payments, icon: CreditCard, color: 'text-accent-foreground', bg: 'bg-accent/20', trend: '+8%' },
-  ]
+  const { data, isLoading } = useSWR('/api/admin/dashboard/stats', fetcher)
 
   if (isLoading) {
     return (
@@ -60,57 +25,109 @@ export default function AdminDashboard() {
     )
   }
 
+  const { stats, chartData, recentUsers } = data || {}
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-slate-100">نظرة عامة</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">مرحباً، إليك ملخص أداء المنصة.</p>
+    <div className="space-y-8" dir="rtl">
+      {/* Title Area */}
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h2 className="text-2xl font-black text-slate-800 tracking-tight">لوحة التحكم</h2>
+          <p className="text-slate-500 text-sm mt-1 font-medium">مرحباً بك في نظام إدارة الاختبارات الشخصية</p>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-        {statCards.map((stat) => (
-          <Card key={stat.label} className="p-1 border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm hover:shadow-md transition-all group overflow-hidden rounded-xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 group-hover:scale-110 transition-transform ${stat.bg}`}>
-                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                </div>
-                {stat.trend && (
-                  <div className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/50">
-                    {stat.trend}
-                  </div>
-                )}
-              </div>
-              <div className="text-2xl md:text-3xl font-black text-slate-900 dark:text-slate-100 mb-1">{stat.value.toLocaleString('ar-SA')}</div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">{stat.label}</div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Quick Links */}
-      <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Row 1: Real Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: 'إدارة الأسئلة', desc: 'أضف أو عدّل أسئلة الاختبارات وربطها بالأنماط', href: '/admin/questions', icon: Activity, color: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
-          { title: 'إدارة البرومبتات', desc: 'تحكم في محتوى التقارير المُولَّدة بالذكاء الاصطناعي', href: '/admin/prompts', icon: BarChart3, color: 'text-accent-foreground', bg: 'bg-accent/5 hover:bg-accent/10' },
-          { title: 'بيانات المستخدمين', desc: 'راقب نشاط المستخدمين وصدّر البيانات للتسويق', href: '/admin/users', icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/5 hover:bg-primary/10' },
-        ].map(item => (
-          <a
-            key={item.title}
-            href={item.href}
-            className={`block p-6 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-sm hover:border-blue-400 transition-all hover:-translate-y-1 hover:shadow-md group`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-lg border border-gray-100 dark:border-slate-800 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform ${item.bg}`}>
-                <item.icon className={`w-6 h-6 ${item.color}`} />
-              </div>
-              <ArrowUpRight className="w-5 h-5 text-gray-300 dark:text-slate-600 group-hover:text-blue-500 transition-all" />
+          { label: 'المستخدمين', value: stats?.users || 0, icon: Users, color: '#ff9800', bg: 'bg-orange-50' },
+          { label: 'الكتب', value: stats?.books || 0, icon: BookOpen, color: '#03a9f4', bg: 'bg-blue-50' },
+          { label: 'الاختبارات', value: stats?.tests || 0, icon: ClipboardList, color: '#8bc34a', bg: 'bg-green-50' },
+          { label: 'المبيعات', value: `£${stats?.sales || 0}`, icon: CreditCard, color: '#e91e63', bg: 'bg-pink-50' },
+        ].map((card) => (
+          <div key={card.label} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow group">
+            <div className={`w-14 h-14 rounded-2xl ${card.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+              <card.icon className="w-7 h-7" style={{ color: card.color }} />
             </div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 text-lg tracking-tight">{item.title}</h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">{item.desc}</p>
-          </a>
+            <div>
+              <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">{card.label}</div>
+              <div className="text-3xl font-black text-slate-800">{card.value}</div>
+            </div>
+          </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Dynamic Chart */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-slate-800">إحصائيات المستخدمين الجدد</h3>
+            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-widest">آخر 6 أشهر</span>
+          </div>
+          <div className="h-[350px] w-full" dir="ltr">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#03a9f4" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#03a9f4" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                  dy={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }}
+                />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', direction: 'rtl' }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="users" 
+                  name="المستخدمين الجدد"
+                  stroke="#03a9f4" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorUsers)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Recent Activity / Users */}
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-black text-slate-800">أحدث المستخدمين</h3>
+            <a href="/admin/users" className="text-blue-500 text-xs font-bold hover:underline">عرض الكل</a>
+          </div>
+          <div className="space-y-6 flex-1">
+            {recentUsers?.map((user: any) => (
+              <div key={user.id} className="flex items-center justify-between group">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 font-bold group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{user.name}</div>
+                    <div className="text-xs text-slate-400 font-medium">{format(new Date(user.createdAt), 'd MMM yyyy', { locale: ar })}</div>
+                  </div>
+                </div>
+                <div className="text-xs font-bold bg-green-50 text-green-600 px-2.5 py-1 rounded-lg">
+                  {user._count.attempts} اختبار
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

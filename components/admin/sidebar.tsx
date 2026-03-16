@@ -28,49 +28,57 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
   const pathname = usePathname()
 
   return (
-    <aside className={cn("w-72 bg-card/50 backdrop-blur-xl border-l border-border/50 h-full flex flex-col shadow-2xl z-50", className)}>
-      <div className="p-8 border-b border-border/50">
-        <Link href="/" className="flex items-center gap-3 group" onClick={onItemClick}>
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground font-black text-xl shadow-lg shadow-primary/20">
-            M
+    <aside className={cn("w-72 bg-[#15283c] text-white h-full flex flex-col z-50", className)} dir="ltr">
+      {/* Profile Section */}
+      <div className="p-6 bg-[#214162] mb-6">
+        <div className="flex items-center gap-4">
+          <div className="relative">
+
+            <div className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#214162]" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-foreground tracking-tight group-hover:text-primary transition-colors">Sami-Test</h1>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Admin Control</p>
+            <h3 className="font-bold text-lg leading-tight">مسؤول النظام</h3>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <span className="text-emerald-400 text-xs font-semibold uppercase tracking-wider">متصل</span>
+            </div>
           </div>
-        </Link>
+        </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto scrollbar-hide">
-        {menuItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={onItemClick}
-            className={cn(
-              "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group relative",
-              pathname === item.href
-                ? "bg-primary text-primary-foreground shadow-xl shadow-primary/20 font-bold"
-                : "text-muted-foreground hover:bg-primary/5 hover:text-primary font-semibold"
-            )}
-          >
-            <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", pathname === item.href ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
-            <span className="text-[15px]">{item.label}</span>
-            {pathname === item.href && (
-              <motion.div
-                layoutId="active-pill"
-                className="absolute right-2 w-1.5 h-6 bg-primary-foreground rounded-full"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-            )}
-          </Link>
-        ))}
+      <div className="px-4 mb-4">
+        <h4 className="text-[#ff5722] text-xs font-black uppercase tracking-[2px] mb-4 px-2 text-right">عام</h4>
+      </div>
+
+      <nav className="flex-1 px-2 space-y-1 overflow-y-auto scrollbar-hide">
+        {menuItems.map((item) => {
+          const isActive = pathname === item.href
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={onItemClick}
+              className={cn(
+                "flex items-center gap-4 px-4 py-3 rounded transition-all duration-200 group relative",
+                isActive
+                  ? "bg-[#ff5722] text-white shadow-lg"
+                  : "text-[#99abb4] hover:bg-[#214162] hover:text-white"
+              )}
+            >
+              <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-[#ff9800] group-hover:text-white")} />
+              <span className="text-[14px] font-medium">{item.label}</span>
+              {isActive && (
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-l-full" />
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
-      <div className="p-4 border-t border-border/50 bg-background/30 backdrop-blur-md">
-        <button className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-muted-foreground hover:bg-destructive/10 hover:text-destructive font-bold transition-all duration-300 group">
-          <LogOut className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          <span>تسجيل الخروج</span>
+      <div className="p-4 border-t border-white/5 bg-[#214162]">
+        <button className="flex items-center gap-4 px-4 py-3 w-full rounded text-[#99abb4] hover:text-white hover:bg-white/5 transition-all duration-200 group">
+          <LogOut className="w-5 h-5 text-[#ff9800] group-hover:text-white" />
+          <span className="text-[14px] font-medium">تسجيل الخروج</span>
         </button>
       </div>
     </aside>

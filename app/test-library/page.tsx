@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { motion } from 'framer-motion'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -28,24 +29,8 @@ const colors = [
 ];
 
 export default function TestLibraryPage() {
-  const [books, setBooks] = useState<Book[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchLibrary() {
-      try {
-        const res = await fetch('/api/test-library')
-        if (!res.ok) throw new Error('Failed to fetch library')
-        const data = await res.json()
-        setBooks(data)
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchLibrary()
-  }, [])
+  const { data: booksData, isLoading: loading } = useSWR<Book[]>('/api/test-library', fetcher)
+  const books = booksData || []
 
   if (loading) {
     return (

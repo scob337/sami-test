@@ -7,40 +7,46 @@ interface LoadingSpinnerProps {
 }
 
 const sizes = {
-  sm: 'w-6 h-6',
-  md: 'w-10 h-10',
-  lg: 'w-16 h-16',
+  sm: 'w-5 h-5',
+  md: 'w-8 h-8',
+  lg: 'w-12 h-12',
 }
 
 export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
   return (
-    <div className={cn(sizes[size], 'flex items-center justify-center', className)}>
+    <div className={cn('relative flex items-center justify-center', sizes[size], className)}>
+      {/* Outer Ring */}
       <motion.div
+        className="absolute inset-0 rounded-full border-2 border-transparent border-t-current opacity-40"
         animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        className="w-full h-full"
-      >
-        <svg
-          className="w-full h-full text-primary"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          />
-        </svg>
-      </motion.div>
+        transition={{
+          duration: 1.2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Inner Pulsing Ring */}
+      <motion.div
+        className="absolute inset-1 rounded-full border-2 border-transparent border-b-current opacity-70"
+        animate={{ rotate: -360 }}
+        transition={{
+          duration: 0.8,
+          repeat: Infinity,
+          ease: "linear"
+        }}
+      />
+
+      {/* Center Dot */}
+      <motion.div
+        className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]"
+        animate={{ scale: [1, 1.3, 1] }}
+        transition={{
+          duration: 1,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
     </div>
   )
 }

@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { 
   Plus, Search, MoreVertical, Edit, Trash2, ExternalLink,
   ClipboardList, BookOpen, CheckCircle2, XCircle, Eye
@@ -32,25 +34,14 @@ function formatDate(d: string) {
 }
 
 export default function TestsPage() {
-  const [tests, setTests] = useState<Test[]>([])
+  const { data: testsData, isLoading, mutate } = useSWR<Test[]>('/api/admin/tests', fetcher)
+  const tests = testsData || []
+
   const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editTest, setEditTest] = useState<Test | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const fetchTests = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await fetch('/api/admin/tests')
-      if (!res.ok) throw new Error()
-      setTests(await res.json())
-    } catch { toast.error('خطأ في تحميل الاختبارات') }
-    finally { setIsLoading(false) }
-  }, [])
-
-  useEffect(() => { fetchTests() }, [fetchTests])
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -60,7 +51,7 @@ export default function TestsPage() {
       if (!res.ok) throw new Error()
       toast.success('تم حذف الاختبار بنجاح')
       setDeleteId(null)
-      fetchTests()
+      mutate()
     } catch { toast.error('فشل الحذف') }
     finally { setIsDeleting(false) }
   }
@@ -68,10 +59,12 @@ export default function TestsPage() {
   const openAdd = () => { setEditTest(null); setModalOpen(true) }
   const openEdit = (t: Test) => { setEditTest(t); setModalOpen(true) }
 
-  const filtered = tests.filter(t =>
-    t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (t.book?.title ?? '').toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filtered = useMemo(() => {
+    return tests.filter(t =>
+      t.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.book?.title ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [tests, searchTerm])
 
   return (
     <div className="space-y-6">
@@ -220,7 +213,7 @@ export default function TestsPage() {
       <TestFormModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={fetchTests}
+        onSuccess={mutate}
         editTest={editTest}
       />
 

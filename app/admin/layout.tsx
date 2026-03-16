@@ -38,7 +38,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background text-foreground" dir="rtl">
+    <div className="flex h-screen bg-[#f8f8f8] text-foreground" dir="rtl">
       <Sidebar className="hidden lg:flex" />
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header />

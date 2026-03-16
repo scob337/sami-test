@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { 
   Plus, Search, MoreVertical, Edit, Trash2, Move, 
   ChevronDown, Filter, FileQuestion, Tags
@@ -46,29 +48,20 @@ interface TestOption { id: number; name: string }
 export default function QuestionsPage() {
   const [selectedTest, setSelectedTest] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
-  const [tests, setTests] = useState<TestOption[]>([])
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+
+  const { data: testsData } = useSWR<TestOption[]>('/api/admin/tests', fetcher)
+  const { data: questionsData, isLoading, mutate } = useSWR<Question[]>(
+    `/api/admin/questions${selectedTest !== 'all' ? `?testId=${selectedTest}` : ''}`,
+    fetcher
+  )
+
+  const tests = testsData || []
+  const questions = questionsData || []
+
   const [modalOpen, setModalOpen] = useState(false)
   const [editQuestion, setEditQuestion] = useState<Question | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const [testsRes, questionsRes] = await Promise.all([
-        fetch('/api/admin/tests'),
-        fetch(`/api/admin/questions${selectedTest !== 'all' ? `?testId=${selectedTest}` : ''}`),
-      ])
-      const [testsData, questionsData] = await Promise.all([testsRes.json(), questionsRes.json()])
-      setTests(testsData)
-      setQuestions(questionsData)
-    } catch { toast.error('خطأ في تحميل البيانات') }
-    finally { setIsLoading(false) }
-  }, [selectedTest])
-
-  useEffect(() => { fetchData() }, [fetchData])
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -78,7 +71,7 @@ export default function QuestionsPage() {
       if (!res.ok) throw new Error()
       toast.success('تم حذف السؤال بنجاح')
       setDeleteId(null)
-      fetchData()
+      mutate()
     } catch { toast.error('فشل الحذف') }
     finally { setIsDeleting(false) }
   }
@@ -88,9 +81,19 @@ export default function QuestionsPage() {
 
   const currentTestId = selectedTest !== 'all' ? parseInt(selectedTest) : (tests[0]?.id ?? 1)
 
-  const filtered = questions.filter(q =>
-    q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filtered = useMemo(() => {
+    return questions.filter(q =>
+      q.questionText.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [questions, searchTerm])
+
+  const patternStats = useMemo(() => {
+    const stats: Record<string, number> = {}
+    Object.keys(PATTERN_LABELS).forEach(k => {
+      stats[k] = questions.reduce((acc, q) => acc + q.options.filter(o => o.scores.some(s => s.pattern === k)).length, 0)
+    })
+    return stats
+  }, [questions])
 
   return (
     <div className="space-y-6">
@@ -147,7 +150,7 @@ export default function QuestionsPage() {
                 <div key={k} className="flex items-center justify-between">
                   <span className="text-xs text-slate-500">{v}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${PATTERN_COLORS[k]}`}>
-                    {questions.reduce((acc, q) => acc + q.options.filter(o => o.scores.some(s => s.pattern === k)).length, 0)}
+                    {patternStats[k] || 0}
                   </span>
                 </div>
               ))}
@@ -262,7 +265,7 @@ export default function QuestionsPage() {
       <QuestionFormModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={fetchData}
+        onSuccess={mutate}
         testId={currentTestId}
         editQuestion={editQuestion}
       />

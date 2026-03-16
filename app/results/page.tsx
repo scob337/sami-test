@@ -34,28 +34,20 @@ const PERSONALITY_TYPES = [
   { code: 'THINKER', name: 'المفكر', description: 'تحليلي ومنطقي، يعتمد على البيانات والعقل في اتخاذ قراراته وفهم الحياة.' },
 ]
 
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
+
 export default function ResultsPage() {
   const router = useRouter()
   const { result } = useTestStore()
   const { user } = useAuthStore()
-  const [report, setReport] = useState<string | null>(null)
+  
+  const { data: reportData } = useSWR(
+    result?.attemptId ? `/api/test/report?attemptId=${result.attemptId}` : null,
+    fetcher
+  )
 
-  useEffect(() => {
-    if (result?.attemptId) {
-      const fetchReport = async () => {
-        try {
-          const res = await fetch(`/api/test/report?attemptId=${result.attemptId}`)
-          if (res.ok) {
-            const data = await res.json()
-            setReport(data.reportText)
-          }
-        } catch (error) {
-          console.error('Error fetching report:', error)
-        }
-      }
-      fetchReport()
-    }
-  }, [result?.attemptId])
+  const report = reportData?.reportText
 
   const currentType = useMemo(() => {
     if (!result) return PERSONALITY_TYPES[3] // Default to Wise for testing if empty

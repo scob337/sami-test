@@ -1,7 +1,8 @@
-
 'use client'
 
-import { useState, useEffect } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -52,10 +53,16 @@ export default function DashboardPage() {
   const { user: authUser } = useAuthStore()
   const router = useRouter()
 
-  const [dbUser, setDbUser] = useState<any>(null)
-  const [attempts, setAttempts] = useState<any[]>([])
-  const [books, setBooks] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const userId = authUser?.id || '1'
+  const { data, isLoading: isLoadingData, mutate } = useSWR(
+    authUser ? `/api/user/dashboard?userId=${userId}` : null,
+    fetcher
+  )
+
+  const dbUser = data?.user
+  const attempts = data?.attempts || []
+  const books = data?.books || []
+  
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isUpdating, setIsEditUpdating] = useState(false)
 
@@ -95,12 +102,8 @@ export default function DashboardPage() {
         toast.success('تم رفع نتائج اختبارك بنجاح!')
         resetTest()
 
-        // Refresh attempts data to show the newly synced test
-        const listRes = await fetch(`/api/user/dashboard?userId=${userId}`)
-        if (listRes.ok) {
-          const listData = await listRes.json()
-          setAttempts(listData.attempts || [])
-        }
+        // Refresh data using SWR mutate
+        mutate()
 
       } catch (error) {
         console.error('Error syncing offline test:', error)
@@ -111,40 +114,21 @@ export default function DashboardPage() {
     if (authUser && isFinished) {
       syncTestResults(authUser.id.toString())
     }
-  }, [authUser, isFinished, answers, resetTest])
+  }, [authUser, isFinished, answers, resetTest, mutate])
 
   // Edit Form State
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [editPhone, setEditPhone] = useState('')
 
+  // Pre-fill edit form when data arrives
   useEffect(() => {
-    async function fetchDashboardData() {
-      // In a real app, you'd get the DB userId from the auth session or a mapping
-      // For now, we'll use a placeholder or the ID if it's numeric
-      const userId = authUser?.id || '1'
-
-      try {
-        const res = await fetch(`/api/user/dashboard?userId=${userId}`)
-        if (res.ok) {
-          const data = await res.json()
-          setDbUser(data.user)
-          setAttempts(data.attempts || [])
-          setBooks(data.books || [])
-
-          // Pre-fill edit form
-          setEditName(data.user?.name || '')
-          setEditEmail(data.user?.email || '')
-          setEditPhone(data.user?.phone || '')
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error)
-      } finally {
-        setIsLoading(false)
-      }
+    if (dbUser) {
+      setEditName(dbUser.name || '')
+      setEditEmail(dbUser.email || '')
+      setEditPhone(dbUser.phone || '')
     }
-    fetchDashboardData()
-  }, [authUser?.id])
+  }, [dbUser])
 
   const handleUpdateProfile = async () => {
     if (!editName.trim()) {
@@ -173,7 +157,8 @@ export default function DashboardPage() {
       }
 
       const updatedUser = await res.json()
-      setDbUser(updatedUser)
+      // Refresh local data
+      mutate()
       toast.success('تم تحديث البيانات بنجاح')
       setIsEditModalOpen(false)
     } catch (error: any) {
@@ -182,6 +167,8 @@ export default function DashboardPage() {
       setIsEditUpdating(false)
     }
   }
+
+  const isLoading = isLoadingData
 
   const latestResult = attempts[0]?.result
 

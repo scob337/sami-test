@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
@@ -119,34 +121,29 @@ function TestPageContent() {
       setIsRegistered(true)
       setUserData(user)
     }
+  }, [user])
 
-    async function fetchData() {
-      try {
-        const [questionsRes, testInfoRes] = await Promise.all([
-          fetch(`/api/questions?testId=${testId}`),
-          fetch(`/api/test/info?testId=${testId}`)
-        ])
-        
-        if (!questionsRes.ok) throw new Error('Failed to fetch questions')
-        
-        const questionsData = await questionsRes.json()
-        setQuestions(questionsData)
-        
-        if (testInfoRes.ok) {
-          const testInfoData = await testInfoRes.json()
-          setTestName(testInfoData.name)
-        }
+  const { data: questionsData } = useSWR<Question[]>(
+    testId ? `/api/questions?testId=${testId}` : null,
+    fetcher
+  )
+  const { data: testInfoData } = useSWR(
+    testId ? `/api/test/info?testId=${testId}` : null,
+    fetcher
+  )
 
-      } catch (error) {
-        toast.error('حدث خطأ أثناء إعداد الاختبار')
-        console.error(error)
-      } finally {
-        setIsLoading(false)
-      }
+  useEffect(() => {
+    if (questionsData) {
+      setQuestions(questionsData)
+      setIsLoading(false)
     }
+  }, [questionsData])
 
-    fetchData()
-  }, [user, testId])
+  useEffect(() => {
+    if (testInfoData) {
+      setTestName(testInfoData.name)
+    }
+  }, [testInfoData])
 
   const handleRegistrationComplete = (data: any) => {
     setUserData(data)

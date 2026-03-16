@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
+import useSWR from 'swr'
+import { fetcher } from '@/lib/fetcher'
 import { 
   Plus, MoreVertical, Edit, Trash2, BookOpen, 
   FileText, Download, Upload, Search, ShoppingBag,
@@ -30,25 +32,14 @@ interface Book {
 }
 
 export default function BooksPage() {
-  const [books, setBooks] = useState<Book[]>([])
+  const { data: booksData, isLoading, mutate } = useSWR<Book[]>('/api/admin/books', fetcher)
+  const books = booksData || []
+
   const [searchTerm, setSearchTerm] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editBook, setEditBook] = useState<Book | null>(null)
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const fetchBooks = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const res = await fetch('/api/admin/books')
-      if (!res.ok) throw new Error()
-      setBooks(await res.json())
-    } catch { toast.error('خطأ في تحميل الكتب') }
-    finally { setIsLoading(false) }
-  }, [])
-
-  useEffect(() => { fetchBooks() }, [fetchBooks])
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -58,7 +49,7 @@ export default function BooksPage() {
       if (!res.ok) throw new Error()
       toast.success('تم حذف الكتاب بنجاح')
       setDeleteId(null)
-      fetchBooks()
+      mutate()
     } catch { toast.error('فشل الحذف') }
     finally { setIsDeleting(false) }
   }
@@ -66,9 +57,15 @@ export default function BooksPage() {
   const openAdd = () => { setEditBook(null); setModalOpen(true) }
   const openEdit = (b: Book) => { setEditBook(b); setModalOpen(true) }
 
-  const filtered = books.filter(b =>
-    b.title.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filtered = useMemo(() => {
+    return books.filter(b =>
+      b.title.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [books, searchTerm])
+
+  const totalSales = useMemo(() => {
+    return books.reduce((s, b) => s + (b._count?.payments ?? 0), 0)
+  }, [books])
 
   return (
     <div className="space-y-6">
@@ -77,7 +74,7 @@ export default function BooksPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-foreground">إدارة الكتب</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            {books.length} كتاب • إجمالي المبيعات: {books.reduce((s, b) => s + (b._count?.payments ?? 0), 0)} عملية
+            {books.length} كتاب • إجمالي المبيعات: {totalSales} عملية
           </p>
         </div>
         <Button
@@ -210,7 +207,7 @@ export default function BooksPage() {
       <BookFormModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={fetchBooks}
+        onSuccess={mutate}
         editBook={editBook}
       />
 

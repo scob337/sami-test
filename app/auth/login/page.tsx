@@ -111,6 +111,15 @@ export default function LoginPage() {
               )}
             </div>
 
+            <div className="flex items-center justify-end px-2">
+              <a 
+                href="/auth/forgot-password" 
+                className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                نسيت كلمة المرور؟
+              </a>
+            </div>
+
             <Button
               type="submit"
               disabled={isLoading}

@@ -40,13 +40,15 @@ export async function GET(request: Request) {
         })
 
         if (prismaUser) {
+            // Check for any completed payment for THIS test by THIS user
             const previousPayment = await prisma.payment.findFirst({
                 where: {
                     userId: prismaUser.id,
                     status: 'COMPLETED',
-                    attempt: {
-                        testId: attempt.testId
-                    }
+                    OR: [
+                        { testId: attempt.testId },
+                        { attempt: { testId: attempt.testId } }
+                    ]
                 } as any
             })
             if (previousPayment) isPaid = true

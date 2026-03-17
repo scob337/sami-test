@@ -78,10 +78,10 @@ export default function TestsPage() {
         </div>
         <Button
           onClick={openAdd}
-          className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 px-5 h-11 font-semibold"
+          className="flex items-center gap-2 rounded-xl bg-[#ff5722] hover:bg-[#e64a19] text-white shadow-lg shadow-orange-500/20 px-6 h-12 font-black transition-all active:scale-95"
         >
-          <Plus className="w-4 h-4" />
-          إنشاء اختبار
+          <Plus className="w-5 h-5 ml-1" />
+          إنشاء اختبار جديد
         </Button>
       </div>
 
@@ -130,10 +130,10 @@ export default function TestsPage() {
                   <tr key={test.id} className="hover:bg-accent/50 transition-colors group">
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
-                          <ClipboardList className="w-4 h-4 text-primary" />
+                        <div className="w-10 h-10 rounded-xl bg-[#15283c] flex items-center justify-center shrink-0 shadow-sm">
+                          <ClipboardList className="w-5 h-5 text-white" />
                         </div>
-                        <span className="font-semibold text-slate-800">{test.name}</span>
+                        <span className="font-black text-[#1e293b] dark:text-slate-200">{test.name}</span>
                       </div>
                     </td>
                     <td className="py-4 px-5">
@@ -170,17 +170,17 @@ export default function TestsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200"
+                            className="h-10 w-10 p-0 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-[#ff5722] hover:text-white border border-slate-100 dark:border-slate-700 transition-all shadow-sm"
                           >
-                            <MoreVertical className="h-4 w-4 text-slate-500" />
+                            <MoreVertical className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-slate-100 min-w-[150px]">
                           <DropdownMenuItem
                             onClick={() => openEdit(test)}
-                            className="flex items-center gap-2.5 cursor-pointer py-2.5 text-slate-700"
+                            className="flex items-center gap-2.5 cursor-pointer py-3 text-[#15283c] dark:text-slate-200 font-bold focus:bg-slate-50 dark:focus:bg-slate-800"
                           >
-                            <Edit className="w-4 h-4" /> تعديل
+                            <Edit className="w-4 h-4 text-[#ff5722]" /> تعديل الاختبار
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
                             <a

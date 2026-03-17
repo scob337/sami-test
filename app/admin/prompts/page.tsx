@@ -102,7 +102,7 @@ export default function PromptsPage() {
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
-            className="h-12 px-6 rounded-xl border-2 border-slate-100 dark:border-slate-800 font-bold hover:bg-slate-50 flex items-center gap-2"
+            className="h-12 px-6 rounded-xl border-2 border-[#15283c]/20 text-[#15283c] dark:text-slate-300 font-bold hover:bg-[#15283c] hover:text-white transition-all flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
             <span>الوضع الافتراضي</span>

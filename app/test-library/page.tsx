@@ -121,17 +121,19 @@ export default function TestLibraryPage() {
                       >
                           <div className={`absolute top-0 left-0 w-full h-1 ${activeStyle.bgHeader} opacity-80 group-hover:opacity-100 transition-opacity`}></div>
                           <div className="flex items-center justify-between mb-5">
-                              <span className={`text-xl font-bold tracking-tight ${activeStyle.textHex} dark:${activeStyle.textHex} ${activeStyle.bgHex} dark:bg-slate-800 border ${activeStyle.borderHex} dark:border-slate-700 px-3 py-1 rounded-lg`}>
+                              <span className={`text-xs font-bold tracking-tight ${activeStyle.textHex} dark:${activeStyle.textHex} ${activeStyle.bgHex} dark:bg-slate-800 border ${activeStyle.borderHex} dark:border-slate-700 px-3 py-1 rounded-lg`}>
                                  {hasTests ? 'متاح الآن' : 'قريباً'}
                               </span>
                               {hasTests && <ArrowUpLeft className={`text-slate-300 dark:text-slate-600 ${activeStyle.hoverGroupText} transition-colors w-5 h-5`} />}
                           </div>
-                          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">{book.title}</h3>
+                          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+                            {hasTests ? book.tests[0].name : book.title}
+                          </h3>
                           <p className="text-sm text-slate-500 dark:text-slate-400 font-medium mb-6 flex-grow line-clamp-3">
-                              {book.description || 'كتاب متخصص يقدم لك رؤى عميقة واختبارات متقدمة لتحليل شخصيتك وفهم أنماط سلوكك المختلفة.'}
+                              {hasTests && (book.tests[0] as any).description ? (book.tests[0] as any).description : book.description}
                           </p>
-                          <div className={`text-xs font-bold ${activeStyle.textHex} uppercase tracking-widest mt-auto`}>
-                             {hasTests ? `${book.tests.length} اختبار (اختبارات)` : 'كتاب إرشادي'}
+                          <div className={`text-[10px] font-bold ${activeStyle.textHex} uppercase tracking-widest mt-auto`}>
+                             {hasTests ? 'اختبار تحليل الشخصية' : 'كتاب إرشادي'}
                           </div>
                       </Link>
                     </motion.div>

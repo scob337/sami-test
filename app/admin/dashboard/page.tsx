@@ -4,9 +4,12 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { 
-  Users, BookOpen, ClipboardList, CreditCard
+  Users, BookOpen, ClipboardList, CreditCard, Plus, ExternalLink
 } from 'lucide-react'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, 
   Tooltip, ResponsiveContainer 
@@ -101,8 +104,8 @@ export default function AdminDashboard() {
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#03a9f4" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#03a9f4" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#ff5722" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#ff5722" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -125,7 +128,7 @@ export default function AdminDashboard() {
                   type="monotone" 
                   dataKey="users" 
                   name="المستخدمين الجدد"
-                  stroke="#03a9f4" 
+                  stroke="#ff5722" 
                   strokeWidth={4}
                   fillOpacity={1} 
                   fill="url(#colorUsers)" 
@@ -136,31 +139,90 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Activity / Users */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-slate-800">أحدث المستخدمين</h3>
-            <a href="/admin/users" className="text-blue-500 text-xs font-bold hover:underline">عرض الكل</a>
-          </div>
-          <div className="space-y-6 flex-1">
-            {recentUsers?.map((user: any) => (
-              <div key={user.id} className="flex items-center justify-between group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 font-bold group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
-                    {user.name.charAt(0).toUpperCase()}
+        <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden">
+        <CardContent className="p-6">
+          <h3 className="text-sm font-bold text-[#64748b] dark:text-slate-400 mb-4">آخر المستخدمين المنضمين</h3>
+          <div className="space-y-4">
+            {recentUsers.map((user) => (
+              <div key={user.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#15283c] flex items-center justify-center text-white text-xs font-bold">
+                    {user.name?.[0] || 'U'}
                   </div>
                   <div>
-                    <div className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{user.name}</div>
-                    <div className="text-xs text-slate-400 font-medium">{format(new Date(user.createdAt), 'd MMM yyyy', { locale: ar })}</div>
+                    <p className="text-sm font-bold text-[#1e293b] dark:text-slate-200">{user.name}</p>
+                    <p className="text-xs text-[#64748b] dark:text-slate-400">{user.email}</p>
                   </div>
                 </div>
-                <div className="text-xs font-bold bg-green-50 text-green-600 px-2.5 py-1 rounded-lg">
-                  {user._count.attempts} اختبار
+                <div className="text-left">
+                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{new Date(user.createdAt).toLocaleDateString('ar-SA')}</p>
+                  <p className="text-xs font-bold text-[#ff5722]">{user._count.attempts} محاولات</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+          <Button variant="ghost" className="w-full mt-6 text-[#15283c] dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" onClick={() => (window.location.href = '/admin/users')}>
+            عرض جميع المستخدمين
+          </Button>
+        </CardContent>
+      </Card>
+      
+      <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden">
+        <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-[#ff5722]" />
+            </div>
+            <h2 className="text-lg font-black text-[#1e293b] dark:text-slate-200">إجراءات سريعة</h2>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 grid grid-cols-2 gap-4">
+          <Button 
+            variant="outline" 
+            className="h-24 flex flex-col gap-2 rounded-2xl border-slate-100 dark:border-slate-800 hover:border-[#ff5722] hover:bg-orange-50/50 dark:hover:bg-orange-950/10 group transition-all"
+            onClick={() => (window.location.href = '/admin/tests')}
+          >
+            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-[#ff5722] group-hover:text-white transition-all">
+              <Plus className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold text-[#64748b] group-hover:text-[#ff5722]">اختبار جديد</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            className="h-24 flex flex-col gap-2 rounded-2xl border-slate-100 dark:border-slate-800 hover:border-[#15283c] hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-all"
+            onClick={() => (window.location.href = '/admin/books')}
+          >
+            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-[#15283c] group-hover:text-white transition-all">
+              <Plus className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold text-[#64748b] group-hover:text-[#15283c]">كتاب جديد</span>
+          </Button>
+        </CardContent>
+      </Card>
       </div>
     </div>
+  )
+}
+
+function StatCard({ title, value, icon: Icon, color, trend }: any) {
+  return (
+    <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden group hover:shadow-md transition-all">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110", color)}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          {trend && (
+            <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-600 px-2.5 py-1 rounded-full">
+              +{trend}%
+            </span>
+          )}
+        </div>
+        <div>
+          <p className="text-sm font-bold text-[#64748b] dark:text-slate-400 mb-1">{title}</p>
+          <p className="text-3xl font-black text-[#1e293b] dark:text-slate-100">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

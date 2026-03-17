@@ -63,12 +63,7 @@ export function HeroSection() {
                 >
                     <button 
                         onClick={() => {
-                            if (authUser) {
-                                router.push('/test')
-                            } else {
-                                // Store the intended destination to return after login
-                                router.push('/auth/login?callbackUrl=/test')
-                            }
+                            router.push('/test-library')
                         }}
                         className="flex items-center justify-center gap-3 bg-[#10B981] hover:bg-[#059669] text-white px-10 py-5 rounded-2xl font-bold text-lg md:text-xl transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-900/20 cursor-pointer"
                     >

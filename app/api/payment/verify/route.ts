@@ -43,34 +43,45 @@ export async function GET(request: Request) {
     // Extract attemptId from metadata
     const attemptId = paymentData.metadata?.attemptId
     const userId = paymentData.metadata?.userId
+    const testId = paymentData.metadata?.testId
 
-    if (attemptId) {
+    if (attemptId || testId) {
         // Create or update payment record
-        // Use findFirst + update/create because attemptId might not be in PaymentWhereUniqueInput
-        const existingPayment = await prisma.payment.findFirst({
-            where: { attemptId: parseInt(attemptId) } as any
-        })
+        const whereClause: any = {}
+        if (attemptId) whereClause.attemptId = parseInt(attemptId)
+        else if (testId && userId) {
+            // If No attemptId (e.g. buying book/test directly), match by test+user
+            // But usually we link to attempt if available
+        }
+
+        const existingPayment = attemptId ? await prisma.payment.findUnique({
+            where: { attemptId: parseInt(attemptId) }
+        }) : null
+
+        const paymentPayload = {
+            status: 'COMPLETED',
+            amount: paymentData.amount / 100,
+            userId: parseInt(userId),
+            testId: testId ? parseInt(testId) : undefined,
+            attemptId: attemptId ? parseInt(attemptId) : undefined,
+        }
 
         if (existingPayment) {
             await prisma.payment.update({
                 where: { id: existingPayment.id },
-                data: {
-                    status: 'COMPLETED',
-                    amount: paymentData.amount / 100,
-                }
+                data: paymentPayload
             })
         } else {
             await prisma.payment.create({
-                data: {
-                    userId: parseInt(userId),
-                    attemptId: parseInt(attemptId),
-                    amount: paymentData.amount / 100,
-                    status: 'COMPLETED'
-                } as any
+                data: paymentPayload
             })
         }
         
-        return NextResponse.redirect(new URL(`/results?attemptId=${attemptId}&paid=true`, request.url))
+        const redirectUrl = attemptId 
+            ? `/results?attemptId=${attemptId}&paid=true` 
+            : `/test?testId=${testId}`
+            
+        return NextResponse.redirect(new URL(redirectUrl, request.url))
     }
 
     return NextResponse.redirect(new URL('/dashboard', request.url))

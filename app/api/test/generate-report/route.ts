@@ -12,6 +12,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
+    // 0. Fetch the actual user from DB for accurate name
+    const attempt = await prisma.attempt.findUnique({
+      where: { id: parseInt(attemptId) },
+      include: { user: true }
+    })
+    const realUserName = attempt?.user?.name || 'المبدع'
+
     // 1. Fetch Expert Prompt for this test
     const expertPrompt = await prisma.aiPrompt.findFirst({
       where: { testId: parseInt(testId) }
@@ -57,7 +64,7 @@ export async function POST(request: Request) {
 ${systemPrompt}
 
 بيانات المستخدم:
-الاسم: ${userData?.user_metadata?.fullName || 'غير معروف'}
+الاسم: ${realUserName}
 الجنس: ${userData?.user_metadata?.gender || 'غير معروف'}
 
 تحليل الأنماط المكتشفة:

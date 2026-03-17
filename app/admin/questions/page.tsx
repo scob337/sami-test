@@ -107,10 +107,10 @@ export default function QuestionsPage() {
         </div>
         <Button
           onClick={openAddModal}
-          className="flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 px-5 h-11 font-semibold"
+          className="flex items-center gap-2 rounded-xl bg-[#ff5722] hover:bg-[#e64a19] text-white shadow-lg shadow-orange-500/20 px-6 h-12 font-black transition-all active:scale-95"
         >
-          <Plus className="w-4 h-4" />
-          إضافة سؤال
+          <Plus className="w-5 h-5 ml-1" />
+          إضافة سؤال جديد
         </Button>
       </div>
 
@@ -127,10 +127,10 @@ export default function QuestionsPage() {
                 <button
                   key={t.id}
                   onClick={() => setSelectedTest(t.id.toString())}
-                  className={`w-full text-right px-3 py-2.5 rounded-xl text-sm transition-all font-medium ${
+                  className={`w-full text-right px-4 py-3 rounded-xl text-sm transition-all font-black ${
                     selectedTest === t.id.toString()
-                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                      ? 'bg-[#15283c] text-white shadow-md shadow-navy-500/20'
+                      : 'text-[#64748b] dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#1e293b] dark:hover:text-slate-200'
                   }`}
                 >
                   {t.name}
@@ -209,12 +209,12 @@ export default function QuestionsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start gap-2 mb-2">
                         {q.test && (
-                          <span className="shrink-0 text-xs font-semibold text-primary bg-primary/8 px-2.5 py-1 rounded-lg">
+                          <span className="shrink-0 text-[10px] font-black text-[#ff5722] bg-[#ff5722]/8 px-2.5 py-1 rounded-lg uppercase tracking-wider">
                             {q.test.name}
                           </span>
                         )}
                       </div>
-                      <p className="font-semibold text-slate-800 leading-snug mb-3">{q.questionText}</p>
+                      <p className="font-black text-[#1e293b] dark:text-slate-200 leading-snug mb-3 text-base">{q.questionText}</p>
                       <div className="flex flex-wrap gap-1.5">
                         {q.options.map(opt => (
                           <span key={opt.id} className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg font-medium">
@@ -234,9 +234,9 @@ export default function QuestionsPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-slate-200"
+                          className="h-10 w-10 p-0 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-[#ff5722] hover:text-white border border-slate-100 dark:border-slate-700 transition-all shadow-sm"
                         >
-                          <MoreVertical className="h-4 w-4 text-slate-500" />
+                          <MoreVertical className="h-5 w-5" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-slate-100 min-w-[140px]">

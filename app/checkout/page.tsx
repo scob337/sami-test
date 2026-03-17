@@ -102,6 +102,7 @@ function CheckoutContent() {
                 },
                 metadata: {
                     attemptId: id,
+                    testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
                     userId: user?.id,
                     kind: item.kind
                 }

@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { supabaseClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
   BookOpen,
@@ -26,11 +27,22 @@ const menuItems = [
 
 export function Sidebar({ className, onItemClick }: { className?: string; onItemClick?: () => void }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    try {
+      await supabaseClient.auth.signOut()
+      router.push('/')
+      router.refresh()
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
+  }
 
   return (
     <aside className={cn("w-72 bg-[#15283c] text-white h-full flex flex-col z-50", className)} dir="rtl">
       {/* Profile Section */}
-      <div className="p-6 bg-[#214162] mb-6 border-b border-white/5">
+      <div className="p-6 bg-[#1a334d] mb-6 border-b border-white/5">
         <div className="flex items-center gap-4">
           <div className="relative">
             <div className="w-12 h-12 rounded-xl bg-[#ff5722] flex items-center justify-center font-black text-xl shadow-lg">
@@ -82,7 +94,10 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
       </nav>
 
       <div className="p-6 mt-auto border-t border-white/5">
-        <button className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-[#99abb4] hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border-2 border-transparent transition-all duration-300 group">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-[#99abb4] hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border-2 border-transparent transition-all duration-300 group"
+        >
           <LogOut className="w-5 h-5 text-[#ff9800] group-hover:text-red-500" />
           <span className="text-[15px] font-black tracking-tight group-hover:text-red-500">خروج آمن</span>
         </button>

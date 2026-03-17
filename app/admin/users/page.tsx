@@ -86,11 +86,10 @@ export default function UsersPage() {
         </div>
         <Button
           onClick={handleExportCSV}
-          variant="outline"
-          className="flex items-center gap-2 rounded-xl border-border bg-card h-11 px-5 font-semibold text-foreground hover:bg-accent hover:text-accent-foreground"
+          className="flex items-center gap-2 rounded-xl bg-[#15283c] hover:bg-[#1a334d] text-white shadow-lg shadow-navy-500/20 px-5 h-11 font-semibold transition-all active:scale-95"
         >
           <Download className="w-4 h-4" />
-          تصدير CSV
+          تصدير ملف Excel (CSV)
         </Button>
       </div>
 
@@ -145,11 +144,12 @@ export default function UsersPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-right">
                 <thead>
-                  <tr className="bg-muted/50 border-b border-border text-muted-foreground text-xs font-bold uppercase tracking-wider">
-                    <th className="py-3.5 px-5">المستخدم</th>
-                    <th className="py-3.5 px-5 text-center">الحالة</th>
-                    <th className="py-3.5 px-5 text-center">الاختبارات</th>
-                    <th className="py-3.5 px-5">تاريخ التسجيل</th>
+                  <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[#64748b] dark:text-slate-400 text-[11px] font-black uppercase tracking-wider">
+                    <th className="py-4 px-6 text-right">بيانات المستخدم</th>
+                    <th className="py-4 px-6 text-center">حالة الاشتراك</th>
+                    <th className="py-4 px-6 text-center">حالة النشاط</th>
+                    <th className="py-4 px-6 text-center">المحاولات</th>
+                    <th className="py-4 px-6 text-right">تاريخ الانضمام</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
@@ -157,44 +157,56 @@ export default function UsersPage() {
                     const status = getUserStatus(user)
                     const StatusIcon = status.icon
                     return (
-                      <tr key={user.id} className="hover:bg-muted/30 transition-colors group">
-                        <td className="py-4 px-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center text-primary font-bold text-base shrink-0">
+                      <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
+                        <td className="py-5 px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-[14px] bg-[#15283c] flex items-center justify-center text-white font-black text-lg shrink-0 shadow-sm">
                               {user.name.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-foreground text-sm leading-tight">{user.name}</p>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <p className="font-black text-[#1e293b] dark:text-slate-200 text-base leading-tight">{user.name}</p>
+                              <div className="flex items-center gap-3 mt-1.5">
                                 {user.email && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Mail className="w-3 h-3" /> {user.email}
+                                  <span className="text-xs font-bold text-[#64748b] dark:text-slate-400 flex items-center gap-1.5">
+                                    <Mail className="w-3.5 h-3.5" /> {user.email}
                                   </span>
                                 )}
                                 {user.phone && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Phone className="w-3 h-3" /> {user.phone}
+                                  <span className="text-xs font-bold text-[#64748b] dark:text-slate-400 flex items-center gap-1.5">
+                                    <Phone className="w-3.5 h-3.5" /> {user.phone}
                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-4 px-5 text-center">
-                          <Badge className={`text-xs font-semibold border-0 inline-flex items-center gap-1 ${status.class}`}>
-                            <StatusIcon className="w-3 h-3" />
+                        <td className="py-5 px-6 text-center">
+                          {user._count?.payments > 0 ? (
+                            <Badge className="bg-[#ff5722]/10 text-[#ff5722] hover:bg-[#ff5722]/20 border-none font-black px-3 py-1.5 rounded-lg text-xs gap-1.5">
+                              <CreditCard className="w-3.5 h-3.5" />
+                              مدفوع
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 border-none font-black px-3 py-1.5 rounded-lg text-xs">
+                              مجاني
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-5 px-6 text-center">
+                          <Badge className={`text-[11px] font-black border-none px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 mx-auto w-fit ${status.class}`}>
+                            <StatusIcon className="w-3.5 h-3.5" />
                             {status.label}
                           </Badge>
                         </td>
-                        <td className="py-4 px-5 text-center">
-                          <span className="text-sm font-bold text-foreground bg-accent px-3 py-1 rounded-lg">
+                        <td className="py-5 px-6 text-center">
+                          <span className="text-sm font-black text-[#1e293b] dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-4 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
                             {user._count?.attempts ?? 0}
                           </span>
                         </td>
-                        <td className="py-4 px-5">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5" />
-                            {new Date(user.createdAt).toLocaleDateString('ar-SA')}
+                        <td className="py-5 px-6 text-right">
+                          <span className="text-xs font-bold text-[#94a3b8] dark:text-slate-500 flex items-center justify-end gap-2">
+                            {new Date(user.createdAt).toLocaleDateString('ar-SA', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            <Calendar className="w-4 h-4" />
                           </span>
                         </td>
                       </tr>

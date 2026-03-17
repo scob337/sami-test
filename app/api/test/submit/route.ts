@@ -103,25 +103,60 @@ export async function POST(request: Request) {
       ? `نمطك الأساسي هو: ${primaryPattern}. وأنت تميل أيضاً إلى: ${secondaryPattern}.`
       : `نمطك الأساسي هو: ${primaryPattern}.`
 
-    // 4. Save Attempt and Answers to DB
-    const attempt = await prisma.attempt.create({
-      data: {
-        userId: user.id,
-        testId: parseInt(testId),
-        status: 'COMPLETED',
-        completedAt: new Date(),
-        result: {
-          create: {
-            primaryPattern,
-            secondaryPattern: (secondaryPattern || undefined) as any,
-            scoresJson: patternScores as any,
-          },
-        },
-      },
-      include: {
-        result: true,
-      }
+    // 4. Save Attempt and Answers to DB (Reuse if exists to keep ID stable)
+    const existingAttempt = await prisma.attempt.findFirst({
+        where: { userId: user.id, testId: parseInt(testId) },
+        orderBy: { startedAt: 'desc' }
     })
+
+    let attempt;
+    if (existingAttempt) {
+        // Update existing attempt and result
+        attempt = await prisma.attempt.update({
+            where: { id: existingAttempt.id },
+            data: {
+                status: 'COMPLETED',
+                completedAt: new Date(),
+                result: {
+                    upsert: {
+                        create: {
+                            primaryPattern,
+                            secondaryPattern: (secondaryPattern || undefined) as any,
+                            scoresJson: patternScores as any,
+                        },
+                        update: {
+                            primaryPattern,
+                            secondaryPattern: (secondaryPattern || undefined) as any,
+                            scoresJson: patternScores as any,
+                        }
+                    }
+                }
+            },
+            include: { result: true }
+        })
+        // Clear old answers to replace with new ones
+        await prisma.answer.deleteMany({ where: { attemptId: attempt.id } })
+    } else {
+        // Create new attempt
+        attempt = await prisma.attempt.create({
+            data: {
+                userId: user.id,
+                testId: parseInt(testId),
+                status: 'COMPLETED',
+                completedAt: new Date(),
+                result: {
+                    create: {
+                        primaryPattern,
+                        secondaryPattern: (secondaryPattern || undefined) as any,
+                        scoresJson: patternScores as any,
+                    },
+                },
+            },
+            include: {
+                result: true,
+            }
+        })
+    }
 
     // 5. Save individual answers linked to the attempt
     await prisma.answer.createMany({

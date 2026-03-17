@@ -51,16 +51,18 @@ model Book {
 }
 
 model Test {
-  id        Int      @id @default(autoincrement())
-  name      String
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId    Int
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId      Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   questions Question[]
   attempts  Attempt[]
   aiPrompts AiPrompt[]
+  payments  Payment[]
 }
 
 model AiPrompt {
@@ -165,6 +167,8 @@ model Payment {
   userId    Int
   book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
   bookId    Int?
+  test      Test?    @relation(fields: [testId], references: [id], onDelete: Cascade)
+  testId    Int?
   attempt   Attempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   attemptId Int?     @unique
   amount    Float

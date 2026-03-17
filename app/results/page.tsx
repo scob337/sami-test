@@ -8,10 +8,10 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
 import { 
   Crown, Star, Heart, Briefcase, Lightbulb, 
-  AlertTriangle, CheckCircle2, Lock
+  AlertTriangle, CheckCircle2, Lock, Download, BookOpen
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, Suspense, useCallback } from 'react'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -44,9 +44,9 @@ export default function ResultsPage() {
     setUrlAttemptId(params.get('attemptId'))
   }, [])
 
-  // Fetch results if not in store
+  // Fetch results if not in store or to get latest payment status
   const { data: dbResult, isLoading: isLoadingResult } = useSWR<any>(
-    (!result && urlAttemptId) ? `/api/test/result?attemptId=${urlAttemptId}` : null,
+    urlAttemptId ? `/api/test/result?attemptId=${urlAttemptId}` : null,
     fetcher
   )
 
@@ -63,19 +63,26 @@ export default function ResultsPage() {
     }
   }, [dbResult, result, setResult])
 
-  const { data: reportData } = useSWR<any>(
+  const { data: reportData, error: reportError, mutate: mutateReport } = useSWR<any>(
     (result?.attemptId || urlAttemptId) ? `/api/test/report?attemptId=${result?.attemptId || urlAttemptId}` : null,
-    fetcher
+    fetcher,
+    { 
+      revalidateOnFocus: false,
+      refreshInterval: (data) => (data?.status === 'pending' ? 3000 : 0)
+    }
   )
 
-  const report = reportData?.reportText
+  const isPending = reportData?.status === 'pending'
+  const report = isPending ? null : reportData?.reportText
+  const isPaid = reportData?.isPaid ?? (dbResult?.attempt?.payment?.status === 'COMPLETED')
+  const hasResult = !!(result || dbResult)
 
   // Protection: Redirect to home if no result and not loading
   useEffect(() => {
-    if (!authLoading && !isLoadingResult && !result && !urlAttemptId) {
+    if (!authLoading && !isLoadingResult && !hasResult && !urlAttemptId) {
       router.push('/')
     }
-  }, [result, urlAttemptId, isLoadingResult, authLoading, router])
+  }, [hasResult, urlAttemptId, isLoadingResult, authLoading, router])
 
   const currentType = useMemo(() => {
     const code = (result?.primaryPattern || '').toUpperCase()
@@ -167,9 +174,12 @@ export default function ResultsPage() {
               <div className="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <Crown className="w-8 h-8 text-purple-400" />
               </div>
-              <div>
-                <p className="text-xs font-black text-purple-400 uppercase tracking-widest mb-1">النمط الأساسي</p>
+              <div className="space-y-2">
+                <p className="text-xs font-black text-purple-400 uppercase tracking-widest">النمط الأساسي</p>
                 <h2 className="text-3xl font-black text-white">{currentType.name}</h2>
+                <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-[250px]">
+                  {currentType.description}
+                </p>
               </div>
             </motion.div>
 
@@ -180,11 +190,16 @@ export default function ResultsPage() {
               <div className="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
                 <Star className="w-8 h-8 text-pink-400" />
               </div>
-              <div>
-                <p className="text-xs font-black text-pink-400 uppercase tracking-widest mb-1">النمط الثانوي</p>
+              <div className="space-y-2">
+                <p className="text-xs font-black text-pink-400 uppercase tracking-widest">النمط الثانوي</p>
                 <h2 className="text-3xl font-black text-white">
                   {result?.secondaryPattern ? secondaryType.name : 'لا توجد شخصية'}
                 </h2>
+                {result?.secondaryPattern && (
+                  <p className="text-sm text-slate-400 font-medium leading-relaxed max-w-[250px]">
+                    {secondaryType.description}
+                  </p>
+                )}
               </div>
             </motion.div>
           </div>
@@ -223,64 +238,116 @@ export default function ResultsPage() {
             </div>
           </motion.div>
 
-          {/* Detailed Analysis Sections */}
-          <div className="space-y-6">
-            
-            {[
-              { id: 'desc', title: 'وصف الشخصية', text: currentType.description, icon: Star, color: 'text-blue-400' },
-              { id: 'strengths', title: 'نقاط القوة', text: currentType.strengths, icon: CheckCircle2, color: 'text-emerald-400' },
-              { id: 'weaknesses', title: 'نقاط التحسين', text: currentType.weaknesses, icon: AlertTriangle, color: 'text-amber-400' },
-              { id: 'relationships', title: 'في العلاقات', text: currentType.relationships, icon: Heart, color: 'text-pink-400' },
-              { id: 'work', title: 'بيئة العمل', text: currentType.work, icon: Briefcase, color: 'text-indigo-400' },
-              { id: 'tips', title: 'نصائح للتطوير', text: currentType.tips, icon: Lightbulb, color: 'text-amber-300' },
-            ].map((section, idx) => (
-              <motion.div 
-                key={section.id}
-                initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }}
-                className="bg-[#112240] rounded-[32px] p-8 border border-white/5 shadow-xl hover:border-white/10 transition-all group"
-              >
-                <div className="flex items-center gap-4 mb-4">
-                  <div className={cn("w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform", section.color.replace('text', 'bg').replace('400', '400/10'))}>
-                    <section.icon className={cn("w-6 h-6", section.color)} />
+          {/* Simplified Report Content */}
+          <div className="space-y-8">
+            {/* Comprehensive Report Block (Locked/Unlocked) */}
+            <motion.div 
+              initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
+              className="bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl space-y-8 relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between border-b border-white/5 pb-8">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                    <Star className="w-8 h-8 text-blue-400" />
                   </div>
-                  <h4 className="text-xl font-black text-white">{section.title}</h4>
+                  <div>
+                    <h3 className="text-2xl md:text-3xl font-black text-white">التقرير التحليلي الشامل</h3>
+                    <p className="text-slate-400 font-medium text-sm md:text-base mt-1 italic">تقرير مفصل تم إعداده خصيصاً لك</p>
+                  </div>
                 </div>
-                <p className="text-slate-300 leading-relaxed font-medium text-lg pr-4 border-r-2 border-white/5">
-                  {section.text}
-                </p>
-              </motion.div>
-            ))}
-            
-          </div>
+                {reportData?.isPartial ? (
+                  <div className="flex flex-col items-end gap-2 text-blue-400">
+                    <div className="flex items-center gap-2 bg-blue-500/10 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-500/20">
+                      <Lock className="w-3 h-3" />
+                      نسخة مجانية
+                    </div>
+                  </div>
+                ) : (
+                  <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                )}
+              </div>
 
-          {/* Premium Unlocked Banner */}
-          <motion.div 
-            initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-            className="mt-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-[48px] p-10 md:p-16 text-center shadow-2xl shadow-blue-500/20 relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)]" />
-            
-            <div className="relative z-10 space-y-6">
-              <div className="flex justify-center mb-8">
-                <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
-                   <Lock className="w-10 h-10 text-white" />
-                </div>
+              <div className="relative min-h-[200px]">
+                {isPending ? (
+                  <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                    <LoadingSpinner size="lg" />
+                    <p className="text-blue-400 font-bold animate-pulse">جاري تحليل بياناتك وصياغة التقرير...</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className={cn(
+                      "prose prose-invert max-w-none text-slate-300 leading-relaxed font-medium text-base md:text-lg whitespace-pre-wrap transition-all pb-64 md:pb-80",
+                      reportData?.isPartial && "max-h-[800px] md:max-h-[1000px] overflow-hidden mask-fade-bottom"
+                    )}>
+                      {report || 'جاري تحميل تفاصيل التقرير...'}
+                    </div>
+
+                    {reportData?.isPartial && (
+                      <div className="absolute inset-x-0 bottom-0 pt-64 md:pt-96 pb-8 md:pb-16 flex flex-col items-center justify-center bg-gradient-to-t from-[#112240] via-[#112240]/98 to-transparent z-40 text-center space-y-6 md:space-y-10">
+                        <div className="max-w-xl space-y-5 md:space-y-7 px-6">
+                          <p className="text-lg md:text-2xl font-black text-white leading-tight">
+                            هذه مجرد <span className="text-blue-400">بداية</span> لاكتشاف أعماق شخصيتك...
+                          </p>
+                          
+                          {/* Curiosity Features List */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-right">
+                            {[
+                              { icon: Heart, text: 'تحليل عميق للعلاقات العاطفية' },
+                              { icon: Briefcase, text: 'دليل المسار المهني المثالي لك' },
+                              { icon: Lightbulb, text: 'استراتيجيات تطوير نقاط القوة' },
+                              { icon: AlertTriangle, text: 'تحذيرات حول عيوب الشخصية' }
+                            ].map((feat, i) => (
+                              <div key={i} className="flex items-center gap-2 text-slate-400 text-[10px] md:text-xs">
+                                <feat.icon className="w-3 h-3 md:w-4 md:h-4 text-blue-500/50" />
+                                <span>{feat.text}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          <p className="text-slate-400 font-bold text-xs md:text-base leading-relaxed">
+                            افتح التقرير الكامل الآن للحصول على كافة التفاصيل الحصرية التي تنتظرك.
+                          </p>
+                        </div>
+                        
+                        <Link href={`/checkout?type=test&id=${result?.attemptId || urlAttemptId}`} className="w-full md:w-auto px-6">
+                          <Button className="h-14 md:h-20 w-full md:px-14 rounded-2xl md:rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white font-black text-lg md:text-2xl shadow-[0_20px_40px_-15px_rgba(37,99,235,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 md:gap-4 border border-white/10 group">
+                            <Crown className="w-5 h-5 md:w-8 md:h-8 group-hover:rotate-12 transition-transform" />
+                            اشترك وافتح التقرير الكامل
+                          </Button>
+                        </Link>
+                        
+                        <p className="text-[9px] md:text-[10px] text-slate-500 font-black uppercase tracking-widest opacity-60">تحليل مدعوم بالذكاء الاصطناعي بنسبة 100%</p>
+                      </div>
+                    )}
+                    
+                    {isPaid && dbResult?.attempt?.test?.book && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-12 pt-12 border-t border-white/5 flex flex-col items-center text-center space-y-6"
+                      >
+                          <div className="space-y-2">
+                            <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-black">
+                              <CheckCircle2 className="w-4 h-4" />
+                              اكتمل التحليل بنجاح
+                            </div>
+                            <h3 className="text-xl md:text-2xl font-black text-white">هدية إضافية: {dbResult.attempt.test.book.title}</h3>
+                            <p className="text-slate-400 text-sm font-medium">لقد حصلت أيضاً على النسخة الرقمية الكاملة من هذا الكتاب</p>
+                          </div>
+
+                          <a href={dbResult.attempt.test.book.filePdf} target="_blank" rel="noopener noreferrer" className="w-full md:w-auto">
+                            <Button className="h-16 px-10 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-lg shadow-xl shadow-emerald-500/20 flex items-center gap-3 group">
+                              <Download className="w-6 h-6 group-hover:translate-y-0.5 transition-transform" />
+                              تحميل الكتاب بصيغة PDF
+                            </Button>
+                          </a>
+                      </motion.div>
+                    )}
+                  </>
+                )}
               </div>
-              <h2 className="text-3xl md:text-5xl font-black text-white">هذا التقرير هو البداية فقط!</h2>
-              <p className="text-blue-100 font-bold text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                للحصول على التقرير الكامل الذي يتضمن تحليلاً معمقاً لكل جانب من جوانب شخصيتك، مع خطة تطوير مفصلة ونصائح عملية مخصصة لك فقط.
-              </p>
-              <div className="pt-8">
-                <Link href="/checkout">
-                  <Button className="h-16 px-12 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-black text-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 mx-auto">
-                    <Crown className="w-6 h-6" />
-                    احصل على التقرير الشامل الآن
-                  </Button>
-                </Link>
-                <p className="text-blue-200/60 text-xs font-bold mt-4 uppercase tracking-[3px]">أكثر من 50 صفحة من التحليل المخصص</p>
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
 
         </div>
       </div>

@@ -17,18 +17,20 @@ export async function GET(request: Request) {
     const numericId = isNumericId ? parseInt(userId) : NaN
     
     if (isNumericId && !isNaN(numericId)) {
-      user = await prisma.user.findUnique({
+      user = await (prisma.user.findUnique as any)({
         where: { id: numericId },
         include: {
           attempts: {
-            where: { status: 'COMPLETED' },
             include: {
-              result: true,
+              result: {
+                include: { report: true }
+              },
+              payment: true,
               test: {
-                select: { name: true }
+                include: { book: true }
               }
             },
-            orderBy: { completedAt: 'desc' },
+            orderBy: { startedAt: 'desc' },
           },
           payments: {
             where: { status: 'COMPLETED' },
@@ -47,18 +49,20 @@ export async function GET(request: Request) {
       if (emailVal) orConditions.push({ email: emailVal })
       if (phoneVal) orConditions.push({ phone: phoneVal })
 
-      user = await prisma.user.findFirst({
+      user = await (prisma.user.findFirst as any)({
         where: { OR: orConditions },
         include: {
           attempts: {
-            where: { status: 'COMPLETED' },
             include: {
-              result: true,
+              result: {
+                include: { report: true }
+              },
+              payment: true,
               test: {
-                select: { name: true }
+                include: { book: true }
               }
             },
-            orderBy: { completedAt: 'desc' },
+            orderBy: { startedAt: 'desc' },
           },
           payments: {
             where: { status: 'COMPLETED' },
@@ -85,20 +89,21 @@ export async function GET(request: Request) {
       }
     }
 
-    if (!user) {
+    const finalUser = user as any
+    if (!finalUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        createdAt: user.createdAt,
+        id: finalUser.id,
+        name: finalUser.name,
+        email: finalUser.email,
+        phone: finalUser.phone,
+        createdAt: finalUser.createdAt,
       },
-      attempts: user.attempts,
-      books: user.payments.map(p => p.book),
+      attempts: finalUser.attempts || [],
+      books: (finalUser.payments || []).map((p: any) => p.book).filter(Boolean),
     })
   } catch (error) {
     console.error('Error fetching user dashboard data:', error)

@@ -25,8 +25,6 @@ apiClient.interceptors.response.use(
       window.location.href = '/auth/login'
     } else if (error.response?.status === 403) {
       toast.error('ليس لديك صلاحية للقيام بهذا الإجراء')
-    } else if (error.response?.status === 404) {
-      toast.error('المورد غير موجود')
     } else if (error.response?.status && error.response.status >= 500) {
       toast.error('حدث خطأ في الخادم')
     }

@@ -15,16 +15,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Invalid attemptId' }, { status: 400 })
     }
 
-    const result = await prisma.result.findUnique({
+    const result = await (prisma.result.findUnique as any)({
       where: { attemptId: id },
       include: {
         attempt: {
           include: {
             test: {
-              select: {
-                name: true
+              include: {
+                book: true
               }
             },
+            payment: true,
             user: {
               select: {
                 name: true

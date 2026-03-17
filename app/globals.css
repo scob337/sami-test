@@ -160,6 +160,20 @@
   .primary-gradient {
     @apply bg-gradient-to-br from-primary via-sky-500 to-cyan-400;
   }
+
+  .mask-fade-bottom {
+    mask-image: linear-gradient(to bottom, black 0%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 80%, transparent 100%);
+  }
+
+  /* Moyasar Form Custom Styling */
+  .mysr-form {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .mysr-form iframe {
+    border-radius: 1rem !important;
+  }
 }
 
 

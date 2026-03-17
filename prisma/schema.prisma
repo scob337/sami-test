@@ -126,6 +126,7 @@ model Attempt {
 
   answers     Answer[]
   result      Result?
+  payment     Payment?
 }
 
 model Answer {
@@ -162,8 +163,10 @@ model Payment {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId    Int
+  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId    Int?
+  attempt   Attempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  attemptId Int?     @unique
   amount    Float
   status    String   @default("PENDING") // PENDING, COMPLETED, FAILED
   createdAt DateTime @default(now())

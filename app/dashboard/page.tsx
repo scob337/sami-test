@@ -241,8 +241,8 @@ export default function DeepNavyDashboard() {
                           </div>
                         </div>
                         <div className="flex items-center gap-4">
-                          <Badge className={cn("h-8 px-4 rounded-xl font-black text-xs", attempt.isPaid ? "bg-emerald-500/20 text-emerald-400 border-none" : "bg-amber-500/20 text-amber-400 border-none")}>
-                            {attempt.isPaid ? 'مكتمل الدفع' : 'في انتظار الدفع'}
+                          <Badge className={cn("h-8 px-4 rounded-xl font-black text-xs", attempt.payment?.status === 'COMPLETED' ? "bg-emerald-500/20 text-emerald-400 border-none" : "bg-amber-500/20 text-amber-400 border-none")}>
+                            {attempt.payment?.status === 'COMPLETED' ? 'مكتمل الدفع' : 'في انتظار الدفع'}
                           </Badge>
                           <Link href={`/results?attemptId=${attempt.id}`}>
                             <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl bg-white/5 hover:bg-blue-500 hover:text-white transition-all">

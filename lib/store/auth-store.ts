@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { User } from '@supabase/supabase-js'
+import { supabaseClient } from '@/lib/supabase/client'
 
 export interface AuthUser extends User {
   isAdmin?: boolean
@@ -26,6 +27,9 @@ export const useAuthStore = create<AuthStore>((set) => ({
     try {
       // Call server logout to clear Supabase server cookies
       await fetch('/api/auth/logout', { method: 'POST' })
+
+      // Sign out from client properly
+      await supabaseClient.auth.signOut()
 
       // Clear client-side storages
       try { localStorage.clear() } catch {}

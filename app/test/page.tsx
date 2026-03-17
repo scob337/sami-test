@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useCallback } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -65,7 +65,9 @@ function TestPageContent() {
     resetTest()
   }, [resetTest])
 
-  const submitResults = async (finalUserData: any) => {
+  const submitResults = useCallback(async (finalUserData: any) => {
+    if (isSubmitting) return
+    
     try {
       setIsSubmitting(true)
 
@@ -116,14 +118,14 @@ function TestPageContent() {
       }).catch(e => console.error('Background report failure (ignored):', e))
 
       toast.success('تم إكمال الاختبار بنجاح!')
-      setTimeout(() => router.push('/results'), 1500)
+      setTimeout(() => router.push(`/results?attemptId=${resultData.attemptId}`), 1500)
 
     } catch (error) {
       toast.error('حدث خطأ أثناء حفظ النتائج، يرجى المحاولة مرة أخرى')
       console.error('Submit Results Exception:', error)
       setIsSubmitting(false)
     }
-  }
+  }, [isSubmitting, questions, testId, answers, setResult, router])
 
   useEffect(() => {
     if (user) {

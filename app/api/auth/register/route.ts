@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const { data: existingUser } = await supabase
       .from('users')
       .select('id')
-      .eq('email', validatedData.email)
+      .eq('email', validatedData.email || '')
       .single()
 
     if (existingUser) {
@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
       const admin = createSupabaseAdmin(supabaseUrl, serviceRoleKey)
 
       const { data: adminUser, error: adminError } = await admin.auth.admin.createUser({
-        email: validatedData.email,
-        password: validatedData.password,
+        email: validatedData.email || '',
+        password: validatedData.password!,
         email_confirm: true,
         user_metadata: {
           fullName: validatedData.fullName,
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
 
       // Sign in the new user to create a session
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email: validatedData.email,
-        password: validatedData.password,
+        email: validatedData.email || '',
+        password: validatedData.password!,
       })
 
       if (signInError) {
@@ -74,14 +74,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'تم إنشاء الحساب بنجاح', userId: adminUser.user?.id }, { status: 201 })
       }
 
-      // Ensure phone is saved in Prisma
+      // Ensure user exists in Prisma and phone is synced
       try {
-        await prisma.user.updateMany({
-           where: { email: validatedData.email },
-           data: { phone: validatedData.phone }
+        await prisma.user.upsert({
+          where: (validatedData.email && validatedData.email.trim() !== '') ? { email: validatedData.email } : { phone: validatedData.phone },
+          update: { 
+            name: validatedData.fullName,
+            phone: validatedData.phone,
+            email: validatedData.email || null
+          },
+          create: {
+            name: validatedData.fullName,
+            email: validatedData.email || null,
+            phone: validatedData.phone
+          }
         })
       } catch (e) {
-        console.error("Failed to sync phone to Prisma:", e)
+        console.error("Failed to sync user to Prisma:", e)
       }
 
       return NextResponse.json(
@@ -96,7 +105,8 @@ export async function POST(request: NextRequest) {
 
     // Sign up with Supabase Auth (fallback to default flow)
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: validatedData.email,
+      email: validatedData.email || undefined,
+      phone: !validatedData.email ? validatedData.phone : undefined,
       password: validatedData.password,
       options: {
         data: {
@@ -114,12 +124,17 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-       await prisma.user.updateMany({
-          where: { email: validatedData.email },
-          data: { phone: validatedData.phone }
+       await prisma.user.upsert({
+           where: (validatedData.email && validatedData.email.trim() !== '') ? { email: validatedData.email } : { phone: validatedData.phone },
+          update: { phone: validatedData.phone, name: validatedData.fullName },
+          create: { 
+            phone: validatedData.phone, 
+            name: validatedData.fullName,
+            email: validatedData.email || null
+          }
        })
     } catch (e) {
-       console.error("Failed to sync phone to Prisma:", e)
+       console.error("Failed to sync user to Prisma:", e)
     }
 
     return NextResponse.json(

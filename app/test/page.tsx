@@ -127,7 +127,7 @@ function TestPageContent() {
     testId ? `/api/questions?testId=${testId}` : null,
     fetcher
   )
-  const { data: testInfoData } = useSWR(
+  const { data: testInfoData } = useSWR<any>(
     testId ? `/api/test/info?testId=${testId}` : null,
     fetcher
   )
@@ -150,12 +150,30 @@ function TestPageContent() {
     setIsRegistered(true)
   }
 
-  if (!isRegistered && !user) {
+  if (!user) {
     return (
-      <main className="min-h-screen flex flex-col bg-slate-50 overflow-x-hidden">
+      <main className="min-h-screen flex flex-col bg-[#0A1A3B] items-center justify-center p-6 text-center" dir="rtl">
         <Header />
-        <div className="flex-1 flex flex-col">
-          <PreTestForm onComplete={handleRegistrationComplete} />
+        <div className="max-w-md space-y-8 relative z-10">
+          <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-500/20">
+            <Brain className="w-10 h-10 text-white" />
+          </div>
+          <div className="space-y-4">
+            <h2 className="text-3xl font-black text-white">عذراً، يجب تسجيل الدخول أولاً</h2>
+            <p className="text-slate-400 font-medium leading-relaxed">يرجى تسجيل الدخول أو إنشاء حساب جديد لتتمكن من إجراء الاختبار وحفظ نتائجك بشكل احترافي.</p>
+          </div>
+          <div className="flex flex-col gap-4">
+            <Link href={`/auth/login?callbackUrl=${encodeURIComponent(`/test${testId ? `?testId=${testId}` : ''}`)}`} className="w-full">
+              <Button className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white font-black text-lg rounded-2xl shadow-xl shadow-blue-600/20 transition-all active:scale-95">
+                سجل دخولك الآن
+              </Button>
+            </Link>
+            <Link href={`/auth/register?callbackUrl=${encodeURIComponent(`/test${testId ? `?testId=${testId}` : ''}`)}`} className="w-full">
+              <Button variant="ghost" className="w-full h-14 text-blue-400 hover:text-blue-300 hover:bg-white/5 font-black text-lg">
+                ليس لدي حساب، أريد التسجيل
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
     )

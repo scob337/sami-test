@@ -2,8 +2,8 @@
 
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
-import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Container } from '@/components/layout/container'
@@ -14,15 +14,21 @@ import { useTestStore } from '@/lib/store/test-store'
 import Link from 'next/link'
 import {
   Download,
-  Share2,
   BookOpen,
   Settings,
-  User,
+  User as UserIcon,
   Zap,
   Calendar,
   CheckCircle2,
-  ArrowRight,
-  Target
+  ArrowLeft,
+  Target,
+  ShoppingBag,
+  Clock,
+  ChevronLeft,
+  Award,
+  CreditCard,
+  Edit3,
+  ClipboardList
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
@@ -38,395 +44,398 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
-const recentTests = [
-  {
-    id: '1',
-    type: 'INFJ',
-    date: '2024-03-11',
-    name: 'المستشار',
-    status: 'مكتمل',
-    score: '92%'
-  }
-]
-
-export default function DashboardPage() {
-  const { user: authUser } = useAuthStore()
+export default function DeepNavyDashboard() {
+  const { user: authUser, loading } = useAuthStore()
   const router = useRouter()
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editPhone, setEditPhone] = useState('')
 
-  const userId = authUser?.id || '1'
-  const { data, isLoading: isLoadingData, mutate } = useSWR(
-    authUser ? `/api/user/dashboard?userId=${userId}` : null,
+  useEffect(() => {
+    if (!loading && !authUser) {
+      router.push('/')
+    }
+  }, [authUser, loading, router])
+
+  const userId = authUser?.id
+  const { data, isLoading: isLoadingData, mutate } = useSWR<any>(
+    authUser 
+      ? `/api/user/dashboard?userId=${userId}&email=${encodeURIComponent(authUser.email || '')}&phone=${encodeURIComponent(authUser.user_metadata?.phone || '')}` 
+      : null,
     fetcher
   )
 
   const dbUser = data?.user
   const attempts = data?.attempts || []
   const books = data?.books || []
-  
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [isUpdating, setIsEditUpdating] = useState(false)
 
-  // Use test store for syncing offline results
-  const { isFinished, answers, resetTest } = useTestStore()
+  // Memoized Stats
+  const userStats = useMemo(() => {
+    return [
+      { label: 'الاختبارات', value: attempts.length, icon: ClipboardList, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+      { label: 'الكتب الرقمية', value: books.length, icon: BookOpen, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+      { label: 'التقارير السابقة', value: attempts.filter((a:any) => a.reportGenerated).length, icon: Award, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+    ]
+  }, [attempts, books])
 
-  useEffect(() => {
-    async function syncTestResults(userId: string) {
-      if (!isFinished || Object.keys(answers).length === 0) return
-
-      try {
-        const response = await fetch('/api/test/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            answers,
-            userId: parseInt(userId),
-            testId: 1 // Default testId
-          }),
-        })
-
-        if (!response.ok) throw new Error('Failed to sync test results')
-        const resultData = await response.json()
-
-        // Generate Report
-        await fetch('/api/test/generate-report', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            attemptId: resultData.attemptId,
-            testId: 1,
-            userData: authUser,
-            answers
-          })
-        })
-
-        toast.success('تم رفع نتائج اختبارك بنجاح!')
-        resetTest()
-
-        // Refresh data using SWR mutate
-        mutate()
-
-      } catch (error) {
-        console.error('Error syncing offline test:', error)
-        toast.error('حدث خطأ أثناء مزامنة نتائج اختبارك السابق')
-      }
-    }
-
-    if (authUser && isFinished) {
-      syncTestResults(authUser.id.toString())
-    }
-  }, [authUser, isFinished, answers, resetTest, mutate])
-
-  // Edit Form State
-  const [editName, setEditName] = useState('')
-  const [editEmail, setEditEmail] = useState('')
-  const [editPhone, setEditPhone] = useState('')
-
-  // Pre-fill edit form when data arrives
-  useEffect(() => {
-    if (dbUser) {
-      setEditName(dbUser.name || '')
-      setEditEmail(dbUser.email || '')
-      setEditPhone(dbUser.phone || '')
-    }
+  // Callbacks for performance
+  const handleOpenEdit = useCallback(() => {
+    setEditName(dbUser?.name || '')
+    setEditEmail(dbUser?.email || '')
+    setEditPhone(dbUser?.phone || '')
+    setIsEditModalOpen(true)
   }, [dbUser])
 
   const handleUpdateProfile = async () => {
-    if (!editName.trim()) {
-      toast.error('يرجى إدخال الاسم')
-      return
-    }
-
+    if (!editName.trim()) { toast.error('يرجى إدخال الاسم'); return }
     try {
-      setIsEditUpdating(true)
-      const userId = authUser?.id || '1'
-
+      setIsUpdating(true)
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          name: editName,
-          email: editEmail,
-          phone: editPhone,
-        })
+        body: JSON.stringify({ userId, name: editName, email: editEmail, phone: editPhone })
       })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Update failed')
-      }
-
-      const updatedUser = await res.json()
-      // Refresh local data
+      if (!res.ok) throw new Error('Update failed')
       mutate()
-      toast.success('تم تحديث البيانات بنجاح')
+      toast.success('تم تحديث ملفك الشخصي')
       setIsEditModalOpen(false)
     } catch (error: any) {
-      toast.error(error.message || 'حدث خطأ أثناء التحديث')
+      toast.error('حدث خطأ أثناء التحديث')
     } finally {
-      setIsEditUpdating(false)
+      setIsUpdating(false)
     }
   }
 
-  const isLoading = isLoadingData
-
-  const latestResult = attempts[0]?.result
-
-  const stats = [
-    {
-      label: 'إجمالي الاختبارات',
-      value: attempts.length.toString(),
-      icon: BookOpen,
-      color: 'text-primary',
-      bg: 'bg-primary/10'
-    },
-    {
-      label: 'الكتب المشتراة',
-      value: books.length.toString(),
-      icon: Download,
-      color: 'text-accent-foreground',
-      bg: 'bg-accent/20'
-    },
-    {
-      label: 'مستوى النشاط',
-      value: attempts.length > 0 ? 'نشط' : 'غير نشط',
-      icon: Zap,
-      color: 'text-primary',
-      bg: 'bg-primary/10'
-    },
-    {
-      label: 'عضو منذ',
-      value: dbUser ? new Date(dbUser.createdAt).getFullYear().toString() : '---',
-      icon: Calendar,
-      color: 'text-accent-foreground',
-      bg: 'bg-accent/20'
-    }
-  ]
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12
-      }
-    }
+  if (loading || (!authUser && !isLoadingData)) {
+    return (
+      <div className="min-h-screen bg-[#0A1A3B] flex flex-col items-center justify-center">
+        <LoadingSpinner size="lg" className="text-blue-500" />
+      </div>
+    )
   }
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+  if (isLoadingData) {
+    return (
+      <div className="min-h-screen bg-[#0A1A3B] flex flex-col items-center justify-center">
+        <LoadingSpinner size="lg" className="text-blue-500" />
+      </div>
+    )
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#f8f9fa] dark:bg-slate-950 text-slate-800 dark:text-slate-100" dir="rtl">
+    <div className="min-h-screen bg-[#0A1A3B] text-white font-sans overflow-x-hidden selection:bg-blue-500/30" dir="rtl">
       <Header />
+      
+      {/* Hero Header Section */}
+      <section className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-[#0A1A3B] to-[#112240]">
+        <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
+          <div className="absolute top-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-[150px]" />
+          <div className="absolute bottom-10 left-10 w-80 h-80 bg-purple-600 rounded-full blur-[150px]" />
+        </div>
 
-      {/* Top Banner Area */}
-      <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 mt-16 pt-10 pb-12 w-full">
         <Container>
-          <div className="max-w-6xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8">
-            <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl font-semibold text-slate-900 dark:text-slate-100 tracking-tight">
-                مرحباً بك، {authUser?.user_metadata?.fullName || dbUser?.name || 'المستخدم'}!
-              </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">
-                إليك ما يمكنك القيام به اليوم في منصة Sami-Test
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              {/* Banner 1 */}
-              <div className="bg-[#09344d] rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between text-white shadow-md">
-                <span className="font-medium text-base sm:text-lg mb-4 sm:mb-0 text-center sm:text-right">احصل على وصول كامل لمنصة الأعمال — مجاناً لمدة 7 أيام</span>
-                <Button className="bg-[#10b981] hover:bg-[#059669] text-white font-bold px-8 py-6 h-auto rounded-md transition-colors text-base hidden sm:flex items-center gap-2">
-                  بدء تجربة مجانية <ArrowRight className="w-5 h-5 rotate-180" />
-                </Button>
-              </div>
-
-              {/* Banner 2 */}
-              <div className="bg-[#09344d] rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between text-white shadow-md">
-                <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mb-4 sm:mb-0">
-                  <span className="font-bold text-lg">البدء في استخدام المنصة</span>
-                  <span className="text-sm text-slate-300">— 2/6 مكتمل</span>
-                </div>
-                <div className="flex items-center gap-4 w-full sm:w-1/3">
-                  <div className="w-full h-2 bg-slate-700/50 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#10b981] w-1/3 rounded-full"></div>
-                  </div>
-                  <span className="text-slate-400 font-bold rotate-180 hidden sm:block">›</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </div>
-
-      <div className="flex-1 py-12">
-        <Container>
-          <div className="max-w-6xl mx-auto space-y-6 px-4 sm:px-6 lg:px-8">
-            <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 tracking-wider">البدء</h2>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-              {/* Main Card (Profile/Test) */}
-              <Card className="lg:col-span-2 p-8 sm:p-12 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none rounded-xl bg-white dark:bg-slate-900 flex flex-col items-center text-center space-y-8">
-                <div className="w-full flex justify-start">
-                  <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-slate-200 text-lg">
-                    <Target className="w-6 h-6" /> أكمل ملفك الشخصي
+          <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12">
+            <div className="flex-1 space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="flex items-center gap-4"
+              >
+                <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-2xl shadow-blue-500/20">
+                  <div className="w-full h-full bg-[#112240] rounded-[24px] flex items-center justify-center font-black text-3xl">
+                    {dbUser?.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                 </div>
-
-                {/* Decorative Wheel/Circle placeholder */}
-                <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-full bg-gradient-to-tr from-rose-100 dark:from-rose-950/40 via-amber-50 dark:via-amber-900/20 to-teal-100 dark:to-teal-950/40 border-8 border-white dark:border-slate-800 shadow-lg flex items-center justify-center relative spin-slow relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {/* Wheel segments mockup */}
-                    <div className="w-full h-px bg-white/50 dark:bg-slate-800/50 absolute rotate-45 transform origin-center"></div>
-                    <div className="w-full h-px bg-white/50 dark:bg-slate-800/50 absolute -rotate-45 transform origin-center"></div>
-                    <div className="w-full h-px bg-white/50 dark:bg-slate-800/50 absolute rotate-90 transform origin-center"></div>
-                    <div className="w-full h-px bg-white/50 dark:bg-slate-800/50 absolute transform origin-center"></div>
-                  </div>
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#f8f9fa] dark:bg-slate-950 shadow-inner z-10 border border-gray-100 dark:border-slate-800"></div>
-                </div>
-
-                <div className="space-y-4 max-w-lg mt-4">
-                  <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">خذ اختبار الشخصية الخاص بك!</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-base leading-relaxed">
-                    ملفك الشخصي هو قلب المنصة. قم بإجراء اختبار سريع لرؤية ملفك الشخصي مليئاً بالرؤى العميقة حول شخصيتك، بالإضافة إلى نصائح للتفاعل مع الآخرين!
+                <div>
+                  <h1 className="text-4xl font-black tracking-tight leading-tight">
+                    أهلاً بك، {dbUser?.name?.split(' ')[0]}
+                  </h1>
+                  <p className="text-slate-400 font-medium text-lg mt-1 italic opacity-80">
+                    مستعد لاكتشاف أبعاد جديدة لشخصيتك اليوم؟
                   </p>
                 </div>
+              </motion.div>
 
-                <Link href="/test-library" className="w-full sm:w-auto mt-4">
-                  <Button className="bg-[#2ba8e0] hover:bg-[#1f8ebd] text-white px-10 py-6 h-auto rounded-md font-bold w-full shadow-md transition-colors text-lg tracking-wide uppercase">
-                    ابدأ الاختبار
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="flex flex-wrap gap-4"
+              >
+                {userStats.map((stat, i) => (
+                  <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 px-6 py-4 rounded-3xl flex items-center gap-4 hover:border-white/20 transition-all">
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", stat.bg)}>
+                      <stat.icon className={cn("w-5 h-5", stat.color)} />
+                    </div>
+                    <div>
+                      <div className="text-slate-400 text-xs font-black uppercase tracking-widest">{stat.label}</div>
+                      <div className="text-xl font-black text-white">{stat.value}</div>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-blue-600 to-blue-500 p-8 rounded-[40px] shadow-2xl shadow-blue-500/10 w-full lg:w-[400px] relative group overflow-hidden"
+            >
+              <Zap className="absolute -top-4 -right-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black">تحليل سريع متاح</h3>
+                  <Award className="w-6 h-6 text-white/50" />
+                </div>
+                <p className="text-white/80 font-medium leading-relaxed">
+                  لديك وصول حالي لـ {attempts.length} نماذج اختبار جديدة. ابدأ الآن للحصول على تقريرك.
+                </p>
+                <Link href="/test-library" className="block">
+                  <Button className="w-full h-14 bg-white text-blue-600 hover:bg-slate-50 font-black text-lg rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    ابدأ اختبار جديد
                   </Button>
                 </Link>
-              </Card>
-
-              {/* Secondary Cards Column */}
-              <div className="lg:col-span-1 flex flex-col gap-6">
-
-                {/* Library Card */}
-                <Card className="p-6 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none rounded-xl bg-white dark:bg-slate-900 flex flex-col space-y-6">
-                  <div className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-200">
-                    <Download className="w-5 h-5 text-slate-900 dark:text-slate-300" /> مكتبة المنصة
-                  </div>
-                  <div className="flex flex-col items-center justify-center py-6 bg-slate-50 dark:bg-slate-800/50 border border-gray-100 dark:border-slate-800 rounded-lg">
-                    <BookOpen className="w-10 h-10 text-slate-400 mb-2" />
-                    <div className="text-center">
-                      <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">متوفر في</span><br />
-                      <span className="text-lg font-bold text-slate-700 dark:text-slate-300">المتجر الرقمي</span>
-                    </div>
-                  </div>
-                  <p className="text-sm text-center text-slate-600 dark:text-slate-400 px-2 leading-relaxed">
-                    تصفح الكتب المميزة واكتسب رؤى عميقة حول تطور شخصيتك!
-                  </p>
-                  <Link href="/test-library" className="w-full mt-auto pt-2">
-                    <Button className="w-full bg-[#2ba8e0] hover:bg-[#1f8ebd] text-white py-6 h-auto rounded-md font-bold text-sm shadow-sm">
-                      تصفح المتجر
-                    </Button>
-                  </Link>
-                </Card>
-
-                {/* Tests Results Card */}
-                <Card className="p-6 border border-gray-200 dark:border-slate-800 shadow-sm dark:shadow-none rounded-xl bg-white dark:bg-slate-900 flex flex-col space-y-6">
-                  <div className="flex items-center gap-3 font-bold text-slate-800 dark:text-slate-200">
-                    <Calendar className="w-5 h-5 text-slate-900 dark:text-slate-300" /> اختباراتك السابقة
-                  </div>
-                  <div className="flex justify-center gap-6 py-6 border-b border-gray-100 dark:border-slate-800">
-                    <div className="w-12 h-12 rounded bg-[#ea4335] text-white shadow-sm flex items-center justify-center">
-                      <CheckCircle2 className="w-6 h-6" />
-                    </div>
-                    <div className="w-12 h-12 rounded bg-[#1f8ebd] text-white shadow-sm flex items-center justify-center">
-                      <Zap className="w-6 h-6" />
-                    </div>
-                  </div>
-                  <p className="text-sm text-center text-slate-600 dark:text-slate-400 px-2 leading-relaxed">
-                    راجع نتائجك السابقة بسهولة للتحضير لمرحلتك القادمة ومتابعة تطورك.
-                  </p>
-                  <Button variant="outline" className="w-full border-gray-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 dark:hover:text-slate-100 dark:bg-slate-950 py-6 h-auto font-semibold">
-                    عرض النتائج
-                  </Button>
-                </Card>
-
               </div>
-            </div>
+            </motion.div>
           </div>
         </Container>
-      </div>
+      </section>
+
+      {/* Main Content Sections */}
+      <section className="pb-32 -mt-10 relative z-20">
+        <Container>
+          <div className="grid lg:grid-cols-3 gap-8">
+            
+            {/* Right Column: History & Books */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Previous Attempts Card */}
+              <div className="bg-[#112240] rounded-[40px] border border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight">آخر محاولات الاختبار</h2>
+                    <p className="text-slate-500 font-medium mt-1">تتبع رحلة تطور شخصيتك عبر الزمن</p>
+                  </div>
+                  <History className="w-8 h-8 text-blue-500/30" />
+                </div>
+
+                <div className="space-y-4">
+                  {attempts.length === 0 ? (
+                    <div className="py-12 flex flex-col items-center text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                      <Clock className="w-12 h-12 text-slate-600" />
+                      <p className="text-slate-400 font-bold">لم تقم بإجراء أي اختبارات بعد</p>
+                    </div>
+                  ) : (
+                    attempts.map((attempt: any) => (
+                      <div key={attempt.id} className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 p-6 rounded-3xl transition-all flex items-center justify-between gap-6">
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                            <CheckCircle2 className="w-7 h-7 text-blue-400" />
+                          </div>
+                          <div>
+                            <div className="text-lg font-black">{attempt.test?.name}</div>
+                            <div className="text-sm text-slate-500 font-medium">{new Date(attempt.createdAt).toLocaleDateString('ar-SA')}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Badge className={cn("h-8 px-4 rounded-xl font-black text-xs", attempt.isPaid ? "bg-emerald-500/20 text-emerald-400 border-none" : "bg-amber-500/20 text-amber-400 border-none")}>
+                            {attempt.isPaid ? 'مكتمل الدفع' : 'في انتظار الدفع'}
+                          </Badge>
+                          <Link href={`/results?attemptId=${attempt.id}`}>
+                            <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl bg-white/5 hover:bg-blue-500 hover:text-white transition-all">
+                              <ChevronLeft className="w-6 h-6" />
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Purchased Books Card */}
+              <div className="bg-[#112240] rounded-[40px] border border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight">مكتبتي الرقمية</h2>
+                    <p className="text-slate-500 font-medium mt-1">الكتب والمصادر التي قمت باقتنائها</p>
+                  </div>
+                  <ShoppingBag className="w-8 h-8 text-purple-500/30" />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
+                  {books.length === 0 ? (
+                    <div className="sm:col-span-2 py-12 flex flex-col items-center text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                      <BookOpen className="w-12 h-12 text-slate-600" />
+                      <p className="text-slate-400 font-bold">لا توجد كتب مشتراة حتى الآن</p>
+                      <Link href="/test-library">
+                        <Button variant="link" className="text-blue-400 font-black">تصفح المتجر الآن</Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    books.map((book: any) => (
+                      <div key={book.id} className="bg-white/5 border border-white/5 p-6 rounded-3xl hover:border-purple-500/30 transition-all flex flex-col gap-5">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-20 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 border border-white/5 shadow-inner">
+                            <BookOpen className="w-8 h-8 text-purple-400" />
+                          </div>
+                          <div>
+                            <div className="font-black text-lg line-clamp-1">{book.title}</div>
+                            <div className="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1">نسخة رقمية (PDF)</div>
+                          </div>
+                        </div>
+                        <Button className="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 font-bold flex items-center gap-2">
+                          <Download className="w-4 h-4" />
+                          تحميل الكتاب
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Left Column: Quick Actions & Profile */}
+            <div className="space-y-8">
+              <Card className="bg-[#112240] border-white/5 rounded-[40px] p-8 shadow-2xl space-y-8 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full" />
+                
+                <div className="flex items-center gap-3 relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
+                    <UserIcon className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <h3 className="text-2xl font-black tracking-tight">الملف الشخصي</h3>
+                </div>
+
+                <div className="space-y-6 relative z-10">
+                  <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">الاسم بالكامل</div>
+                      <div className="font-black text-lg text-white">{dbUser?.name}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">رقم الجوال</div>
+                      <div className="font-bold text-slate-300 tracking-wider" dir="ltr">{dbUser?.phone || '---'}</div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">البريد الإلكتروني</div>
+                      <div className="font-bold text-slate-300 italic opacity-80">{dbUser?.email || 'لم يتم الربط'}</div>
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={handleOpenEdit}
+                    className="w-full h-14 bg-white/5 border border-white/10 hover:bg-white text-white hover:text-[#0A1A3B] font-black text-lg rounded-2xl transition-all flex items-center gap-2"
+                  >
+                    <Edit3 className="w-5 h-5" />
+                    تعديل البيانات
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Support Card */}
+              <div className="bg-gradient-to-br from-[#112240] to-[#1a2c4d] rounded-[40px] p-8 border border-white/5 shadow-2xl relative group cursor-pointer hover:border-blue-500/30 transition-all overflow-hidden">
+                <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-blue-500/10 blur-3xl rounded-full" />
+                <div className="space-y-4 relative z-10">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
+                    <Settings className="w-6 h-6 animate-spin-slow" />
+                  </div>
+                  <h3 className="text-xl font-black">الدعم والمساعدة</h3>
+                  <p className="text-slate-400 font-medium leading-relaxed">تواجه مشكلة في الاختبار أو تحميل التقارير؟ فريقنا متواجد لخدمتك دائماً.</p>
+                  <Button variant="link" className="text-blue-400 p-0 font-black flex items-center gap-2">
+                    تواصل معنا <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </Container>
+      </section>
 
       <Footer />
 
-      {/* Edit Profile Modal */}
+      {/* Modern Redesigned Dialog */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border dark:border-slate-800 border-0 shadow-2xl rounded-xl" dir="rtl">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-              تعديل بيانات الملف الشخصي
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-2xl bg-[#112240] border-none shadow-2xl rounded-[32px] overflow-hidden p-0" dir="rtl">
+          <div className="bg-[#15283c] p-8 text-white">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
+                <Edit3 className="w-6 h-6 text-[#ff5722]" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-black tracking-tight">تطوير ملفك التعريفي</DialogTitle>
+                <p className="text-white/60 font-medium mt-1">قم بتعديل بياناتك المسجلة لدينا</p>
+              </div>
+            </div>
+          </div>
 
-          <div className="space-y-6 py-6">
-            <div className="space-y-3">
-              <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">الاسم بالكامل</Label>
+          <div className="p-8 space-y-6">
+            <div className="space-y-2">
+              <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الاسم الثلاثي *</Label>
               <Input
                 value={editName}
                 onChange={e => setEditName(e.target.value)}
-                placeholder="أدخل اسمك الجديد..."
-                className="text-right h-12 px-4 rounded-md bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 focus:border-[#2ba8e0] font-medium"
+                className="h-14 px-6 bg-white/5 border-white/10 rounded-2xl text-white font-bold text-lg focus:ring-blue-500/50"
               />
             </div>
-
+            
             <div className="grid sm:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">البريد الإلكتروني</Label>
-                <Input
-                  type="email"
-                  value={editEmail}
-                  onChange={e => setEditEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="text-right h-12 px-4 rounded-md bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 focus:border-[#2ba8e0] font-medium"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-sm font-bold text-slate-700 dark:text-slate-300">رقم الهاتف</Label>
+              <div className="space-y-2">
+                <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الجوال</Label>
                 <Input
                   value={editPhone}
                   onChange={e => setEditPhone(e.target.value)}
-                  placeholder="05xxxxxxxx"
-                  className="text-right h-12 px-4 rounded-md bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700 focus:border-[#2ba8e0] font-medium"
                   dir="ltr"
+                  className="h-14 px-6 bg-white/5 border-white/10 rounded-2xl text-white font-bold text-lg focus:ring-blue-500/50 text-right"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الإيميل</Label>
+                <Input
+                  value={editEmail}
+                  onChange={e => setEditEmail(e.target.value)}
+                  className="h-14 px-6 bg-white/5 border-white/10 rounded-2xl text-white font-bold text-lg focus:ring-blue-500/50"
                 />
               </div>
             </div>
           </div>
 
-          <DialogFooter className="flex flex-col sm:flex-row-reverse gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+          <DialogFooter className="p-8 pt-0 flex flex-col sm:flex-row-reverse gap-4">
             <Button
               onClick={handleUpdateProfile}
               disabled={isUpdating}
-              className="w-full sm:w-auto h-12 px-8 rounded-md bg-[#2ba8e0] hover:bg-[#1f8ebd] text-white font-bold shadow-sm"
+              className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-[#ff5722] hover:bg-[#e64a19] text-white font-black shadow-xl shadow-orange-500/20"
             >
-              {isUpdating ? (
-                <div className="flex items-center gap-2">
-                  <LoadingSpinner size="sm" />
-                  <span>جاري الافظ...</span>
-                </div>
-              ) : (
-                'حفظ التعديلات'
-              )}
+              {isUpdating ? <LoadingSpinner size="sm" /> : 'تـأكيد الـتعديل'}
             </Button>
-            <Button
-              variant="outline"
+            <Button 
+              variant="ghost" 
               onClick={() => setIsEditModalOpen(false)}
-              className="w-full sm:w-auto h-12 px-6 rounded-md text-slate-600 dark:text-slate-300 border-gray-300 dark:border-slate-700 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 dark:bg-slate-900"
+              className="w-full sm:w-auto h-14 px-8 rounded-2xl text-slate-400 font-bold hover:bg-white/5"
             >
               إلغاء
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </main>
+    </div>
+  )
+}
+
+function History(props: any) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg>
+  )
+}
+
+function Badge({ children, className }: any) {
+  return (
+    <span className={cn("inline-flex items-center border p-1", className)}>
+      {children}
+    </span>
   )
 }

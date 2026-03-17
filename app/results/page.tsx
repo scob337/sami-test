@@ -13,6 +13,8 @@ import {
 import { useRouter } from 'next/navigation'
 import { useMemo, useEffect, useState } from 'react'
 import { useAuthStore } from '@/lib/store/auth-store'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 const TRAIT_COLORS: Record<string, string> = {
   'WISE': 'bg-purple-500',
@@ -24,111 +26,152 @@ const TRAIT_COLORS: Record<string, string> = {
   'SPONTANEOUS': 'bg-amber-500',
 }
 
-const PERSONALITY_TYPES = [
-  { code: 'ASSERTIVE', name: 'الحازم', description: 'قائد طبيعي ومبادر، يمتلك رؤية واضحة وقدرة على اتخاذ القرارات الصعبة.' },
-  { code: 'PRECISE', name: 'المدقق', description: 'منظم ويهتم بالتفاصيل، يسعى دائماً للإتقان والجودة في كل عمل.' },
-  { code: 'CALM', name: 'الهادئ', description: 'هادئ ومتزن ومستمع جيد، يفضل الاستقرار والانسجام في محيطه.' },
-  { code: 'WISE', name: 'الحكيم', description: 'عميق التفكير ورزين، يمتلك بصيرة نافذة وقدرة على فهم الأمور بعمق.' },
-  { code: 'SPONTANEOUS', name: 'العفوي', description: 'مبدع، حيوي ومحب للمغامرة، يكره الروتين ويبحث دائماً عن التجديد.' },
-  { code: 'OPEN', name: 'المنفتح', description: 'اجتماعي وودود بجاذبية طبيعية، يستمتع بالتواصل مع الآخرين وبناء العلاقات.' },
-  { code: 'THINKER', name: 'المفكر', description: 'تحليلي ومنطقي، يعتمد على البيانات والعقل في اتخاذ قراراته وفهم الحياة.' },
-]
-
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 
+import { PERSONALITY_DETAILED_DATA } from '@/lib/constants/personality-data'
+
 export default function ResultsPage() {
   const router = useRouter()
-  const { result } = useTestStore()
-  const { user } = useAuthStore()
+  const { result, setResult } = useTestStore()
+  const { user, loading: authLoading } = useAuthStore()
   
-  const { data: reportData } = useSWR(
-    result?.attemptId ? `/api/test/report?attemptId=${result.attemptId}` : null,
+  // Get attemptId from URL as fallback
+  const [urlAttemptId, setUrlAttemptId] = useState<string | null>(null)
+  
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    setUrlAttemptId(params.get('attemptId'))
+  }, [])
+
+  // Fetch results if not in store
+  const { data: dbResult, isLoading: isLoadingResult } = useSWR<any>(
+    (!result && urlAttemptId) ? `/api/test/result?attemptId=${urlAttemptId}` : null,
+    fetcher
+  )
+
+  useEffect(() => {
+    if (dbResult && !result) {
+      setResult({
+        attemptId: dbResult.attemptId,
+        primaryPattern: dbResult.primaryPattern,
+        secondaryPattern: dbResult.secondaryPattern,
+        scores: dbResult.scoresJson,
+        summary_ar: '', // API could be expanded to return this if needed
+        summary_en: ''
+      })
+    }
+  }, [dbResult, result, setResult])
+
+  const { data: reportData } = useSWR<any>(
+    (result?.attemptId || urlAttemptId) ? `/api/test/report?attemptId=${result?.attemptId || urlAttemptId}` : null,
     fetcher
   )
 
   const report = reportData?.reportText
 
+  // Protection: Redirect to home if no result and not loading
+  useEffect(() => {
+    if (!authLoading && !isLoadingResult && !result && !urlAttemptId) {
+      router.push('/')
+    }
+  }, [result, urlAttemptId, isLoadingResult, authLoading, router])
+
   const currentType = useMemo(() => {
-    if (!result) return PERSONALITY_TYPES[3] // Default to Wise for testing if empty
-    return PERSONALITY_TYPES.find(
-      (t) => t.code === (result.primaryPattern || '').toUpperCase()
-    ) || PERSONALITY_TYPES[3]
+    const code = (result?.primaryPattern || '').toUpperCase()
+    return PERSONALITY_DETAILED_DATA[code] || PERSONALITY_DETAILED_DATA['WISE']
   }, [result?.primaryPattern])
 
   const secondaryType = useMemo(() => {
-    if (!result) return PERSONALITY_TYPES[5] // Default to Open
-    // Just sort scores and grab the second one
-    const sorted = Object.entries(result.scores || {}).sort(([, a], [, b]) => (b as number) - (a as number))
+    if (!result?.scores) return PERSONALITY_DETAILED_DATA['OPEN']
+    const sorted = Object.entries(result.scores).sort(([, a], [, b]) => (b as number) - (a as number))
     if (sorted.length > 1) {
-      return PERSONALITY_TYPES.find(t => t.code === sorted[1][0]) || PERSONALITY_TYPES[5]
+      const code = sorted[1][0].toUpperCase()
+      return PERSONALITY_DETAILED_DATA[code] || PERSONALITY_DETAILED_DATA['OPEN']
     }
-    return PERSONALITY_TYPES[5]
+    return PERSONALITY_DETAILED_DATA['OPEN']
   }, [result?.scores])
 
   const sortedScores = useMemo(() => {
-    if (!result?.scores) {
-      // Dummy data matching mockup
-      return [
-        ['WISE', 9], ['OPEN', 9], ['PRECISE', 7], ['THINKER', 7], 
-        ['ASSERTIVE', 6], ['CALM', 5], ['SPONTANEOUS', 3]
-      ]
-    }
+    if (!result?.scores) return []
     return Object.entries(result.scores)
       .sort(([, a], [, b]) => (b as number) - (a as number))
   }, [result?.scores])
 
-  if (!result && false) { // Removed forced return for testing mockup styles if no result
+  if (authLoading || isLoadingResult || (!result && urlAttemptId)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen flex items-center justify-center bg-[#0A1A3B]">
+        <LoadingSpinner size="lg" className="text-blue-500" />
       </div>
     )
   }
 
-  // Helper date for mockup
+  if (!result) return null;
+
   const dateStr = new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
-    <main className="min-h-screen flex flex-col bg-slate-50" dir="rtl">
+    <main className="min-h-screen flex flex-col bg-[#0A1A3B]" dir="rtl">
+      <Header />
       
       {/* Deep Blue Header Area */}
-      <div className="bg-[#0A1A3B] pt-12 pb-32 px-4 relative">
+      <div className="bg-[#0A1A3B] pt-32 pb-32 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(25,75,155,0.4)_0%,transparent_60%)]" />
+        <div className="absolute top-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-[150px] opacity-20" />
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-purple-600 rounded-full blur-[150px] opacity-20" />
         
-        <div className="max-w-3xl mx-auto text-center relative z-10 space-y-2 mt-8">
-          <p className="text-blue-200/70 text-sm">{dateStr}</p>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
-            نتيجة {user && 'name' in user ? (user as any).name : 'شخصيتك'}
-          </h1>
+        <div className="max-w-3xl mx-auto text-center relative z-10 space-y-4">
+          <motion.p 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="text-blue-400 font-bold uppercase tracking-widest text-sm"
+          >
+            {dateStr}
+          </motion.p>
+          <motion.h1 
+            initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+            className="text-4xl md:text-5xl font-black text-white leading-tight"
+          >
+            تحليل شخصية {user?.user_metadata?.fullName || user?.email?.split('@')[0] || 'المبدع'}
+          </motion.h1>
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md"
+          >
+             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+             <span className="text-blue-200 text-xs font-bold">التقرير جاهز الآن</span>
+          </motion.div>
         </div>
       </div>
 
       {/* Main Content Overlapping Header */}
       <div className="flex-1 px-4 -mt-20 relative z-20 pb-24">
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-8">
           
           {/* Top Cards (Primary & Secondary) */}
-          <div className="grid grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <motion.div 
-              initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-              className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center space-y-3"
+              initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}
+              className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:bg-white/10 transition-all cursor-default"
             >
-              <Crown className="w-8 h-8 text-purple-500" />
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Crown className="w-8 h-8 text-purple-400" />
+              </div>
               <div>
-                <p className="text-xs md:text-sm text-slate-500 mb-1">النمط الأساسي</p>
-                <h2 className="text-xl md:text-2xl font-black text-slate-900">{currentType.name}</h2>
+                <p className="text-xs font-black text-purple-400 uppercase tracking-widest mb-1">النمط الأساسي</p>
+                <h2 className="text-3xl font-black text-white">{currentType.name}</h2>
               </div>
             </motion.div>
 
             <motion.div 
-              initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}
-              className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center space-y-3"
+              initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}
+              className="bg-white/5 backdrop-blur-xl rounded-[32px] p-8 border border-white/10 shadow-2xl flex flex-col items-center justify-center text-center space-y-4 group hover:bg-white/10 transition-all cursor-default"
             >
-              <Star className="w-8 h-8 text-pink-500" />
+              <div className="w-16 h-16 rounded-2xl bg-pink-500/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                <Star className="w-8 h-8 text-pink-400" />
+              </div>
               <div>
-                <p className="text-xs md:text-sm text-slate-500 mb-1">النمط الثانوي</p>
-                <h2 className="text-xl md:text-2xl font-black text-slate-900">{secondaryType.name}</h2>
+                <p className="text-xs font-black text-pink-400 uppercase tracking-widest mb-1">النمط الثانوي</p>
+                <h2 className="text-3xl font-black text-white">{secondaryType.name}</h2>
               </div>
             </motion.div>
           </div>
@@ -136,27 +179,29 @@ export default function ResultsPage() {
           {/* Traits Distribution Chart */}
           <motion.div 
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl md:rounded-3xl p-6 md:p-8 shadow-sm border border-slate-100"
+            className="bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl"
           >
-            <h3 className="text-lg font-bold text-slate-900 mb-6 text-right">توزيع الأنماط</h3>
+            <div className="flex items-center justify-between mb-10">
+              <h3 className="text-2xl font-black text-white">توزيع الأنماط</h3>
+              <div className="text-blue-400 bg-blue-400/10 px-4 py-2 rounded-xl text-xs font-black">تحليل حسابي دقيق</div>
+            </div>
             
-            <div className="space-y-4">
-              {sortedScores.map(([typeCode, score], index) => {
-                const trait = PERSONALITY_TYPES.find(t => t.code === typeCode) || { name: typeCode };
-                const colorClass = TRAIT_COLORS[typeCode as string] || 'bg-slate-500';
-                // Calculate width percentage relative to max score (13)
-                const widthPercent = Math.min(100, ((score as number) / 13) * 100);
+            <div className="space-y-6">
+              {sortedScores.map(([typeCode, score]: [string, any], index: number) => {
+                const traitData = PERSONALITY_DETAILED_DATA[typeCode.toUpperCase()] || { name: typeCode };
+                const colorClass = (TRAIT_COLORS as any)[typeCode.toUpperCase()] || 'bg-slate-500';
+                const widthPercent = Math.min(100, ((score as number) / 15) * 100);
 
                 return (
-                  <div key={typeCode} className="flex flex-col gap-1">
-                    <div className="flex justify-between items-center text-sm font-medium">
-                      <span className="text-slate-500">{score as number}</span>
-                      <span className="text-slate-700">{trait.name}</span>
+                  <div key={typeCode} className="group">
+                    <div className="flex justify-between items-center text-sm font-bold mb-2">
+                       <span className="text-white bg-white/5 px-3 py-1 rounded-lg group-hover:bg-white/10 transition-colors">{score as number} نقطة</span>
+                       <span className="text-slate-300">{traitData.name}</span>
                     </div>
-                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex justify-end">
+                    <div className="w-full bg-white/5 h-4 rounded-full overflow-hidden flex justify-end p-0.5 border border-white/5">
                       <motion.div 
-                        initial={{ width: 0 }} animate={{ width: `${widthPercent}%` }} transition={{ duration: 1, delay: 0.5 + index * 0.1 }}
-                        className={`h-full rounded-full ${colorClass}`}
+                        initial={{ width: 0 }} animate={{ width: `${widthPercent}%` }} transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 + index * 0.1 }}
+                        className={`h-full rounded-full ${colorClass} shadow-[0_0_15px_rgba(255,255,255,0.1)]`}
                       />
                     </div>
                   </div>
@@ -165,112 +210,68 @@ export default function ResultsPage() {
             </div>
           </motion.div>
 
-          {/* Characteristics Cards List */}
-          <div className="space-y-4 pt-4">
+          {/* Detailed Analysis Sections */}
+          <div className="space-y-6">
             
-            {/* Description */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">وصف مختصر</h4>
-                <Star className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                شخصية حكيمة ومتأملة تتميز بالعمق في التفكير والنظرة الشاملة للأمور.
-              </p>
-            </motion.div>
-
-            {/* Strengths */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">نقاط القوة</h4>
-                <CheckCircle2 className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                الحكمة والبصيرة، النظرة الشاملة، القدرة على تقديم النصح، التفكير الاستراتيجي.
-              </p>
-            </motion.div>
-
-            {/* Weaknesses */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">نقاط التحسين</h4>
-                <AlertTriangle className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                الإفراط في التحليل، صعوبة اتخاذ قرارات سريعة، العزلة أحياناً.
-              </p>
-            </motion.div>
-
-            {/* Relationships */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">العلاقات</h4>
-                <Heart className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                تقدم عمقاً فكرياً لعلاقاتك. تحتاج لشريك يقدر تأملاتك ويشاركك الحوار.
-              </p>
-            </motion.div>
-
-            {/* Work */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">بيئة العمل</h4>
-                <Briefcase className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                مناسب للأدوار الاستشارية والاستراتيجية. تتفوق في التخطيط طويل المدى.
-              </p>
-            </motion.div>
-
-            {/* Tips */}
-            <motion.div initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-white rounded-xl md:rounded-2xl p-6 shadow-sm border border-slate-100 text-right"
-            >
-              <div className="flex items-center justify-end gap-3 mb-3">
-                <h4 className="font-bold text-slate-900 text-lg">نصائح للتطوير</h4>
-                <Lightbulb className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="text-slate-500 leading-relaxed font-medium">
-                وازن بين التأمل والعمل. ولا تدع التحليل يمنعك من التقدم.
-              </p>
-            </motion.div>
+            {[
+              { id: 'desc', title: 'وصف الشخصية', text: currentType.description, icon: Star, color: 'text-blue-400' },
+              { id: 'strengths', title: 'نقاط القوة', text: currentType.strengths, icon: CheckCircle2, color: 'text-emerald-400' },
+              { id: 'weaknesses', title: 'نقاط التحسين', text: currentType.weaknesses, icon: AlertTriangle, color: 'text-amber-400' },
+              { id: 'relationships', title: 'في العلاقات', text: currentType.relationships, icon: Heart, color: 'text-pink-400' },
+              { id: 'work', title: 'بيئة العمل', text: currentType.work, icon: Briefcase, color: 'text-indigo-400' },
+              { id: 'tips', title: 'نصائح للتطوير', text: currentType.tips, icon: Lightbulb, color: 'text-amber-300' },
+            ].map((section, idx) => (
+              <motion.div 
+                key={section.id}
+                initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }}
+                className="bg-[#112240] rounded-[32px] p-8 border border-white/5 shadow-xl hover:border-white/10 transition-all group"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={cn("w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform", section.color.replace('text', 'bg').replace('400', '400/10'))}>
+                    <section.icon className={cn("w-6 h-6", section.color)} />
+                  </div>
+                  <h4 className="text-xl font-black text-white">{section.title}</h4>
+                </div>
+                <p className="text-slate-300 leading-relaxed font-medium text-lg pr-4 border-r-2 border-white/5">
+                  {section.text}
+                </p>
+              </motion.div>
+            ))}
             
           </div>
 
           {/* Premium Unlocked Banner */}
           <motion.div 
             initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-            className="mt-12 bg-[#F59E0B] rounded-2xl md:rounded-3xl p-8 md:p-12 text-center"
+            className="mt-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-[48px] p-10 md:p-16 text-center shadow-2xl shadow-blue-500/20 relative overflow-hidden"
           >
-            <div className="flex justify-center mb-6">
-              <div className="w-16 h-16 rounded-full border-2 border-slate-900/10 flex items-center justify-center">
-                 <Lock className="w-8 h-8 text-slate-900" />
+            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_0%,transparent_70%)]" />
+            
+            <div className="relative z-10 space-y-6">
+              <div className="flex justify-center mb-8">
+                <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
+                   <Lock className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-white">هذا التقرير هو البداية فقط!</h2>
+              <p className="text-blue-100 font-bold text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+                للحصول على التقرير الكامل الذي يتضمن تحليلاً معمقاً لكل جانب من جوانب شخصيتك، مع خطة تطوير مفصلة ونصائح عملية مخصصة لك فقط.
+              </p>
+              <div className="pt-8">
+                <Link href="/checkout">
+                  <Button className="h-16 px-12 rounded-2xl bg-white text-blue-600 hover:bg-blue-50 font-black text-xl shadow-[0_10px_30px_rgba(0,0,0,0.1)] transition-transform hover:scale-105 active:scale-95 flex items-center gap-3 mx-auto">
+                    <Crown className="w-6 h-6" />
+                    احصل على التقرير الشامل الآن
+                  </Button>
+                </Link>
+                <p className="text-blue-200/60 text-xs font-bold mt-4 uppercase tracking-[3px]">أكثر من 50 صفحة من التحليل المخصص</p>
               </div>
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-slate-900 mb-4">هذا التقرير مختصر وغير مكتمل!</h2>
-            <p className="text-slate-900/80 font-medium mb-8 max-w-lg mx-auto">
-              للحصول على التقرير الكامل الذي يتضمن تحليلاً معمقاً لشخصيتك، وخطة تطوير مفصلة، ونصائح مخصصة - احصل على الكتاب الكامل.
-            </p>
-            <Link href="/checkout">
-              <button className="bg-slate-900 text-white hover:bg-slate-800 transition-colors px-8 py-4 rounded-xl font-bold text-lg md:text-xl shadow-xl w-full sm:w-auto cursor-pointer">
-                احصل على التقرير الكامل
-              </button>
-            </Link>
           </motion.div>
 
         </div>
       </div>
+      <Footer />
     </main>
   )
 }

@@ -28,29 +28,32 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
   const pathname = usePathname()
 
   return (
-    <aside className={cn("w-72 bg-[#15283c] text-white h-full flex flex-col z-50", className)} dir="ltr">
+    <aside className={cn("w-72 bg-[#15283c] text-white h-full flex flex-col z-50", className)} dir="rtl">
       {/* Profile Section */}
-      <div className="p-6 bg-[#214162] mb-6">
+      <div className="p-6 bg-[#214162] mb-6 border-b border-white/5">
         <div className="flex items-center gap-4">
           <div className="relative">
-
-            <div className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#214162]" />
+            <div className="w-12 h-12 rounded-xl bg-[#ff5722] flex items-center justify-center font-black text-xl shadow-lg">
+              A
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-[#214162]" />
           </div>
           <div>
-            <h3 className="font-bold text-lg leading-tight">مسؤول النظام</h3>
+            <h3 className="font-black text-lg leading-tight tracking-tight">مسؤول النظام</h3>
             <div className="flex items-center gap-1.5 mt-1">
-              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-              <span className="text-emerald-400 text-xs font-semibold uppercase tracking-wider">متصل</span>
+              <span className="text-emerald-400 text-[10px] font-black uppercase tracking-[1.5px] border border-emerald-500/30 px-2 py-0.5 rounded-md">
+                متصل الآن
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-4 mb-4">
-        <h4 className="text-[#ff5722] text-xs font-black uppercase tracking-[2px] mb-4 px-2 text-right">عام</h4>
+      <div className="px-6 mb-4">
+        <h4 className="text-[#ff5722] text-[11px] font-black uppercase tracking-[3px] opacity-70">القائمة الرئيسية</h4>
       </div>
 
-      <nav className="flex-1 px-2 space-y-1 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 px-3 space-y-1.5 overflow-y-auto scrollbar-hide">
         {menuItems.map((item) => {
           const isActive = pathname === item.href
           return (
@@ -59,26 +62,29 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
               href={item.href}
               onClick={onItemClick}
               className={cn(
-                "flex items-center gap-4 px-4 py-3 rounded transition-all duration-200 group relative",
+                "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
                 isActive
-                  ? "bg-[#ff5722] text-white shadow-lg"
+                  ? "bg-[#ff5722] text-white shadow-xl shadow-orange-500/20"
                   : "text-[#99abb4] hover:bg-[#214162] hover:text-white"
               )}
             >
-              <item.icon className={cn("w-5 h-5", isActive ? "text-white" : "text-[#ff9800] group-hover:text-white")} />
-              <span className="text-[14px] font-medium">{item.label}</span>
+              <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-[#ffa726]")} />
+              <span className="text-[15px] font-black tracking-tight">{item.label}</span>
               {isActive && (
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-l-full" />
+                <motion.div 
+                  layoutId="active-nav-indicator"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full" 
+                />
               )}
             </Link>
           )
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5 bg-[#214162]">
-        <button className="flex items-center gap-4 px-4 py-3 w-full rounded text-[#99abb4] hover:text-white hover:bg-white/5 transition-all duration-200 group">
-          <LogOut className="w-5 h-5 text-[#ff9800] group-hover:text-white" />
-          <span className="text-[14px] font-medium">تسجيل الخروج</span>
+      <div className="p-6 mt-auto border-t border-white/5">
+        <button className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-[#99abb4] hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border-2 border-transparent transition-all duration-300 group">
+          <LogOut className="w-5 h-5 text-[#ff9800] group-hover:text-red-500" />
+          <span className="text-[15px] font-black tracking-tight group-hover:text-red-500">خروج آمن</span>
         </button>
       </div>
     </aside>

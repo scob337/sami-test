@@ -1,12 +1,9 @@
-export const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) {
-    const error = new Error('An error occurred while fetching the data.')
-    // Attach extra info to the error object.
-    const info = await res.json()
-    ;(error as any).info = info
-    ;(error as any).status = res.status
+import api from './api'
+
+export const fetcher = async <T = any>(url: string): Promise<T> => {
+  try {
+    return await api.get<T>(url)
+  } catch (error: any) {
     throw error
   }
-  return res.json()
 }

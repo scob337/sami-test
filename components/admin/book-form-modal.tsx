@@ -98,7 +98,7 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
           </div>
         </div>
 
-        <div className="p-8 space-y-6">
+        <div className="max-h-[70vh] overflow-y-auto p-8 space-y-6 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
           <div className="space-y-2.5">
             <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">عنوان الكتاب *</Label>
             <div className="relative group">

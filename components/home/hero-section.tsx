@@ -2,9 +2,13 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/lib/store/auth-store'
 import { Brain, Sparkles, Lock, Timer, BarChart3 } from 'lucide-react'
 
 export function HeroSection() {
+    const router = useRouter()
+    const { user: authUser } = useAuthStore()
     return (
         <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden text-center px-4" dir="rtl">
             {/* Deep Blue Background Gradient */}
@@ -57,12 +61,20 @@ export function HeroSection() {
                     transition={{ duration: 0.5, delay: 0.4 }}
                     className="pt-6"
                 >
-                    <Link href="/test">
-                        <button className="flex items-center justify-center gap-3 bg-[#10B981] hover:bg-[#059669] text-white px-10 py-5 rounded-2xl font-bold text-lg md:text-xl transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-900/20 cursor-pointer">
-                            ابدأ الاختبار
-                            <Sparkles className="w-5 h-5" />
-                        </button>
-                    </Link>
+                    <button 
+                        onClick={() => {
+                            if (authUser) {
+                                router.push('/test')
+                            } else {
+                                // Store the intended destination to return after login
+                                router.push('/auth/login?callbackUrl=/test')
+                            }
+                        }}
+                        className="flex items-center justify-center gap-3 bg-[#10B981] hover:bg-[#059669] text-white px-10 py-5 rounded-2xl font-bold text-lg md:text-xl transition-all hover:scale-105 active:scale-95 shadow-xl shadow-emerald-900/20 cursor-pointer"
+                    >
+                        ابدأ الاختبار
+                        <Sparkles className="w-5 h-5" />
+                    </button>
                 </motion.div>
 
                 {/* Features Badges */}

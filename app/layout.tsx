@@ -10,6 +10,7 @@ const cairo = Cairo({
 import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import { ThemeProvider } from '@/components/theme-provider'
+import { AuthInitializer } from '@/components/providers/auth-initializer'
 import './globals.css'
 
 const geist = Geist({
@@ -81,7 +82,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
@@ -93,7 +94,9 @@ export default function RootLayout({
           </div>
 
           <div className="relative z-10 flex flex-col min-h-screen">
-            {children}
+            <AuthInitializer>
+              {children}
+            </AuthInitializer>
           </div>
 
           <Toaster position="top-center" richColors />

@@ -22,10 +22,16 @@ export async function GET(request: Request) {
       orderBy: { sortOrder: 'asc' },
     })
 
-    // Randomize questions if requested
-    const shuffled = [...questions].sort(() => Math.random() - 0.5)
+    // Randomize options for each question for security/anti-cheating
+    const shuffledQuestions = questions.map(q => ({
+      ...q,
+      options: [...q.options].sort(() => Math.random() - 0.5)
+    }))
 
-    return NextResponse.json(shuffled)
+    // Randomize questions order
+    const finalShuffled = [...shuffledQuestions].sort(() => Math.random() - 0.5)
+
+    return NextResponse.json(finalShuffled)
   } catch (error) {
     console.error('Error fetching questions:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

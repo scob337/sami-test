@@ -5,39 +5,85 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
+    const email = searchParams.get('email')
+    const phone = searchParams.get('phone')
 
-    if (!userId || isNaN(parseInt(userId))) {
-      return NextResponse.json({ error: 'Valid userId is required' }, { status: 400 })
+    if (!userId && !email && !phone) {
+      return NextResponse.json({ error: 'identification is required' }, { status: 400 })
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: parseInt(userId) },
-      include: {
-        attempts: {
-          where: { status: 'COMPLETED' },
-          include: {
-            result: true,
-            test: {
-              select: {
-                name: true,
+    let user;
+    const isNumericId = userId && /^\d+$/.test(userId)
+    const numericId = isNumericId ? parseInt(userId) : NaN
+    
+    if (isNumericId && !isNaN(numericId)) {
+      user = await prisma.user.findUnique({
+        where: { id: numericId },
+        include: {
+          attempts: {
+            where: { status: 'COMPLETED' },
+            include: {
+              result: true,
+              test: {
+                select: { name: true }
               }
-            }
+            },
+            orderBy: { completedAt: 'desc' },
           },
-          orderBy: {
-            completedAt: 'desc',
+          payments: {
+            where: { status: 'COMPLETED' },
+            include: { book: true },
+            orderBy: { createdAt: 'desc' },
           },
         },
-        payments: {
-          where: { status: 'COMPLETED' },
+      })
+    }
+
+    if (!user && ((email && email.trim() !== '') || (phone && phone.trim() !== ''))) {
+      const emailVal = email?.trim()
+      const phoneVal = phone?.trim()
+      
+      const orConditions = []
+      if (emailVal) orConditions.push({ email: emailVal })
+      if (phoneVal) orConditions.push({ phone: phoneVal })
+
+      user = await prisma.user.findFirst({
+        where: { OR: orConditions },
+        include: {
+          attempts: {
+            where: { status: 'COMPLETED' },
+            include: {
+              result: true,
+              test: {
+                select: { name: true }
+              }
+            },
+            orderBy: { completedAt: 'desc' },
+          },
+          payments: {
+            where: { status: 'COMPLETED' },
+            include: { book: true },
+            orderBy: { createdAt: 'desc' },
+          },
+        },
+      })
+
+      // If user not found in Prisma but we have identifiers, create them (Safety sync)
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            email: emailVal || undefined,
+            phone: phoneVal || '',
+            name: emailVal ? emailVal.split('@')[0] : 'User',
+            isAdmin: false
+          },
           include: {
-            book: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-      },
-    })
+            attempts: true,
+            payments: { include: { book: true } }
+          }
+        })
+      }
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })

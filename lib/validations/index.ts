@@ -2,10 +2,10 @@ import { z } from 'zod'
 
 // Auth Schemas
 export const registerSchema = z.object({
-  email: z.string().email('البريد الإلكتروني غير صحيح'),
+  email: z.string().email('البريد الإلكتروني غير صحيح').optional().or(z.literal('')),
   password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
   confirmPassword: z.string(),
-  phone: z.string().min(10, 'رقم الهاتف غير صحيح'),
+  phone: z.string().min(10, 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل'),
   fullName: z.string().min(2, 'الاسم الكامل مطلوب'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'كلمات المرور غير متطابقة',

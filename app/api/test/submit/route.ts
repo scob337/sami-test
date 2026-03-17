@@ -37,17 +37,19 @@ export async function POST(request: Request) {
     validUserId = user.id
 
     // 2. Calculate scores for each pattern
+    // The user's rule: Option index (1-7) maps to specific pattern.
+    // We already verified via verify-data.ts that each option has exactly one PatternScore of 1.
+    // So we can sum them up normally from the optionScore links.
     const patternScores: Record<PatternType, number> = {
       [PatternType.ASSERTIVE]: 0,
       [PatternType.PRECISE]: 0,
       [PatternType.CALM]: 0,
       [PatternType.WISE]: 0,
+      [PatternType.THINKER]: 0,
       [PatternType.SPONTANEOUS]: 0,
       [PatternType.OPEN]: 0,
-      [PatternType.THINKER]: 0,
     }
 
-    const optionIds = answers.map((a: any) => a.answerId)
     const questionIds = answers.map((a: any) => a.questionId)
 
     // Verify all questionIds exist in the DB to avoid P2003
@@ -65,6 +67,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No valid answers provided' }, { status: 400 })
     }
 
+    const optionIds = validAnswers.map((a: any) => a.answerId)
+
     const scores = await prisma.optionScore.findMany({
       where: {
         optionId: { in: optionIds },
@@ -80,14 +84,14 @@ export async function POST(request: Request) {
       .sort((a, b) => b[1] - a[1])
 
     const primaryPattern = sortedPatterns[0][0]
-    const secondaryPattern = sortedPatterns[1][0]
+    const secondaryPattern = sortedPatterns.length > 1 ? sortedPatterns[1][0] : primaryPattern
 
     const summaryAr = `نمطك الأساسي هو: ${primaryPattern}. وأنت تميل أيضاً إلى: ${secondaryPattern}.`
 
     // 4. Save Attempt and Answers to DB
     const attempt = await prisma.attempt.create({
       data: {
-        userId: validUserId,
+        userId: user.id,
         testId: parseInt(testId),
         status: 'COMPLETED',
         completedAt: new Date(),

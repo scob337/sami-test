@@ -46,10 +46,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get user from Prisma to check admin status
-    const dbUser = await prisma.user.findUnique({
+    // Ensure user exists in Prisma and sync their metadata
+    const prismaUser = await prisma.user.upsert({
       where: { email: emailForAuth },
-      select: { isAdmin: true }
+      update: {
+        name: data.user.user_metadata?.fullName || data.user.user_metadata?.name || undefined,
+        phone: data.user.user_metadata?.phone || data.user.phone || undefined,
+      },
+      create: {
+        email: emailForAuth,
+        name: data.user.user_metadata?.fullName || data.user.user_metadata?.name || '',
+        phone: data.user.user_metadata?.phone || data.user.phone || '',
+        isAdmin: false
+      }
     })
 
     return NextResponse.json(
@@ -57,7 +66,7 @@ export async function POST(request: NextRequest) {
         message: 'تم الدخول بنجاح',
         user: {
           ...data.user,
-          isAdmin: dbUser?.isAdmin || false
+          isAdmin: prismaUser.isAdmin
         },
         session: data.session,
       },

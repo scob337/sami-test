@@ -7,7 +7,6 @@ import { LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ThemeToggle } from '@/components/theme-toggle'
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -54,11 +53,10 @@ export function Header() {
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             {user ? (
               <div className="flex items-center gap-3">
                 <Link href="/dashboard" className="hidden sm:block">
-                  <Button className="text-sm font-bold text-black dark:text-white hover:bg-secondary/10 rounded-full">
+                  <Button className="text-sm font-bold text-black dark:text-white bg-secondary/50 dark:bg-secondary rounded-full">
                     لوحة التحكم
                   </Button>
                 </Link>
@@ -129,7 +127,7 @@ export function Header() {
               {user && (
                 <Link
                   href="/dashboard"
-                  className="text-lg font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/10 p-4 rounded-xl transition-all"
+                  className="text-lg font-bold bg-blue-500 hover:bg-blue-600 text-black dark:text-white  p-4 rounded-xl transition-all"
                   onClick={() => setIsOpen(false)}
                 >
                   لوحة التحكم

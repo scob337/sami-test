@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios'
 import { toast } from 'sonner'
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  baseURL: 'api/',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

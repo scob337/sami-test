@@ -104,9 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Sign up with Supabase Auth (fallback to default flow)
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: validatedData.email || undefined,
-      phone: !validatedData.email ? validatedData.phone : undefined,
+    const signUpOptions: any = {
       password: validatedData.password,
       options: {
         data: {
@@ -114,7 +112,15 @@ export async function POST(request: NextRequest) {
           phone: validatedData.phone,
         },
       },
-    })
+    }
+
+    if (validatedData.email) {
+      signUpOptions.email = validatedData.email
+    } else {
+      signUpOptions.phone = validatedData.phone
+    }
+
+    const { data: authData, error: authError } = await supabase.auth.signUp(signUpOptions)
 
     if (authError) {
       return NextResponse.json(

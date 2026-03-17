@@ -18,11 +18,18 @@ import {
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
+interface AIPrompt {
+  id: number
+  testId: string
+  systemPrompt: string
+  reportRules: string
+}
+
 export default function PromptsPage() {
   const [selectedTest, setSelectedTest] = useState('1')
   
   const { data: testsData } = useSWR<any[]>('/api/admin/tests', fetcher)
-  const { data: promptData, isLoading: isLoadingPrompt, mutate } = useSWR(
+  const { data: promptData, isLoading: isLoadingPrompt, mutate } = useSWR<AIPrompt>(
     selectedTest ? `/api/admin/prompts?testId=${selectedTest}` : null,
     fetcher
   )

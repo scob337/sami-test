@@ -14,8 +14,36 @@ import {
 import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
 
+interface DashboardStats {
+  users: number
+  books: number
+  tests: number
+  sales: number
+}
+
+interface ChartData {
+  name: string
+  users: number
+}
+
+interface RecentUser {
+  id: string
+  name: string
+  email: string
+  createdAt: string
+  _count: {
+    attempts: number
+  }
+}
+
+interface DashboardData {
+  stats: DashboardStats
+  chartData: ChartData[]
+  recentUsers: RecentUser[]
+}
+
 export default function AdminDashboard() {
-  const { data, isLoading } = useSWR('/api/admin/dashboard/stats', fetcher)
+  const { data, isLoading } = useSWR<DashboardData>('/api/admin/dashboard/stats', fetcher)
 
   if (isLoading) {
     return (
@@ -25,7 +53,11 @@ export default function AdminDashboard() {
     )
   }
 
-  const { stats, chartData, recentUsers } = data || {}
+  const { stats, chartData, recentUsers } = data || {
+    stats: { users: 0, books: 0, tests: 0, sales: 0 },
+    chartData: [],
+    recentUsers: []
+  }
 
   return (
     <div className="space-y-8" dir="rtl">

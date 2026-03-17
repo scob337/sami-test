@@ -37,18 +37,11 @@ export async function POST(request: Request) {
     validUserId = user.id
 
     // 2. Calculate scores for each pattern
-    // The user's rule: Option index (1-7) maps to specific pattern.
-    // We already verified via verify-data.ts that each option has exactly one PatternScore of 1.
-    // So we can sum them up normally from the optionScore links.
-    const patternScores: Record<PatternType, number> = {
-      [PatternType.ASSERTIVE]: 0,
-      [PatternType.PRECISE]: 0,
-      [PatternType.CALM]: 0,
-      [PatternType.WISE]: 0,
-      [PatternType.THINKER]: 0,
-      [PatternType.SPONTANEOUS]: 0,
-      [PatternType.OPEN]: 0,
-    }
+    // Get all patterns dynamically from the enum
+    const patternScores = Object.values(PatternType).reduce((acc, curr) => {
+      acc[curr as PatternType] = 0
+      return acc
+    }, {} as Record<PatternType, number>)
 
     const questionIds = answers.map((a: any) => a.questionId)
 
@@ -68,6 +61,8 @@ export async function POST(request: Request) {
     }
 
     const optionIds = validAnswers.map((a: any) => a.answerId)
+    // Log for debugging
+    console.log(`[SUBMIT] Processing ${validAnswers.length} valid answers from ${answers.length} total. Option IDs:`, optionIds)
 
     const scores = await prisma.optionScore.findMany({
       where: {
@@ -75,18 +70,38 @@ export async function POST(request: Request) {
       },
     })
 
+    console.log('DEBUG: validAnswers:', validAnswers.length)
+    console.log('DEBUG: optionIds:', optionIds)
+    console.log('DEBUG: scores found:', scores.length)
+    console.log('DEBUG: scores details:', JSON.stringify(scores, null, 2))
+
+    console.log(`[SUBMIT] Found ${scores.length} score records in DB for these options.`)
+    if (scores.length < optionIds.length) {
+      console.warn(`[SUBMIT] MISSING SCORES: Requested ${optionIds.length} options but only found ${scores.length} score records.`)
+      // Identify which options are missing scores
+      const foundOptionIds = new Set(scores.map(s => s.optionId))
+      const missingOptionIds = optionIds.filter(id => !foundOptionIds.has(id))
+      console.warn(`[SUBMIT] Options missing scores:`, missingOptionIds)
+    }
+
     for (const score of scores) {
       patternScores[score.pattern] += score.score
     }
+    console.log('[SUBMIT] Pattern scores summary:', patternScores)
 
     // 3. Determine Primary and Secondary patterns
     const sortedPatterns = (Object.entries(patternScores) as [PatternType, number][])
       .sort((a, b) => b[1] - a[1])
 
-    const primaryPattern = sortedPatterns[0][0]
-    const secondaryPattern = sortedPatterns.length > 1 ? sortedPatterns[1][0] : primaryPattern
+    const scoredPatterns = sortedPatterns.filter(([_, score]) => score > 0)
+    
+    const primaryPattern = scoredPatterns.length > 0 ? scoredPatterns[0][0] : sortedPatterns[0][0]
+    // Only set secondary pattern if there's actually a second pattern with a score > 0
+    const secondaryPattern = scoredPatterns.length > 1 ? scoredPatterns[1][0] : undefined
 
-    const summaryAr = `نمطك الأساسي هو: ${primaryPattern}. وأنت تميل أيضاً إلى: ${secondaryPattern}.`
+    const summaryAr = secondaryPattern 
+      ? `نمطك الأساسي هو: ${primaryPattern}. وأنت تميل أيضاً إلى: ${secondaryPattern}.`
+      : `نمطك الأساسي هو: ${primaryPattern}.`
 
     // 4. Save Attempt and Answers to DB
     const attempt = await prisma.attempt.create({
@@ -98,7 +113,7 @@ export async function POST(request: Request) {
         result: {
           create: {
             primaryPattern,
-            secondaryPattern,
+            secondaryPattern: (secondaryPattern || undefined) as any,
             scoresJson: patternScores as any,
           },
         },
@@ -123,7 +138,9 @@ export async function POST(request: Request) {
       secondaryPattern,
       scores: patternScores,
       summary_ar: summaryAr,
-      summary_en: `Your primary pattern is ${primaryPattern}, and your secondary pattern is ${secondaryPattern}.`,
+      summary_en: secondaryPattern 
+        ? `Your primary pattern is ${primaryPattern}, and your secondary pattern is ${secondaryPattern}.`
+        : `Your primary pattern is ${primaryPattern}.`,
     })
 
   } catch (error) {

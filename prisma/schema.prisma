@@ -143,7 +143,7 @@ model Result {
   attempt         Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   attemptId       Int       @unique
   primaryPattern  PatternType
-  secondaryPattern PatternType
+  secondaryPattern PatternType?
   scoresJson      Json
   createdAt       DateTime  @default(now())
 

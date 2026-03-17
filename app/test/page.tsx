@@ -57,15 +57,24 @@ function TestPageContent() {
     addAnswer,
     setResult,
     setIsFinished,
+    resetTest,
   } = useTestStore()
+
+  // Ensure test is reset on mount to avoid starting from a previous state
+  useEffect(() => {
+    resetTest()
+  }, [resetTest])
 
   const submitResults = async (finalUserData: any) => {
     try {
       setIsSubmitting(true)
 
+      // Use the actual current state from the store to avoid stale closure issues
+      const currentAnswers = useTestStore.getState().answers
+      
       // Filter answers to only include those belonging to the current questions
       const currentQuestionIds = questions.map(q => q.id)
-      const filteredAnswers = answers.filter(a => currentQuestionIds.includes(a.questionId))
+      const filteredAnswers = currentAnswers.filter(a => currentQuestionIds.includes(a.questionId))
 
       const requestBody = {
         answers: filteredAnswers,
@@ -125,11 +134,20 @@ function TestPageContent() {
 
   const { data: questionsData } = useSWR<Question[]>(
     testId ? `/api/questions?testId=${testId}` : null,
-    fetcher
+    fetcher,
+    { 
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false
+    }
   )
   const { data: testInfoData } = useSWR<any>(
     testId ? `/api/test/info?testId=${testId}` : null,
-    fetcher
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false
+    }
   )
 
   useEffect(() => {

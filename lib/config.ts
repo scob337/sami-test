@@ -1,7 +1,6 @@
 export const siteConfig = {
   name: 'Sami-Test',
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   language: 'ar',
   dir: 'rtl',
   currency: 'SAR',

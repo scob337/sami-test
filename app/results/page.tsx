@@ -135,10 +135,21 @@ export default function ResultsPage() {
           </motion.h1>
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md"
+            className="flex flex-col items-center gap-4 mt-6"
           >
-             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-             <span className="text-blue-200 text-xs font-bold">التقرير جاهز الآن</span>
+             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+               <span className="text-blue-200 text-xs font-bold">التقرير جاهز الآن</span>
+             </div>
+             
+             <button
+               onClick={() => {
+                 router.push('/test')
+               }}
+               className="text-blue-400 hover:text-white text-sm font-bold bg-white/5 hover:bg-white/10 px-6 py-2 rounded-xl transition-all border border-white/10"
+             >
+               إعادة الاختبار
+             </button>
           </motion.div>
         </div>
       </div>
@@ -171,7 +182,9 @@ export default function ResultsPage() {
               </div>
               <div>
                 <p className="text-xs font-black text-pink-400 uppercase tracking-widest mb-1">النمط الثانوي</p>
-                <h2 className="text-3xl font-black text-white">{secondaryType.name}</h2>
+                <h2 className="text-3xl font-black text-white">
+                  {result?.secondaryPattern ? secondaryType.name : 'لا توجد شخصية'}
+                </h2>
               </div>
             </motion.div>
           </div>

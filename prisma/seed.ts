@@ -195,6 +195,7 @@ async function main() {
   const book = await prisma.book.create({
     data: {
       title: "اعرف نمطك",
+      slug: "default-book",
       filePdf: "https://example.com/book1.pdf",
     }
   });
@@ -203,6 +204,7 @@ async function main() {
   const test = await prisma.test.create({
     data: {
       name: "اختبار الأنماط السبعة",
+      slug: "default-test",
       bookId: book.id,
     }
   });

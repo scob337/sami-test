@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient()
@@ -17,7 +17,7 @@ export async function PATCH(
     })
     if (!dbUser?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
-    const { id } = params
+    const { id } = await params
 
     const session = await (prisma as any).chatSession.findUnique({
       where: { id: parseInt(id) }

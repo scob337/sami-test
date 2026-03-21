@@ -4,11 +4,26 @@ import { PatternType } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
-    const { answers, userId, testId, guestData } = await request.json()
+    const { answers, userId, testId: testIdRaw, guestData } = await request.json()
     // answers is an array of { questionId: number, answerId: number }
 
-    if (!answers || !Array.isArray(answers) || !testId) {
+    if (!answers || !Array.isArray(answers) || !testIdRaw) {
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
+    }
+
+    let testId: number;
+    const isNumericTestId = /^\d+$/.test(testIdRaw);
+    if (isNumericTestId) {
+      testId = parseInt(testIdRaw);
+    } else {
+      const test = await (prisma as any).test.findUnique({
+        where: { slug: testIdRaw },
+        select: { id: true }
+      });
+      if (!test) {
+        return NextResponse.json({ error: 'Test not found' }, { status: 404 });
+      }
+      testId = test.id;
     }
 
     // 1. Ensure a valid user exists
@@ -105,7 +120,7 @@ export async function POST(request: Request) {
 
     // 4. Save Attempt and Answers to DB (Reuse if exists to keep ID stable)
     const existingAttempt = await prisma.attempt.findFirst({
-        where: { userId: user.id, testId: parseInt(testId) },
+        where: { userId: user.id, testId: testId },
         orderBy: { startedAt: 'desc' }
     })
 
@@ -141,7 +156,7 @@ export async function POST(request: Request) {
         attempt = await prisma.attempt.create({
             data: {
                 userId: user.id,
-                testId: parseInt(testId),
+                testId: testId,
                 status: 'COMPLETED',
                 completedAt: new Date(),
                 result: {

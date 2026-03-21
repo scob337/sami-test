@@ -20,8 +20,19 @@ export async function POST(request: Request) {
     const realUserName = attempt?.user?.name || 'المبدع'
 
     // 1. Fetch Expert Prompt for this test
+    const isNumericTestId = /^\d+$/.test(testId);
+    let targetTestId = parseInt(testId);
+    
+    if (!isNumericTestId) {
+      const test = await (prisma as any).test.findUnique({
+        where: { slug: testId },
+        select: { id: true }
+      });
+      if (test) targetTestId = test.id;
+    }
+
     const expertPrompt = await prisma.aiPrompt.findFirst({
-      where: { testId: parseInt(testId) }
+      where: { testId: targetTestId }
     })
 
     // 1b. Fetch the actual result to get personality patterns

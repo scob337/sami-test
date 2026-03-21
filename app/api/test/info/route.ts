@@ -10,8 +10,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'testId is required' }, { status: 400 })
     }
 
-    const test = await prisma.test.findUnique({
-      where: { id: parseInt(testId) },
+    const isNumericId = /^\d+$/.test(testId)
+    const test = await (prisma as any).test.findFirst({
+      where: isNumericId ? { id: parseInt(testId) } : { slug: testId },
       select: {
         id: true,
         name: true

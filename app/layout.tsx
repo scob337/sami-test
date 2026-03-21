@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Cairo } from 'next/font/google'
+import { SupportButton } from '@/components/chat/SupportButton'
+import { NotificationToast } from '@/components/notifications/NotificationToast'
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -95,14 +97,22 @@ export default function RootLayout({
 
           <div className="relative z-10 flex flex-col min-h-screen">
             <AuthInitializer>
+              <NavbarWrapper />
               {children}
+              <SupportButton />
+              <NotificationToast />
             </AuthInitializer>
           </div>
 
           <Toaster position="top-center" richColors />
           <Analytics />
+          <Footer/>
         </ThemeProvider>
       </body>
     </html>
   )
 }
+
+import { NavbarWrapper } from '@/components/layout/navbar-wrapper'
+import { Footer } from '@/components/layout/footer'
+

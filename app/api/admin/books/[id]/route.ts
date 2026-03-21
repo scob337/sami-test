@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { slugify } from '@/lib/utils'
 
 export async function GET(
   request: Request,
@@ -7,8 +8,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const book = await prisma.book.findUnique({
-      where: { id: parseInt(id) },
+    const isNumericId = /^\d+$/.test(id)
+    const book = await (prisma as any).book.findFirst({
+      where: isNumericId ? { id: parseInt(id) } : { slug: id },
       include: { tests: true },
     })
     if (!book) {
@@ -27,16 +29,18 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { title, description, filePdf, price, isActive } = body
+    const { title, description, filePdf, price, isActive, slug } = body
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
-    const book = await prisma.book.update({
-      where: { id: parseInt(id) },
+    const isNumericId = /^\d+$/.test(id)
+    const book = await (prisma as any).book.update({
+      where: isNumericId ? { id: parseInt(id) } : { slug: id },
       data: {
         title,
+        slug: slug || (title ? slugify(title) : undefined),
         description: description ?? null,
         filePdf: filePdf ?? '',
         price: price ?? 0,
@@ -57,8 +61,9 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    await prisma.book.delete({
-      where: { id: parseInt(id) },
+    const isNumericId = /^\d+$/.test(id)
+    await (prisma as any).book.delete({
+      where: isNumericId ? { id: parseInt(id) } : { slug: id },
     })
     return NextResponse.json({ success: true })
   } catch (error) {

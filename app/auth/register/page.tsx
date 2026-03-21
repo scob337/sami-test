@@ -66,13 +66,12 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-[#0A1A3B] flex flex-col font-sans selection:bg-blue-500/30" dir="rtl">
-      <Navbar />
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
 
-        <div className="w-full max-w-[550px] bg-[#112240]/80 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl p-10 relative z-10">
+        <div className="w-full max-w-[550px] bg-white dark:bg-[#112240]/80 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl p-10 relative z-10">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-black text-white tracking-tight mb-3">ابدأ رحلتك معنا</h1>
             <p className="text-slate-400 font-medium">اكتشف أعماق شخصيتك واحصل على تقارير احترافية</p>

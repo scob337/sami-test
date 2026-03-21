@@ -7,8 +7,9 @@ export async function GET(request: Request) {
     const id = searchParams.get('id')
 
     if (id) {
-      const book = await prisma.book.findUnique({
-        where: { id: parseInt(id), isActive: true },
+      const isNumericId = /^\d+$/.test(id);
+      const book = await (prisma as any).book.findFirst({
+        where: isNumericId ? { id: parseInt(id), isActive: true } : { slug: id, isActive: true },
         include: {
           tests: {
             where: { isActive: true },

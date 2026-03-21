@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
@@ -42,7 +41,6 @@ export default function SettingsPage() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <Header />
       <Section size="lg">
         <Container size="md">
           <div className="space-y-12">

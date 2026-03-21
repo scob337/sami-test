@@ -1,14 +1,13 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { Header } from '@/components/layout/header'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Footer } from '@/components/layout/footer'
 import { useTestStore } from '@/lib/store/test-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
 import { 
   Crown, Star, Heart, Briefcase, Lightbulb, 
-  AlertTriangle, CheckCircle2, Lock, Download, BookOpen
+  AlertTriangle, CheckCircle2, Lock, Download, BookOpen, Share2, Copy, Check, X
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useMemo, useEffect, useState, Suspense, useCallback } from 'react'
@@ -105,6 +104,18 @@ export default function ResultsPage() {
       .sort(([, a], [, b]) => (b as number) - (a as number))
   }, [result?.scores])
 
+  const [showSharePopup, setShowSharePopup] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
+
+  const resultsUrl = typeof window !== 'undefined' ? window.location.href : ''
+  const shareResultText = `اكتشفت أن نمط شخصيتي هو "${currentType.name}" في تحليل Sami-Test! 🌟`
+  const resultShareLinks = [
+    { name: 'واتساب', color: 'bg-green-500 hover:bg-green-600', url: `https://wa.me/?text=${encodeURIComponent(shareResultText + '\n' + resultsUrl)}` },
+    { name: 'تويتر', color: 'bg-sky-500 hover:bg-sky-600', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareResultText)}&url=${encodeURIComponent(resultsUrl)}` },
+    { name: 'فيسبوك', color: 'bg-blue-600 hover:bg-blue-700', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(resultsUrl)}` },
+    { name: 'تيليجرام', color: 'bg-sky-600 hover:bg-sky-700', url: `https://t.me/share/url?url=${encodeURIComponent(resultsUrl)}&text=${encodeURIComponent(shareResultText)}` },
+  ]
+
   if (authLoading || isLoadingResult || (!result && urlAttemptId)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#0A1A3B]">
@@ -119,7 +130,6 @@ export default function ResultsPage() {
 
   return (
     <main className="min-h-screen flex flex-col bg-[#0A1A3B]" dir="rtl">
-      <Header />
       
       {/* Deep Blue Header Area */}
       <div className="bg-[#0A1A3B] pt-32 pb-32 px-4 relative overflow-hidden">
@@ -149,14 +159,21 @@ export default function ResultsPage() {
                <span className="text-blue-200 text-xs font-bold">التقرير جاهز الآن</span>
              </div>
              
-             <button
-               onClick={() => {
-                 router.push('/test')
-               }}
-               className="text-blue-400 hover:text-white text-sm font-bold bg-white/5 hover:bg-white/10 px-6 py-2 rounded-xl transition-all border border-white/10"
-             >
-               إعادة الاختبار
-             </button>
+             <div className="flex items-center gap-3">
+               <button
+                 onClick={() => router.push('/test')}
+                 className="text-blue-400 hover:text-white text-sm font-bold bg-white/5 hover:bg-white/10 px-6 py-2 rounded-xl transition-all border border-white/10"
+               >
+                 إعادة الاختبار
+               </button>
+               <button
+                 onClick={() => setShowSharePopup(true)}
+                 className="text-emerald-400 hover:text-white text-sm font-bold bg-emerald-500/10 hover:bg-emerald-500/20 px-6 py-2 rounded-xl transition-all border border-emerald-500/20 flex items-center gap-2"
+               >
+                 <Share2 className="w-4 h-4" />
+                 شارك نتيجتك
+               </button>
+             </div>
           </motion.div>
         </div>
       </div>
@@ -207,7 +224,7 @@ export default function ResultsPage() {
           {/* Traits Distribution Chart */}
           <motion.div 
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}
-            className="bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl"
+            className="bg-slate-50 dark:bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-10">
               <h3 className="text-2xl font-black text-white">توزيع الأنماط</h3>
@@ -243,7 +260,7 @@ export default function ResultsPage() {
             {/* Comprehensive Report Block (Locked/Unlocked) */}
             <motion.div 
               initial={{ y: 20, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }}
-              className="bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl space-y-8 relative overflow-hidden"
+              className="bg-slate-50 dark:bg-[#112240] rounded-[40px] p-8 md:p-12 border border-white/5 shadow-2xl space-y-8 relative overflow-hidden"
             >
               <div className="flex items-center justify-between border-b border-white/5 pb-8">
                 <div className="flex items-center gap-4">
@@ -352,6 +369,71 @@ export default function ResultsPage() {
         </div>
       </div>
       <Footer />
+
+      {/* Share Popup */}
+      <AnimatePresence>
+        {showSharePopup && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowSharePopup(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/10 space-y-6"
+              onClick={e => e.stopPropagation()}
+              dir="rtl"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                    <Share2 className="w-6 h-6 text-emerald-500" />
+                  </div>
+                  <h3 className="font-black text-lg text-slate-900 dark:text-white">مشاركة النتيجة</h3>
+                </div>
+                <button onClick={() => setShowSharePopup(false)} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-white/5 rounded-2xl p-4 text-center">
+                <p className="text-sm font-black text-slate-700 dark:text-slate-300">نمطك الأساسي</p>
+                <p className="text-2xl font-black text-purple-500 mt-1">{currentType.name}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {resultShareLinks.map(link => (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`h-14 rounded-2xl text-white font-black flex items-center justify-center gap-2 transition-all active:scale-95 ${link.color}`}
+                  >
+                    {link.name}
+                  </a>
+                ))}
+              </div>
+
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(resultsUrl)
+                  setCopiedLink(true)
+                  setTimeout(() => setCopiedLink(false), 2000)
+                }}
+                className="w-full h-14 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 rounded-2xl font-black flex items-center justify-center gap-2 transition-all border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+              >
+                {copiedLink ? <Check className="w-5 h-5 text-emerald-500" /> : <Copy className="w-5 h-5" />}
+                {copiedLink ? 'تم النسخ!' : 'نسخ الرابط'}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   )
 }

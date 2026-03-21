@@ -112,17 +112,17 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
 
           <div className="grid sm:grid-cols-2 gap-6">
             <div className="space-y-2.5">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">الكتاب المرتبط *</Label>
+              <Label className="text-xs font-black uppercase tracking-[2px] mr-2">الكتاب المرتبط *</Label>
               <Select value={bookId} onValueChange={setBookId}>
                 <SelectTrigger className="h-14 px-6 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all">
                   <div className="flex items-center gap-3">
-                    <BookOpen className="w-5 h-5 text-slate-400" />
+                    <BookOpen className="w-5 h-5" />
                     <SelectValue placeholder="اختر كتاباً..." />
                   </div>
                 </SelectTrigger>
                 <SelectContent className="rounded-2xl border-border bg-white dark:bg-slate-900 shadow-xl" dir="rtl">
                   {books.map(b => (
-                    <SelectItem key={b.id} value={b.id.toString()} className="font-bold py-3 px-4 focus:bg-slate-50 dark:focus:bg-slate-800 cursor-pointer">
+                    <SelectItem key={b.id} value={b.id.toString()} className="font-bold py-3 px-4 focus:bg-slate-50 focus:text-white dark:focus:bg-slate-800 cursor-pointer">
                       {b.title}
                     </SelectItem>
                   ))}
@@ -131,12 +131,12 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
             </div>
 
             <div className="space-y-2.5">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">حالة الاختبار</Label>
+              <Label className="text-xs  text-slate-400 uppercase tracking-[2px] mr-2">حالة الاختبار</Label>
               <div className="flex items-center justify-between h-14 px-6 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 rounded-2xl transition-all">
-                <span className={`text-sm font-black ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                <span className={`text-sm  text-white`}>
                   {isActive ? 'نشط حالياً' : 'معطّل'}
                 </span>
-                <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500" />
+                <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500 text-white" />
               </div>
             </div>
           </div>
@@ -160,9 +160,9 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
               </div>
             )}
           </Button>
-          <Button 
-            variant="ghost" 
-            onClick={onClose} 
+          <Button
+            variant="ghost"
+            onClick={onClose}
             className="w-full sm:w-auto h-14 px-8 rounded-2xl text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800"
           >
             <X className="w-5 h-5 ml-2" />

@@ -1,4 +1,3 @@
-import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
@@ -12,7 +11,6 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen flex flex-col">
-      <Header />
       <Section size="lg">
         <Container size="sm">
           <div className="prose prose-invert max-w-none space-y-8">

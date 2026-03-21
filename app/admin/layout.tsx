@@ -1,5 +1,6 @@
 import { Sidebar } from '@/components/admin/sidebar'
 import { Header } from '@/components/admin/header'
+import { UploadManager } from '@/components/admin/upload-manager'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import prisma from '@/lib/prisma'
@@ -46,6 +47,7 @@ export default async function AdminLayout({
           {children}
         </main>
       </div>
+      <UploadManager />
     </div>
   )
 }

@@ -3,7 +3,6 @@
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { motion } from 'framer-motion'
-import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
@@ -14,12 +13,14 @@ import Link from 'next/link'
 interface Test {
   id: number
   name: string
+  slug: string
   isActive: boolean
 }
 
 interface Book {
   id: number
   title: string
+  slug: string
   description: string
   tests: Test[]
 }
@@ -42,7 +43,6 @@ export default function TestLibraryPage() {
 
   return (
     <main className="min-h-screen flex flex-col relative bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 overflow-x-hidden">
-      <Header />
 
       {/* Hero Section (from HTML) */}
       <section className="pt-20 pb-16 sm:pt-32 sm:pb-24 overflow-hidden relative border-b border-slate-100 dark:border-slate-800" dir="rtl">
@@ -116,7 +116,7 @@ export default function TestLibraryPage() {
                       transition={{ delay: idx * 0.05 }}
                     >
                       <Link 
-                        href={hasTests ? `/test?testId=${firstTestId}` : '#'} 
+                        href={hasTests ? `/test?testId=${book.tests[0].slug || book.tests[0].id}` : '#'} 
                         className={`group bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 hover:shadow-xl ${activeStyle.hoverShadow} ${activeStyle.hoverBorder} transition-all duration-300 relative overflow-hidden flex flex-col h-full`}
                       >
                           <div className={`absolute top-0 left-0 w-full h-1 ${activeStyle.bgHeader} opacity-80 group-hover:opacity-100 transition-opacity`}></div>

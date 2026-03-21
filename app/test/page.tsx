@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense, useCallback } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
@@ -81,7 +80,7 @@ function TestPageContent() {
       const requestBody = {
         answers: filteredAnswers,
         userId: finalUserData?.id || 0, // 0 will trigger guest creation in API
-        testId: parseInt(testId),
+        testId: testId,
         guestData: {
           name: finalUserData?.name || 'زائر',
           emailOrPhone: finalUserData?.emailOrPhone || ''
@@ -111,7 +110,7 @@ function TestPageContent() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           attemptId: resultData.attemptId,
-          testId: parseInt(testId),
+          testId: testId,
           userData: finalUserData,
           answers
         })
@@ -173,7 +172,6 @@ function TestPageContent() {
   if (!user) {
     return (
       <main className="min-h-screen flex flex-col bg-[#0A1A3B] items-center justify-center p-6 text-center" dir="rtl">
-        <Header />
         <div className="max-w-md space-y-8 relative z-10">
           <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-500/20">
             <Brain className="w-10 h-10 text-white" />
@@ -256,7 +254,6 @@ function TestPageContent() {
   if (!questions.length) {
     return (
       <main className="min-h-screen flex flex-col">
-        <Header />
         <Section className="flex-1 flex items-center justify-center">
           <Container size="sm" className="text-center space-y-6">
             <Brain className="w-16 h-16 mx-auto text-destructive" />
@@ -330,7 +327,6 @@ function TestPageContent() {
 
   return (
     <main className="min-h-screen flex flex-col bg-slate-50" dir="rtl">
-      <Header />
 
       <div className="flex-1 pt-24 md:pt-32 pb-16 px-4">
         <Container size="md">
@@ -422,8 +418,6 @@ function TestPageContent() {
 
         </Container>
       </div>
-
-      <Footer />
     </main>
   )
 }

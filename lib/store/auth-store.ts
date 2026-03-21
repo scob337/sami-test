@@ -4,6 +4,7 @@ import { supabaseClient } from '@/lib/supabase/client'
 
 export interface AuthUser extends User {
   isAdmin?: boolean
+  name?: string
 }
 
 interface AuthStore {

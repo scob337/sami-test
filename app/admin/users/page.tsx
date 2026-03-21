@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 
 import { useState, useMemo } from 'react'
 import useSWR from 'swr'
@@ -11,7 +12,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
 
 interface User {
-  id: number
+  id: string
   name: string
   email: string | null
   phone: string | null
@@ -159,7 +160,7 @@ export default function UsersPage() {
                     return (
                       <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group">
                         <td className="py-5 px-6">
-                          <div className="flex items-center gap-4">
+                          <Link href={`/admin/users/${user.id}`} className="flex items-center gap-4 hover:opacity-80 transition-opacity">
                             <div className="w-12 h-12 rounded-[14px] bg-[#15283c] flex items-center justify-center text-white font-black text-lg shrink-0 shadow-sm">
                               {user.name.charAt(0)}
                             </div>
@@ -178,7 +179,7 @@ export default function UsersPage() {
                                 )}
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         </td>
                         <td className="py-5 px-6 text-center">
                           {user._count?.payments > 0 ? (

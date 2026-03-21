@@ -94,16 +94,34 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
+    // Fetch user notifications
+    const notifications = await (prisma as any).userNotification.findMany({
+      where: { userId: finalUser.id },
+      include: { notification: true },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    })
+
+    // Fetch enrolled courses
+    const enrolledCourses = await (prisma as any).userCourse?.findMany?.({
+      where: { userId: finalUser.id },
+      include: { course: true },
+      orderBy: { createdAt: 'desc' }
+    }) || []
+
     return NextResponse.json({
       user: {
         id: finalUser.id,
         name: finalUser.name,
         email: finalUser.email,
         phone: finalUser.phone,
+        avatarUrl: finalUser.avatarUrl,
         createdAt: finalUser.createdAt,
       },
       attempts: finalUser.attempts || [],
       books: (finalUser.payments || []).map((p: any) => p.book).filter(Boolean),
+      notifications,
+      enrolledCourses: enrolledCourses.map((e: any) => e.course).filter(Boolean),
     })
   } catch (error) {
     console.error('Error fetching user dashboard data:', error)

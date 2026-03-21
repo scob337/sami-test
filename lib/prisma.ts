@@ -1,3 +1,4 @@
+// Updated Prisma Client to include new models
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
@@ -32,7 +33,6 @@ const prisma = new Proxy({} as PrismaClient, {
     if (globalThis.prismaGlobal === undefined || globalThis.prismaGlobal === null) {
       const client = prismaClientSingleton()
       if (!client) {
-        // Return a dummy function/object that throws on call to prevent "cannot read property of null"
         return (...args: any[]) => {
           throw new Error(`Prisma access failed: DATABASE_URL is missing or invalid. Action: ${String(prop)}`)
         }
@@ -40,6 +40,16 @@ const prisma = new Proxy({} as PrismaClient, {
       globalThis.prismaGlobal = client
     }
     
+    // In development, if a property is missing (e.g. after prisma generate), try recreating the client once
+    if (process.env.NODE_ENV !== 'production' && !(prop in globalThis.prismaGlobal) && typeof prop === 'string' && !prop.startsWith('_')) {
+       console.log(`[Prisma] Property "${String(prop)}" missing in [${Object.keys(globalThis.prismaGlobal).join(',')}]. Re-initializing client...`)
+       const newClient = prismaClientSingleton()
+       if (newClient) {
+         globalThis.prismaGlobal = newClient
+         console.log(`[Prisma] Client re-initialized. New properties: [${Object.keys(newClient).join(',')}]`)
+       }
+    }
+
     const value = (globalThis.prismaGlobal as any)[prop]
     if (typeof value === 'function') {
       return value.bind(globalThis.prismaGlobal)

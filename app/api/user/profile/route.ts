@@ -3,40 +3,52 @@ import prisma from '@/lib/prisma'
 
 export async function PUT(request: Request) {
   try {
-    const { userId, name, email, phone } = await request.json()
+    const { dbUserId, name, email, phone, avatarUrl } = await request.json()
 
-    if (!userId && (!email || email.trim() === '')) {
-      return NextResponse.json({ error: 'identification is required' }, { status: 400 })
+    if (!dbUserId) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
     }
 
-    const numericId = parseInt(userId || '')
-    let updatedUser;
+    const numericId = parseInt(dbUserId)
+    if (isNaN(numericId)) {
+      return NextResponse.json({ error: 'Invalid User ID format' }, { status: 400 })
+    }
 
-    if (!isNaN(numericId)) {
-      // Check if email is already taken by another user
-      if (email) {
-        const existingUser = await prisma.user.findFirst({
-          where: {
-            email,
-            NOT: { id: numericId }
-          }
-        })
-        if (existingUser) {
-          return NextResponse.json({ error: 'البريد الإلكتروني مستخدم بالفعل' }, { status: 400 })
+    // Check if email is already taken by another user
+    if (email && email.trim() !== '') {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          email: email.trim(),
+          NOT: { id: numericId }
         }
+      })
+      if (existingUser) {
+        return NextResponse.json({ error: 'البريد الإلكتروني مستخدم بالفعل' }, { status: 400 })
       }
-
-      updatedUser = await prisma.user.update({
-        where: { id: numericId },
-        data: { name, email, phone }
-      })
-    } else if (email && email.trim() !== '') {
-      updatedUser = await prisma.user.upsert({
-        where: { email },
-        update: { name, phone },
-        create: { email, name: name || '', phone: phone || '' }
-      })
     }
+
+    // Check if phone is already taken by another user
+    if (phone && phone.trim() !== '') {
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          phone: phone.trim(),
+          NOT: { id: numericId }
+        }
+      })
+      if (existingUser) {
+        return NextResponse.json({ error: 'رقم الجوال مستخدم بالفعل' }, { status: 400 })
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: numericId },
+      data: { 
+        name, 
+        email: email?.trim() || undefined, 
+        phone: phone?.trim() || undefined, 
+        avatarUrl 
+      }
+    })
 
     return NextResponse.json(updatedUser)
   } catch (error) {

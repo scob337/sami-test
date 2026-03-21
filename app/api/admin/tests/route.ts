@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { slugify } from '@/lib/utils'
 
 export async function GET() {
   try {
@@ -26,9 +27,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
-    const test = await prisma.test.create({
+    const test = await (prisma as any).test.create({
       data: {
         name,
+        slug: slugify(name),
         bookId: parseInt(bookId),
       }
     })

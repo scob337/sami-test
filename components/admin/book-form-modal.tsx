@@ -1,6 +1,4 @@
-'use client'
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +7,9 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Book, Check, X, CreditCard, Link as LinkIcon, FileText } from 'lucide-react'
+import { Book, Check, X, CreditCard, Link as LinkIcon, FileText, Upload, FileUp } from 'lucide-react'
+import { useUploadStore } from '@/lib/store/upload-store'
+import { Progress } from '@/components/ui/progress'
 
 interface BookFormModalProps {
   open: boolean
@@ -32,6 +32,11 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
   const [price, setPrice] = useState(editBook?.price?.toString() ?? '0')
   const [isActive, setIsActive] = useState(editBook?.isActive ?? true)
   const [isSaving, setIsSaving] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { addUpload, uploads } = useUploadStore()
+  const [currentUploadId, setCurrentUploadId] = useState<string | null>(null)
+  const activeUpload = currentUploadId ? uploads[currentUploadId] : null
 
   useEffect(() => {
     setTitle(editBook?.title ?? '')
@@ -39,11 +44,46 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
     setFilePdf(editBook?.filePdf ?? '')
     setPrice(editBook?.price?.toString() ?? '0')
     setIsActive(editBook?.isActive ?? true)
+    setCurrentUploadId(null)
   }, [editBook, open])
+
+  // Sync filePdf when upload completes
+  useEffect(() => {
+    if (activeUpload?.status === 'completed' && activeUpload.url) {
+      setFilePdf(activeUpload.url)
+    }
+  }, [activeUpload?.status, activeUpload?.url])
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      toast.error('يرجى اختيار ملف PDF فقط')
+      return
+    }
+
+    try {
+      const id = await addUpload(file, 'books')
+      setCurrentUploadId(id)
+    } catch (err) {
+      console.error('File selection error:', err)
+    }
+  }
 
   const handleSave = async () => {
     if (!title.trim()) {
       toast.error('يرجى إدخال عنوان الكتاب')
+      return
+    }
+    
+    if (!filePdf) {
+      toast.error('يرجى رفع ملف الكتاب أولاً')
+      return
+    }
+
+    if (activeUpload && activeUpload.status === 'uploading') {
+      toast.error('يرجى الانتظار حتى ينتهي رفع الملف')
       return
     }
 
@@ -81,7 +121,6 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
   return (
     <Dialog open={open} onOpenChange={val => !val && onClose()}>
       <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-none rounded-[32px] overflow-hidden p-0 shadow-2xl" dir="rtl">
-        {/* Header with Background */}
         <div className="bg-[#15283c] p-8 text-white">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
@@ -154,28 +193,92 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
             </div>
           </div>
 
-          <div className="space-y-2.5">
-            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">رابط ملف PDF</Label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-[#03a9f4] text-slate-300 transition-colors">
-                <LinkIcon className="w-5 h-5" />
+          <div className="space-y-4">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">ملف الكتاب (PDF) *</Label>
+            
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileChange} 
+              accept=".pdf" 
+              className="hidden" 
+            />
+
+            {!activeUpload && !filePdf && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full h-32 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center hover:border-[#ff5722]/50 hover:bg-[#ff5722]/5 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-[#ff5722] group-hover:bg-white dark:group-hover:bg-slate-900 transition-all mb-3 shadow-sm">
+                  <Upload className="w-6 h-6" />
+                </div>
+                <span className="text-sm font-black text-slate-500 group-hover:text-[#ff5722]">اضغط لرفع ملف PDF</span>
+              </button>
+            )}
+
+            {activeUpload && activeUpload.status === 'uploading' && (
+              <div className="p-6 rounded-2xl bg-blue-50 dark:bg-blue-500/5 border-2 border-blue-100 dark:border-blue-500/20 space-y-4">
+                <div className="flex justify-between items-center text-sm font-black text-blue-600 dark:text-blue-400">
+                  <div className="flex items-center gap-2">
+                    <LoadingSpinner size="sm" />
+                    <span>جاري الرفع...</span>
+                  </div>
+                  <span>{activeUpload.progress}%</span>
+                </div>
+                <Progress value={activeUpload.progress} className="h-2 [&>div]:bg-blue-500" />
+                <p className="text-xs font-bold text-blue-500/60 truncate">{activeUpload.fileName}</p>
               </div>
-              <Input
-                value={filePdf}
-                onChange={e => setFilePdf(e.target.value)}
-                placeholder="https://example.com/file.pdf"
-                dir="ltr"
-                className="h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#03a9f4]/50 font-bold text-lg transition-all"
-              />
-            </div>
+            )}
+
+            {(filePdf || (activeUpload && activeUpload.status === 'completed')) && (
+              <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-500/5 border-2 border-emerald-100 dark:border-emerald-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <FileUp className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">تم تجهيز الملف</span>
+                    <p className="text-[10px] font-bold text-emerald-500/60 truncate max-w-[200px]">
+                      {activeUpload?.fileName || 'PDF Document'}
+                    </p>
+                  </div>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-slate-400 hover:text-destructive"
+                  onClick={() => { setFilePdf(''); setCurrentUploadId(null); }}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            {activeUpload && activeUpload.status === 'error' && (
+              <div className="p-4 rounded-2xl bg-destructive/5 border-2 border-destructive/20 flex items-center justify-between">
+                <div className="flex items-center gap-3 text-destructive">
+                  <AlertCircle className="w-5 h-5 shrink-0" />
+                  <span className="text-sm font-bold">فشل رفع الملف، حاول مرة أخرى</span>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-destructive hover:bg-destructive/10"
+                >
+                  إعادة المحاولة
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
         <DialogFooter className="p-8 pt-0 flex flex-col sm:flex-row-reverse gap-4">
           <Button
             onClick={handleSave}
-            disabled={isSaving}
-            className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-[#ff5722] hover:bg-[#e64a19] text-white font-black text-lg shadow-xl shadow-orange-500/20 transition-all active:scale-95"
+            disabled={isSaving || (activeUpload && activeUpload.status === 'uploading')}
+            className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-[#ff5722] hover:bg-[#e64a19] text-white font-black text-lg shadow-xl shadow-orange-500/20 transition-all active:scale-95 disabled:opacity-50"
           >
             {isSaving ? (
               <div className="flex items-center gap-3">

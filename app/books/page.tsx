@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
@@ -51,7 +50,6 @@ const books = [
 export default function BooksPage() {
   return (
     <main className="min-h-screen flex flex-col">
-      <Header />
       <Section size="lg">
         <Container>
           <div className="space-y-12">

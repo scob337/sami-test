@@ -137,7 +137,7 @@ export default function TestsPage() {
                       </div>
                     </td>
                     <td className="py-4 px-5">
-                      <div className="flex items-center gap-1.5 text-sm text-slate-600">
+                      <div className="flex items-center gap-1.5 text-sm text-white">
                         <BookOpen className="w-3.5 h-3.5 text-slate-400" />
                         {test.book?.title ?? <span className="text-slate-300">—</span>}
                       </div>
@@ -187,7 +187,7 @@ export default function TestsPage() {
                               href={`/test?testId=${test.id}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="flex items-center gap-2.5 cursor-pointer py-2.5 text-slate-700"
+                              className="flex items-center gap-2.5 cursor-pointer py-2.5"
                             >
                               <Eye className="w-4 h-4" /> معاينة
                             </a>

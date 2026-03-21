@@ -44,13 +44,12 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-[#0A1A3B] flex flex-col font-sans selection:bg-blue-500/30" dir="rtl">
-      <Navbar />
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
 
-        <div className="w-full max-w-[480px] bg-[#112240]/80 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl p-10 relative z-10 transition-all">
+        <div className="w-full max-w-[480px] bg-white dark:bg-[#112240]/80 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl p-10 relative z-10 transition-all">
           <Link 
             href="/auth/login" 
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-all text-sm font-bold mb-8 group w-fit"

@@ -299,6 +299,7 @@ model Message {
 model Notification {
   id          Int      @id @default(autoincrement())
   title       String
+  content     String   @db.Text
   type      String   @default("info") // info, warning, success
   link      String?  // Optional click-through URL
   isActive  Boolean  @default(true)

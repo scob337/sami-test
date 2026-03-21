@@ -31,6 +31,8 @@ interface Course {
   price: number
   image: string
   introVideoUrl: string
+  videoUrl720: string
+  videoUrl1080: string
   introThumbnailUrl: string
   isActive: boolean
   discountCodes?: DiscountCode[]
@@ -49,6 +51,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     price: '',
     image: '',
     introVideoUrl: '',
+    videoUrl720: '',
+    videoUrl1080: '',
     introThumbnailUrl: '',
     isActive: true
   })
@@ -67,6 +71,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         price: course.price?.toString() || '0',
         image: course.image || '',
         introVideoUrl: course.introVideoUrl || '',
+        videoUrl720: (course as any).videoUrl720 || '',
+        videoUrl1080: (course as any).videoUrl1080 || '',
         introThumbnailUrl: course.introThumbnailUrl || '',
         isActive: course.isActive ?? true
       })
@@ -143,7 +149,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
   const [addingEpisode, setAddingEpisode] = useState(false)
 
   const addNewEpisodeRow = () => {
-    setNewEpisodes([...newEpisodes, { title: '', videoUrl: '', thumbnail: '', duration: '', isFree: false }])
+    setNewEpisodes([...newEpisodes, { title: '', slug: '', videoUrl: '', videoUrl720: '', videoUrl1080: '', thumbnail: '', duration: '', isFree: false }])
   }
 
   const updateNewEpisode = (index: number, data: any) => {
@@ -265,9 +271,25 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FileUploadField 
-              label="فيديو المقدمة (سيكون متاحاً للجميع)"
+              label="فيديو المقدمة الأساسي (سيكون متاحاً للجميع)"
               value={formData.introVideoUrl}
               onChange={(url) => setFormData({ ...formData, introVideoUrl: url })}
+              accept="video/*"
+              bucket="videos"
+              icon="video"
+            />
+            <FileUploadField 
+              label="فيديو المقدمة 720p (اختياري)"
+              value={formData.videoUrl720}
+              onChange={(url) => setFormData({ ...formData, videoUrl720: url })}
+              accept="video/*"
+              bucket="videos"
+              icon="video"
+            />
+            <FileUploadField 
+              label="فيديو المقدمة 1080p (اختياري)"
+              value={formData.videoUrl1080}
+              onChange={(url) => setFormData({ ...formData, videoUrl1080: url })}
               accept="video/*"
               bucket="videos"
               icon="video"
@@ -353,6 +375,15 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                     onChange={(e) => updateNewEpisode(idx, { title: e.target.value })}
                   />
                 </div>
+                <div className="space-y-3">
+                  <Label className="text-xs font-bold">اسم اللينك (Slug) - اختياري</Label>
+                  <Input 
+                    placeholder="مثال: introduction"
+                    value={ep.slug || ''}
+                    className="rounded-xl"
+                    onChange={(e) => updateNewEpisode(idx, { slug: e.target.value })}
+                  />
+                </div>
                 <div className="flex items-center gap-4 pt-6">
                   <Switch 
                     checked={ep.isFree}
@@ -364,10 +395,26 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FileUploadField 
-                  label="ملف الفيديو"
+                  label="ملف الفيديو الأساسي"
                   value={ep.videoUrl}
                   onChange={(url) => updateNewEpisode(idx, { videoUrl: url })}
                   onDurationChange={(dur) => updateNewEpisode(idx, { duration: dur })}
+                  accept="video/*"
+                  bucket="videos"
+                  icon="video"
+                />
+                <FileUploadField 
+                  label="ملف الفيديو 720p (اختياري)"
+                  value={ep.videoUrl720}
+                  onChange={(url) => updateNewEpisode(idx, { videoUrl720: url })}
+                  accept="video/*"
+                  bucket="videos"
+                  icon="video"
+                />
+                <FileUploadField 
+                  label="ملف الفيديو 1080p (اختياري)"
+                  value={ep.videoUrl1080}
+                  onChange={(url) => updateNewEpisode(idx, { videoUrl1080: url })}
                   accept="video/*"
                   bucket="videos"
                   icon="video"

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { slugify } from '@/lib/utils'
 
 export async function GET(
   req: Request,
@@ -26,7 +27,7 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await req.json()
-    const { title, description, videoUrl, thumbnail, duration, isFree, sortOrder } = body
+    const { title, slug, description, videoUrl, videoUrl720, videoUrl1080, thumbnail, duration, isFree, sortOrder } = body
 
     if (!title || !videoUrl) {
         return new NextResponse('Title and Video URL are required', { status: 400 })
@@ -35,8 +36,11 @@ export async function POST(
     const episode = await prisma.episode.create({
       data: {
         title,
+        slug: slug || (title ? slugify(title) : undefined),
         description,
         videoUrl,
+        videoUrl720,
+        videoUrl1080,
         thumbnail,
         duration,
         isFree: isFree ?? false,

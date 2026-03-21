@@ -198,6 +198,8 @@ model Course {
   image            String?   // Main Thumbnail
   introVideoUrl    String?   // Free Intro Video
   introThumbnailUrl String?  // Intro Video Thumbnail
+  videoUrl720      String?  // 720p Intro Video
+  videoUrl1080     String?  // 1080p Intro Video
   price            Float     @default(0)
   isActive         Boolean   @default(true)
   createdAt        DateTime  @default(now())
@@ -215,8 +217,11 @@ model Episode {
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId    Int
   title       String
+  slug        String?  // Realistic URL name
   description String?  @db.Text
   videoUrl    String   // Direct link
+  videoUrl720 String?  // 720p link
+  videoUrl1080 String? // 1080p link
   thumbnail   String?  // Episode Thumbnail
   duration    String?  // Video duration (e.g. "10:25")
   sortOrder   Int      @default(0)
@@ -292,9 +297,8 @@ model Message {
 }
 
 model Notification {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String   @db.Text
+  id          Int      @id @default(autoincrement())
+  title       String
   type      String   @default("info") // info, warning, success
   link      String?  // Optional click-through URL
   isActive  Boolean  @default(true)

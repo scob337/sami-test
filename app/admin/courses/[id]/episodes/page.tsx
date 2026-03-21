@@ -29,7 +29,10 @@ export default function AdminEpisodesPage({ params }: { params: Promise<{ id: st
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
+    slug: '',
     videoUrl: '',
+    videoUrl720: '',
+    videoUrl1080: '',
     thumbnail: '',
     duration: '',
     isFree: false
@@ -52,7 +55,7 @@ export default function AdminEpisodesPage({ params }: { params: Promise<{ id: st
       if (!res.ok) throw new Error()
       toast.success('تم إضافة الحلقة بنجاح')
       setIsAdding(false)
-      setFormData({ title: '', videoUrl: '', thumbnail: '', duration: '', isFree: false })
+      setFormData({ title: '', slug: '', videoUrl: '', videoUrl720: '', videoUrl1080: '', thumbnail: '', duration: '', isFree: false })
       mutate()
     } catch (error) {
       toast.error('فشل في إضافة الحلقة')
@@ -109,6 +112,16 @@ export default function AdminEpisodesPage({ params }: { params: Promise<{ id: st
                 className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-black mx-1">اسم اللينك (Slug) - اختياري</label>
+              <input 
+                value={formData.slug}
+                onChange={e => setFormData({...formData, slug: e.target.value})}
+                placeholder="مثال: introduction"
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+              />
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
@@ -117,6 +130,26 @@ export default function AdminEpisodesPage({ params }: { params: Promise<{ id: st
                   value={formData.videoUrl} 
                   onChange={(url) => setFormData(prev => ({...prev, videoUrl: url}))} 
                   onDurationChange={(d) => setFormData(prev => ({...prev, duration: d}))}
+                  accept="video/*" 
+                  bucket="videos" 
+                  icon="video" 
+                />
+              </div>
+              <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <FileUploadField 
+                  label="فيديو بجودة 720p (اختياري)" 
+                  value={formData.videoUrl720} 
+                  onChange={(url) => setFormData(prev => ({...prev, videoUrl720: url}))} 
+                  accept="video/*" 
+                  bucket="videos" 
+                  icon="video" 
+                />
+              </div>
+              <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700">
+                <FileUploadField 
+                  label="فيديو بجودة 1080p (اختياري)" 
+                  value={formData.videoUrl1080} 
+                  onChange={(url) => setFormData(prev => ({...prev, videoUrl1080: url}))} 
                   accept="video/*" 
                   bucket="videos" 
                   icon="video" 

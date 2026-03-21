@@ -23,7 +23,7 @@ export async function GET(
         ratings: {
           include: {
             user: {
-              select: { name: true }
+              select: { name: true, avatarUrl: true }
             }
           },
           orderBy: { createdAt: 'desc' }

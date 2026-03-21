@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
     if (!dbUser) return new NextResponse('User not found', { status: 404 })
 
-    const { episodeId, lastPos, isWatched } = await request.json()
+    const { episodeId, lastPos, isWatched } = await req.json()
 
     const progress = await prisma.userEpisodeProgress.upsert({
       where: {

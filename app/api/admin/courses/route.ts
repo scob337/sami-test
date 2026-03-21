@@ -4,21 +4,16 @@ import { slugify } from '@/lib/utils'
 
 export async function GET() {
   try {
-    const courses = await (prisma as any).course.findMany({
+    const courses = await prisma.course.findMany({
+      orderBy: { createdAt: 'desc' },
       include: {
         _count: {
-          select: {
-            episodes: true,
-            enrollments: true,
-          }
+          select: { episodes: true, enrollments: true }
         }
-      },
-      orderBy: { createdAt: 'desc' }
+      }
     })
-
     return NextResponse.json(courses)
   } catch (error) {
-    console.error('[ADMIN_COURSES_GET]', error)
     return new NextResponse('Internal Error', { status: 500 })
   }
 }
@@ -26,27 +21,28 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { title, description, price, image, introVideoUrl, introThumbnailUrl, isActive } = body
+    const { title, slug, price, description, image, introVideoUrl, videoUrl720, videoUrl1080, introThumbnailUrl, isActive } = body
 
-    if (!title) {
-        return new NextResponse('Title is required', { status: 400 })
-    }
-
-    const course = await (prisma as any).course.create({
+    const course = await prisma.course.create({
       data: {
         title,
-        slug: slugify(title),
+        slug: slug || slugify(title),
+        price: parseFloat(price),
         description,
-        price: parseFloat(price) || 0,
         image,
         introVideoUrl,
+        videoUrl720,
+        videoUrl1080,
         introThumbnailUrl,
         isActive: isActive ?? true,
         episodes: {
           create: (body.episodes || []).map((ep: any, idx: number) => ({
             title: ep.title || `Episode ${idx + 1}`,
+            slug: ep.slug || slugify(ep.title || `Episode ${idx + 1}`),
             description: ep.description || '',
             videoUrl: ep.videoUrl,
+            videoUrl720: ep.videoUrl720,
+            videoUrl1080: ep.videoUrl1080,
             thumbnail: ep.thumbnail || '',
             duration: ep.duration || '',
             isFree: ep.isFree || false,
@@ -58,7 +54,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(course)
   } catch (error) {
-    console.error('[ADMIN_COURSES_POST]', error)
+    console.error('[COURSES_POST]', error)
     return new NextResponse('Internal Error', { status: 500 })
   }
 }

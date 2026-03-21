@@ -11,12 +11,15 @@ import { useAuthStore } from '@/lib/store/auth-store'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import { VideoPlayer } from '@/components/course/video-player'
 
 interface Episode {
   id: number
   title: string
   description: string
   videoUrl: string
+  videoUrl720?: string
+  videoUrl1080?: string
   thumbnail: string
   duration: string
   isFree: boolean
@@ -38,6 +41,8 @@ interface Course {
   price: number
   image: string
   introVideoUrl: string
+  videoUrl720?: string
+  videoUrl1080?: string
   introThumbnailUrl: string
   episodes: Episode[]
   ratings: Rating[]
@@ -228,15 +233,28 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
         <div className="lg:col-span-2 space-y-6">
           <div className="relative group rounded-[2.5rem] overflow-hidden bg-slate-900 aspect-video shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] border border-white/5 group/video">
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none z-10" />
-            <video
-              key={showIntro ? course.introVideoUrl : currentEpisode?.videoUrl}
-              src={showIntro ? course.introVideoUrl : currentEpisode?.videoUrl}
-              className="w-full h-full object-contain"
-              controls
+            <VideoPlayer
+              key={showIntro ? course.introVideoUrl : currentEpisode?.id}
+              src={showIntro ? course.introVideoUrl : currentEpisode?.videoUrl || ''}
               poster={showIntro ? course.introThumbnailUrl : currentEpisode?.thumbnail || course.image}
               autoPlay={!showIntro}
               onEnded={handleVideoEnd}
-              onTimeUpdate={handleTimeUpdate}
+              onTimeUpdate={(time) => {
+                // Optional: handle duration progress save here
+              }}
+              qualities={(() => {
+                const q = []
+                if (showIntro) {
+                    if (course.introVideoUrl) q.push({ label: 'أساسي', url: course.introVideoUrl })
+                    if (course.videoUrl720) q.push({ label: '720p', url: course.videoUrl720 })
+                    if (course.videoUrl1080) q.push({ label: '1080p', url: course.videoUrl1080 })
+                } else if (currentEpisode) {
+                    if (currentEpisode.videoUrl) q.push({ label: 'أساسي', url: currentEpisode.videoUrl })
+                    if (currentEpisode.videoUrl720) q.push({ label: '720p', url: currentEpisode.videoUrl720 })
+                    if (currentEpisode.videoUrl1080) q.push({ label: '1080p', url: currentEpisode.videoUrl1080 })
+                }
+                return q
+              })()}
             />
             {!currentEpisode && !showIntro && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-20">
@@ -419,9 +437,6 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between items-center mb-1">
                         <span className={cn("text-[10px] font-black uppercase tracking-widest", isActive ? "text-blue-500" : "text-slate-400")}>الحلقة {idx + 1}</span>
-                        {episode.isFree && !isEnrolled && !isAdmin && (
-                          <span className="text-[9px] font-black bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full border border-emerald-500/20">مجانية</span>
-                        )}
                       </div>
                       <p className="font-black text-sm md:text-base truncate leading-tight group-hover:text-blue-500 transition-colors">{episode.title}</p>
                       <div className="flex items-center gap-3 mt-1.5">

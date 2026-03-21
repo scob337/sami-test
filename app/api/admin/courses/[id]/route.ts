@@ -9,7 +9,7 @@ export async function PATCH(
   try {
     const { id } = await params;
     const body = await req.json()
-    const { title, description, price, image, introVideoUrl, introThumbnailUrl, isActive } = body
+    const { title, description, price, image, introVideoUrl, videoUrl720, videoUrl1080, introThumbnailUrl, isActive } = body
 
     const course = await (prisma as any).course.update({
       where: { id: parseInt(id) },
@@ -20,6 +20,8 @@ export async function PATCH(
         price: parseFloat(price) || 0,
         image,
         introVideoUrl,
+        videoUrl720,
+        videoUrl1080,
         introThumbnailUrl,
         isActive
       }

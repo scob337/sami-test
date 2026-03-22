@@ -69,9 +69,6 @@ function CheckoutContent() {
 
   useEffect(() => {
     // Load Moyasar Script
-    const script = document.createElement('script')
-    script.src = 'https://polyfill.io/v3/polyfill.min.js?features=fetch'
-    document.head.appendChild(script)
 
     const moyasarScript = document.createElement('script')
     moyasarScript.src = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.js'
@@ -84,31 +81,35 @@ function CheckoutContent() {
     document.head.appendChild(moyasarStyle)
 
     return () => {
-      document.head.removeChild(script)
       document.head.removeChild(moyasarScript)
       document.head.removeChild(moyasarStyle)
     }
   }, [])
 
   useEffect(() => {
+    let initTimeout: NodeJS.Timeout;
     if (item && (window as any).Moyasar && finalPrice > 0) {
-        const amount = finalPrice * 100 // Moyasar uses subunits
-        const callbackUrl = `${window.location.origin}/api/payment/verify`
-        
-        try {
-            (window as any).Moyasar.init({
-                element: '.mysr-form',
-                amount: Math.round(amount),
-                currency: 'SAR',
-                description: item.title,
-                publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
-                callback_url: callbackUrl,
-                methods: ['creditcard', 'applepay', 'stcpay'],
-                apple_pay: {
-                    label: 'SAMI Test',
-                    validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
-                    country: 'EG'
-                },
+        initTimeout = setTimeout(() => {
+            if (!document.querySelector('.mysr-form')) return;
+
+            const amount = finalPrice * 100 // Moyasar uses subunits
+            const callbackUrl = `${window.location.origin}/api/payment/verify`
+            
+            try {
+                (window as any).Moyasar.init({
+                    element: '.mysr-form',
+                    amount: Math.round(amount),
+                    currency: 'SAR',
+                    language: 'ar',
+                    description: item.title,
+                    publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
+                    callback_url: callbackUrl,
+                    methods: ['creditcard', 'applepay', 'stcpay'],
+                    apple_pay: {
+                        label: 'SAMI Test',
+                        validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
+                        country: 'SA' // typically SA for Moyasar Apple Pay
+                    },
                 metadata: {
                     attemptId: id,
                     itemId: id,
@@ -121,6 +122,11 @@ function CheckoutContent() {
         } catch (err) {
             console.error('Moyasar Init Error:', err)
         }
+        }, 100);
+    }
+    
+    return () => {
+        if (initTimeout) clearTimeout(initTimeout);
     }
   }, [item, finalPrice, id, user, appliedDiscount])
 
@@ -232,7 +238,7 @@ function CheckoutContent() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="grid lg:grid-cols-12 gap-8 items-start"
             >
-              <div className="lg:col-span-7 space-y-6 md:space-y-8">
+              <div className="lg:col-span-7 space-y-6 md:space-y-8 order-last lg:order-first">
                 <div className="space-y-4 md:space-y-6">
                   <button
                     onClick={() => router.back()}
@@ -261,7 +267,25 @@ function CheckoutContent() {
                     </div>
                   </div>
                   
-                  {finalPrice === 0 ? (
+                  {!user ? (
+                      <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 text-center">
+                          <Lock className="w-12 h-12 text-slate-400" />
+                          <div className="space-y-2">
+                              <h3 className="text-xl font-black text-slate-900 dark:text-white">تسجيل الدخول مطلوب</h3>
+                              <p className="text-sm font-bold text-slate-500 max-w-sm mx-auto">سجل دخولك أو أنشئ حساباً جديداً لإتمام عملية الدفع والوصول إلى المحتوى.</p>
+                          </div>
+                          <Button
+                              size="lg"
+                              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto px-10 h-14 rounded-2xl font-black text-lg shadow-xl shadow-blue-600/20"
+                              onClick={() => {
+                                  const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                                  router.push(`/auth/login?redirect=${currentUrl}`);
+                              }}
+                          >
+                              تسجيل الدخول
+                          </Button>
+                      </div>
+                  ) : finalPrice === 0 ? (
                       <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-3xl">
                           <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
                               <CheckCircle2 className="w-8 h-8 text-emerald-500" />
@@ -315,7 +339,7 @@ function CheckoutContent() {
                 </div>
               </div>
 
-              <div className="lg:col-span-5 pb-12 lg:pb-0">
+              <div className="lg:col-span-5 pb-12 lg:pb-0 order-first lg:order-none">
                 <div className="lg:sticky lg:top-32 space-y-6">
                   <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/[0.08] shadow-2xl shadow-black/5 dark:shadow-black/40 space-y-6 md:space-y-8">
                     <div className="flex items-center justify-between">

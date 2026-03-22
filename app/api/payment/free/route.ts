@@ -1,13 +1,28 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { createClient } from '@/lib/supabase/server'
 
 export async function POST(req: Request) {
   try {
-    const { attemptId, itemId, testId, userId, kind, discountCodeId } = await req.json()
-    
-    if (!userId) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user || !user.email) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const dbUser = await prisma.user.findUnique({
+      where: { email: user.email },
+      select: { id: true }
+    })
+
+    if (!dbUser) {
+        return NextResponse.json({ error: 'User not found in database' }, { status: 404 })
+    }
+
+    const { attemptId, itemId, testId, kind, discountCodeId } = await req.json()
+    const userId = dbUser.id
+
 
     if (kind === 'course') {
         let courseId = parseInt(itemId);
@@ -24,16 +39,16 @@ export async function POST(req: Request) {
             data: {
                 status: 'COMPLETED',
                 amount: 0,
-                userId: parseInt(userId),
+                userId: userId,
                 courseId: courseId,
                 discountCodeId: discountCodeId ? parseInt(discountCodeId) : undefined
             }
         });
         
         await prisma.userCourse.upsert({
-            where: { userId_courseId: { userId: parseInt(userId), courseId } },
+            where: { userId_courseId: { userId: userId, courseId } },
             update: {},
-            create: { userId: parseInt(userId), courseId }
+            create: { userId: userId, courseId }
         });
 
         return NextResponse.json({ redirectUrl: `/courses/${itemId}` })
@@ -42,7 +57,7 @@ export async function POST(req: Request) {
     const paymentPayload: any = {
         status: 'COMPLETED',
         amount: 0,
-        userId: parseInt(userId),
+        userId: userId,
         testId: testId ? parseInt(testId) : undefined,
         attemptId: attemptId ? parseInt(attemptId) : undefined,
         discountCodeId: discountCodeId ? parseInt(discountCodeId) : undefined

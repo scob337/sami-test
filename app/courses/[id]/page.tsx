@@ -266,7 +266,7 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
             )}
           </div>
 
-          <div className="p-8 bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/5 space-y-6">
+          <div className="p-5 md:p-8 bg-slate-50 dark:bg-white/5 rounded-3xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 space-y-6">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-3">
@@ -312,7 +312,7 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Comments Section */}
-          <div className="bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/5 p-8 space-y-8">
+          <div className="bg-slate-50 dark:bg-white/5 rounded-3xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 p-5 md:p-8 space-y-8">
             <div className="flex items-center gap-3">
               <MessageCircle className="w-6 h-6 text-blue-500" />
               <h2 className="text-2xl font-black">التعليقات والمناقشات</h2>
@@ -366,7 +366,7 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
 
         {/* Sidebar: Episodes List */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="p-6 bg-slate-50 dark:bg-white/5 rounded-[2.5rem] border border-slate-200 dark:border-white/5 sticky top-28">
+          <div className="p-5 md:p-6 bg-slate-50 dark:bg-white/5 rounded-3xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/5 sticky top-28">
             <h3 className="text-xl font-black mb-6 flex items-center gap-2">
               <ChevronRight className="w-5 h-5 text-blue-500" /> محتوى الكورس
             </h3>
@@ -538,7 +538,7 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/10 space-y-6"
+              className="bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2rem] p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/10 space-y-6"
               onClick={e => e.stopPropagation()}
               dir="rtl"
             >
@@ -627,7 +627,7 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/10 space-y-6"
+              className="bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2rem] p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 dark:border-white/10 space-y-6"
               onClick={e => e.stopPropagation()}
               dir="rtl"
             >

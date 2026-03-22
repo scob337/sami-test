@@ -76,10 +76,18 @@ export function Header() {
                   </Button>
                 </Link>
                 
-                {/* Notifications Dropdown */}
                 <div className="relative">
                   <button 
-                    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                    onClick={() => {
+                        setIsNotificationsOpen(!isNotificationsOpen)
+                        if (!isNotificationsOpen && unreadCount > 0) {
+                            // Optimistically mark as read in UI (this requires mutating SWR cache or ignoring, but SWR will revalidate)
+                            // We trigger the API
+                            fetch('/api/user/notifications/read', { method: 'POST' }).then(() => {
+                                notifications.forEach((n: any) => n.isRead = true);
+                            })
+                        }
+                    }}
                     className="relative p-2 text-slate-500 hover:text-blue-500 transition-colors"
                   >
                     <Bell className="w-5 h-5" />

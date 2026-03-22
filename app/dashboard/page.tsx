@@ -80,7 +80,7 @@ export default function DeepNavyDashboard() {
   const books = data?.books || []
   const payments = data?.payments || []
   const notifications = data?.notifications || []
-  const enrolledCourses = data?.courses || []
+  const enrolledCourses = data?.enrolledCourses || []
 
   // Memoized Stats
   const userStats = useMemo(() => {

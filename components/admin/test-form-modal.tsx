@@ -22,6 +22,9 @@ interface TestFormModalProps {
     name: string
     bookId: number
     isActive: boolean
+    seoTitle?: string | null
+    seoDescription?: string | null
+    seoKeywords?: string | null
   } | null
 }
 
@@ -29,6 +32,9 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
   const [name, setName] = useState(editTest?.name ?? '')
   const [bookId, setBookId] = useState(editTest?.bookId?.toString() ?? '')
   const [isActive, setIsActive] = useState(editTest?.isActive ?? true)
+  const [seoTitle, setSeoTitle] = useState(editTest?.seoTitle ?? '')
+  const [seoDescription, setSeoDescription] = useState(editTest?.seoDescription ?? '')
+  const [seoKeywords, setSeoKeywords] = useState(editTest?.seoKeywords ?? '')
   const [books, setBooks] = useState<Book[]>([])
   const [isSaving, setIsSaving] = useState(false)
 
@@ -36,6 +42,9 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
     setName(editTest?.name ?? '')
     setBookId(editTest?.bookId?.toString() ?? '')
     setIsActive(editTest?.isActive ?? true)
+    setSeoTitle(editTest?.seoTitle ?? '')
+    setSeoDescription(editTest?.seoDescription ?? '')
+    setSeoKeywords(editTest?.seoKeywords ?? '')
   }, [editTest, open])
 
   useEffect(() => {
@@ -51,7 +60,7 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
 
     try {
       setIsSaving(true)
-      const payload = { name, bookId, isActive }
+      const payload = { name, bookId, isActive, seoTitle, seoDescription, seoKeywords }
 
       const url = editTest ? `/api/admin/tests/${editTest.id}` : '/api/admin/tests'
       const method = editTest ? 'PUT' : 'POST'

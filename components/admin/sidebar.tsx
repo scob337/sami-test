@@ -21,9 +21,9 @@ import { motion } from 'framer-motion'
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/admin/dashboard' },
+  { icon: BookOpen, label: 'إدارة الكورسات', href: '/admin/courses' },
   { icon: BookOpen, label: 'إدارة الكتب', href: '/admin/books' },
   { icon: ClipboardList, label: 'إدارة الاختبارات', href: '/admin/tests' },
-  { icon: BookOpen, label: 'إدارة الكورسات', href: '/admin/courses' },
   { icon: HelpCircle, label: 'إدارة الأسئلة', href: '/admin/questions' },
   { icon: MessageSquare, label: 'إدارة التقارير والخبراء', href: '/admin/prompts' },
   { icon: MessageSquare, label: 'دعم العملاء', href: '/admin/support' },

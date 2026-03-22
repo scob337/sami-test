@@ -60,14 +60,17 @@ model Book {
 }
 
 model Test {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  book        Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId      Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  name           String
+  slug           String   @unique
+  description    String?  @db.Text
+  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  bookId         Int
+  isActive       Boolean  @default(true)
+  seoTitle       String?
+  seoDescription String?  @db.Text
+  seoKeywords    String?  @db.Text
+  createdAt      DateTime @default(now())
 
   questions Question[]
   attempts  Attempt[]
@@ -198,10 +201,13 @@ model Course {
   image            String?   // Main Thumbnail
   introVideoUrl    String?   // Free Intro Video
   introThumbnailUrl String?  // Intro Video Thumbnail
-  videoUrl720      String?  // 720p Intro Video
-  videoUrl1080     String?  // 1080p Intro Video
+  videoUrl720      String?   // 720p Intro Video
+  videoUrl1080     String?   // 1080p Intro Video
   price            Float     @default(0)
   isActive         Boolean   @default(true)
+  seoTitle         String?
+  seoDescription   String?   @db.Text
+  seoKeywords      String?   @db.Text
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

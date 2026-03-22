@@ -35,6 +35,9 @@ interface Course {
   videoUrl1080: string
   introThumbnailUrl: string
   isActive: boolean
+  seoTitle: string | null
+  seoDescription: string | null
+  seoKeywords: string | null
   discountCodes?: DiscountCode[]
 }
 
@@ -54,7 +57,10 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
     videoUrl720: '',
     videoUrl1080: '',
     introThumbnailUrl: '',
-    isActive: true
+    isActive: true,
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: ''
   })
 
   // Discount code state
@@ -74,7 +80,10 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
         videoUrl720: (course as any).videoUrl720 || '',
         videoUrl1080: (course as any).videoUrl1080 || '',
         introThumbnailUrl: course.introThumbnailUrl || '',
-        isActive: course.isActive ?? true
+        isActive: course.isActive ?? true,
+        seoTitle: course.seoTitle || '',
+        seoDescription: course.seoDescription || '',
+        seoKeywords: course.seoKeywords || ''
       })
     }
   }, [course])
@@ -568,6 +577,47 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
             checked={formData.isActive}
             onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
           />
+        </div>
+
+        {/* Section: SEO */}
+        <div className="pt-8 border-t border-slate-100 dark:border-slate-800/50 space-y-6">
+          <div className="flex items-center gap-2 text-indigo-500">
+            <Tag className="w-6 h-6" />
+            <h3 className="text-xl font-black">إعدادات محركات البحث (SEO)</h3>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800">
+            <div className="space-y-3">
+              <Label htmlFor="seoTitle" className="text-sm font-bold">العنوان (Meta Title)</Label>
+              <Input 
+                id="seoTitle"
+                placeholder="عنوان مخصص للبحث"
+                className="h-12 rounded-xl bg-white dark:bg-slate-900"
+                value={formData.seoTitle}
+                onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+              />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="seoDescription" className="text-sm font-bold">الوصف (Meta Description)</Label>
+              <Textarea 
+                id="seoDescription"
+                placeholder="وصف مختصر للارشفة في محركات البحث"
+                className="rounded-xl bg-white dark:bg-slate-900"
+                value={formData.seoDescription}
+                onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
+              />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="seoKeywords" className="text-sm font-bold">الكلمات المفتاحية (Keywords)</Label>
+              <Input 
+                id="seoKeywords"
+                placeholder="افصل بين كل كلمة بفاصلة (مثال: كورس, برمجة, تطوير)"
+                className="h-12 rounded-xl bg-white dark:bg-slate-900"
+                value={formData.seoKeywords}
+                onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end pt-4">

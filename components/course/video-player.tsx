@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { 
   Play, Pause, Volume2, VolumeX, Maximize, Minimize, 
-  Settings, Loader2, Volume1, Check
+  Settings, Loader2, Volume1, Check, Gauge
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Slider } from '@/components/ui/slider'
@@ -12,7 +12,6 @@ import {
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
@@ -66,12 +65,9 @@ export function VideoPlayer({
     }
   }, [src, autoPlay])
 
-  // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return
-
       switch (e.key.toLowerCase()) {
         case ' ':
         case 'k':
@@ -108,14 +104,14 @@ export function VideoPlayer({
 
   const togglePlay = () => {
     if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-        triggerCenterAnimation('pause')
-      } else {
+      if (videoRef.current.paused) {
         videoRef.current.play()
         triggerCenterAnimation('play')
+      } else {
+        videoRef.current.pause()
+        triggerCenterAnimation('pause')
       }
-      setIsPlaying(!isPlaying)
+      setIsPlaying(!videoRef.current.paused)
     }
   }
 
@@ -123,8 +119,6 @@ export function VideoPlayer({
     if (videoRef.current) {
       setCurrentTime(videoRef.current.currentTime)
       onTimeUpdate?.(videoRef.current.currentTime)
-
-      // Calculate buffered amount
       if (videoRef.current.buffered.length > 0) {
         const bufferedEnd = videoRef.current.buffered.end(videoRef.current.buffered.length - 1)
         setBuffered(bufferedEnd)
@@ -192,7 +186,7 @@ export function VideoPlayer({
   const skip = (seconds: number) => {
     if (videoRef.current) {
       videoRef.current.currentTime += seconds
-      triggerCenterAnimation('play') // Just to flash the icon
+      triggerCenterAnimation('play')
     }
   }
 
@@ -245,7 +239,6 @@ export function VideoPlayer({
         onEnded={onEnded}
       />
 
-      {/* Buffering Indicator */}
       <AnimatePresence>
         {isBuffering && (
           <motion.div 
@@ -259,7 +252,6 @@ export function VideoPlayer({
         )}
       </AnimatePresence>
 
-      {/* Center Play/Pause Flash Animation */}
       <AnimatePresence>
         {showPlayAnimation && !isBuffering && (
             <motion.div 
@@ -280,7 +272,6 @@ export function VideoPlayer({
         )}
       </AnimatePresence>
 
-      {/* YouTube-style Controls Overlay */}
       <AnimatePresence>
         {showControls && (
           <motion.div 
@@ -288,12 +279,12 @@ export function VideoPlayer({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-black/10 to-transparent z-30"
-            onClick={(e) => e.stopPropagation()} // Prevent clicking controls from playing/pausing video
+            className="absolute inset-0 flex flex-col justify-end pointer-events-none z-30"
             dir="ltr"
           >
-            <div className="w-full px-4 pb-2">
-                {/* Progress Bar (YouTube Style) */}
+            <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 via-black/10 to-transparent pointer-events-none" />
+
+            <div className="w-full px-4 pb-2 relative z-10 pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                 <div className="group/progress relative h-1.5 md:h-2 flex items-center cursor-pointer mb-2" 
                     onClick={(e) => {
                         if (videoRef.current && duration) {
@@ -303,34 +294,27 @@ export function VideoPlayer({
                         }
                     }}>
                     
-                    {/* Hover hit area (invisible but larger for easier clicking) */}
                     <div className="absolute inset-y-[-10px] inset-x-0 z-10" />
 
-                    {/* Background track */}
                     <div className="absolute inset-x-0 h-1 md:h-1.5 bg-white/20 group-hover/progress:h-1.5 md:group-hover/progress:h-2 transition-all rounded-full" />
                     
-                    {/* Buffered track */}
                     <div 
                         className="absolute left-0 h-1 md:h-1.5 bg-white/40 group-hover/progress:h-1.5 md:group-hover/progress:h-2 transition-all rounded-full" 
                         style={{ width: `${(buffered / duration) * 100}%` }}
                     />
                     
-                    {/* Red progress track */}
                     <div 
                         className="absolute left-0 h-1 md:h-1.5 bg-[#ff0000] group-hover/progress:h-1.5 md:group-hover/progress:h-2 transition-all rounded-full" 
                         style={{ width: `${(currentTime / duration) * 100}%` }}
                     />
                     
-                    {/* Scrubber thumb */}
                     <div 
                         className="absolute h-3 w-3 md:h-4 md:w-4 bg-[#ff0000] rounded-full scale-0 group-hover/progress:scale-100 transition-transform shadow-md z-20 pointer-events-none"
                         style={{ left: `calc(${(currentTime / duration) * 100}% - 6px)` }}
                     />
                 </div>
 
-                {/* Bottom Controls */}
                 <div className="flex items-center justify-between mt-1">
-                {/* Left side: Play, Volume, Time */}
                 <div className="flex items-center gap-2 md:gap-4">
                     <button 
                         onClick={(e) => { e.stopPropagation(); togglePlay(); }}
@@ -364,39 +348,14 @@ export function VideoPlayer({
                     </div>
                 </div>
 
-                {/* Right side: Settings, Fullscreen */}
                 <div className="flex items-center gap-1 md:gap-3">
-                    {/* Quality Selector (Settings Icon) */}
                     <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <button className="text-white hover:text-white/80 transition-colors p-1 md:p-2">
-                            <Settings className="w-4 h-4 md:w-5 md:h-5 hover:rotate-90 transition-transform duration-300" />
+                        <button className="text-white hover:text-white/80 transition-colors p-1 md:p-2 flex items-center gap-1">
+                            <Gauge className="w-4 h-4 md:w-5 md:h-5 hover:-rotate-45 transition-transform duration-300" />
                         </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-black/90 backdrop-blur-md border-white/10 text-white min-w-[150px] rounded-xl p-2 mb-2" align="end" onClick={e => e.stopPropagation()}>
-                        <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 mb-1 px-3">الجودة (Quality)</DropdownMenuLabel>
-                        <DropdownMenuItem 
-                            onClick={() => { setActiveSrc(src); setCurrentQuality('Auto') }}
-                            className={cn("rounded-lg cursor-pointer flex items-center justify-between py-2 focus:bg-white/10", currentQuality === 'Auto' && "text-[#ff0000]")}
-                        >
-                        <span className="font-bold text-xs">تلقائي (Auto)</span>
-                        {currentQuality === 'Auto' && <Check className="w-4 h-4" />}
-                        </DropdownMenuItem>
-                        
-                        {qualities.length > 0 && (
-                            qualities.map(q => (
-                                <DropdownMenuItem 
-                                    key={q.label}
-                                    onClick={() => changeQuality(q.label, q.url)}
-                                    className={cn("rounded-lg cursor-pointer flex items-center justify-between py-2 focus:bg-white/10", currentQuality === q.label && "text-[#ff0000]")}
-                                >
-                                    <span className="font-bold text-xs">{q.label}</span>
-                                    {currentQuality === q.label && <Check className="w-4 h-4" />}
-                                </DropdownMenuItem>
-                            ))
-                        )}
-
-                        <DropdownMenuSeparator className="bg-white/10 my-2" />
+                    <DropdownMenuContent className="bg-black/90 backdrop-blur-xl border-white/10 text-white min-w-[150px] rounded-xl p-2 mb-2 shadow-2xl" align="end" onClick={e => e.stopPropagation()}>
                         <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 mb-1 px-3">السرعة (Speed)</DropdownMenuLabel>
                         {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(speed => (
                             <DropdownMenuItem 
@@ -407,12 +366,43 @@ export function VideoPlayer({
                                         setPlaybackSpeed(speed)
                                     }
                                 }}
-                                className={cn("rounded-lg cursor-pointer flex items-center justify-between py-1.5 focus:bg-white/10", playbackSpeed === speed && "text-[#ff0000]")}
+                                className={cn("rounded-lg cursor-pointer flex items-center justify-between py-1.5 focus:bg-slate-500 hover:bg-slate-500 focus:text-[#ff0000] hover:text-[#ff0000] transition-colors gap-2", playbackSpeed === speed && "text-[#ff0000]")}
                             >
                                 <span className="font-bold text-xs">{speed === 1 ? 'العادي (Normal)' : speed}</span>
                                 {playbackSpeed === speed && <Check className="w-4 h-4" />}
                             </DropdownMenuItem>
                         ))}
+                    </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="text-white hover:text-white/80 transition-colors p-1 md:p-2">
+                            <Settings className="w-4 h-4 md:w-5 md:h-5 hover:rotate-90 transition-transform duration-300" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-black/90 backdrop-blur-xl border-white/10 text-white min-w-[150px] rounded-xl p-2 mb-2 shadow-2xl" align="end" onClick={e => e.stopPropagation()}>
+                        <DropdownMenuLabel className="text-[10px] font-black uppercase text-slate-400 mb-1 px-3">الجودة (Quality)</DropdownMenuLabel>
+                        <DropdownMenuItem 
+                            onClick={() => { setActiveSrc(src); setCurrentQuality('Auto') }}
+                            className={cn("rounded-lg cursor-pointer flex items-center justify-between py-2 focus:bg-slate-500 hover:bg-slate-500 focus:text-[#ff0000] hover:text-[#ff0000] transition-colors gap-2", currentQuality === 'Auto' && "text-[#ff0000]")}
+                        >
+                        <span className="font-bold text-xs">تلقائي (Auto)</span>
+                        {currentQuality === 'Auto' && <Check className="w-4 h-4" />}
+                        </DropdownMenuItem>
+                        
+                        {qualities.length > 0 && (
+                            qualities.map(q => (
+                                <DropdownMenuItem 
+                                    key={q.label}
+                                    onClick={() => changeQuality(q.label, q.url)}
+                                    className={cn("rounded-lg cursor-pointer flex items-center justify-between py-2 focus:bg-slate-500 hover:bg-slate-500 focus:text-[#ff0000] hover:text-[#ff0000] transition-colors gap-2", currentQuality === q.label && "text-[#ff0000]")}
+                                >
+                                    <span className="font-bold text-xs">{q.label}</span>
+                                    {currentQuality === q.label && <Check className="w-4 h-4" />}
+                                </DropdownMenuItem>
+                            ))
+                        )}
                     </DropdownMenuContent>
                     </DropdownMenu>
 

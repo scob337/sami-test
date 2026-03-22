@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { MessageCircle, Send, User, Search, CheckCheck, Loader2, BookOpen, Image as ImageIcon, Video, Trash2, X } from 'lucide-react'
+import { MessageCircle, Send, User, Search, CheckCheck, Loader2, BookOpen, Image as ImageIcon, Video, Trash2, X, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -35,12 +35,16 @@ export default function AdminSupportPage() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-    if (selectedSession) {
-      fetch('/api/chat/messages/read', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: selectedSession.id })
-      }).then(() => mutateSessions())
+    
+    if (selectedSession && messages) {
+      const hasUnread = messages.some((m: any) => !m.isAdmin && !m.isRead)
+      if (hasUnread) {
+        fetch('/api/chat/messages/read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: selectedSession.id })
+        }).then(() => mutateSessions())
+      }
     }
   }, [messages, selectedSession])
 
@@ -100,8 +104,11 @@ export default function AdminSupportPage() {
     <div className="flex h-[calc(100vh-120px)] bg-white dark:bg-slate-950 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
       
       {/* Sessions Sidebar */}
-      <div className="w-80 border-l border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-900/30">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+      <div className={cn(
+        "w-full lg:w-80 border-l border-slate-200 dark:border-slate-800 flex-col bg-slate-50/50 dark:bg-slate-900/30",
+        selectedSession ? "hidden lg:flex" : "flex"
+      )}>
+        <div className="p-4 lg:p-6 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-xl font-black mb-4">المحادثات</h2>
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -162,18 +169,29 @@ export default function AdminSupportPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className={cn(
+        "flex-1 flex-col min-w-0 h-full",
+        !selectedSession ? "hidden lg:flex" : "flex"
+      )}>
         {selectedSession ? (
           <>
             {/* Chat Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-950">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-black border border-blue-500/20">
+            <div className="p-4 lg:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-950">
+              <div className="flex items-center gap-2 lg:gap-4">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="lg:hidden shrink-0" 
+                  onClick={() => setSelectedSession(null)}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 font-black border border-blue-500/20 shrink-0">
                   {selectedSession.user.name?.[0]}
                 </div>
-                <div>
-                  <h3 className="font-black text-slate-900 dark:text-white leading-tight">{selectedSession.user.name}</h3>
-                  <p className="text-xs text-slate-500 font-medium">{selectedSession.user.email}</p>
+                <div className="truncate">
+                  <h3 className="font-black text-sm lg:text-base text-slate-900 dark:text-white leading-tight truncate">{selectedSession.user.name}</h3>
+                  <p className="text-[10px] lg:text-xs text-slate-500 font-medium truncate max-w-[120px] lg:max-w-none">{selectedSession.user.email}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -208,7 +226,7 @@ export default function AdminSupportPage() {
             {/* Messages history */}
             <div 
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-8 space-y-6 bg-slate-50/30 dark:bg-slate-950/20"
+              className="flex-1 overflow-y-auto p-4 lg:p-8 space-y-4 lg:space-y-6 bg-slate-50/30 dark:bg-slate-950/20"
             >
               {messages?.map((msg: any) => (
                 <div 
@@ -246,7 +264,7 @@ export default function AdminSupportPage() {
               ))}
             </div>
 
-            <div className="p-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 space-y-4">
+            <div className="p-4 lg:p-6 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 space-y-4">
               <AnimatePresence>
                 {activeUpload && (
                    <motion.div 
@@ -271,14 +289,14 @@ export default function AdminSupportPage() {
                 )}
               </AnimatePresence>
 
-              <form onSubmit={handleSendMessage} className="flex gap-4">
+              <form onSubmit={handleSendMessage} className="flex gap-2 lg:gap-4">
                 <div className="relative flex-1">
                   <input 
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="اكتب ردك هنا..."
+                    placeholder="اكتب ردك..."
                     disabled={sending || !!(activeUpload && activeUpload.status === 'uploading')}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl pr-6 pl-14 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                    className="w-full h-12 lg:h-14 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl lg:rounded-2xl pr-4 lg:pr-6 pl-12 lg:pl-14 py-2 lg:py-4 text-xs lg:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
                   />
                   <input 
                     type="file" 
@@ -291,18 +309,19 @@ export default function AdminSupportPage() {
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={activeUpload !== null}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors disabled:opacity-20"
+                    className="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors disabled:opacity-20 flex p-1"
                   >
-                    <ImageIcon className="w-5 h-5" />
+                    <ImageIcon className="w-4 h-4 lg:w-5 lg:h-5" />
                   </button>
                 </div>
                 <Button 
                   type="submit" 
+                  size="icon"
                   disabled={(!message.trim() && !activeUpload) || sending || !!(activeUpload && activeUpload.status === 'uploading')}
-                  className="h-14 px-8 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black shadow-xl shadow-blue-500/20 gap-3 transition-all active:scale-95"
+                  className="h-12 w-12 lg:w-auto lg:h-14 lg:px-8 bg-blue-600 hover:bg-blue-500 rounded-xl lg:rounded-2xl font-black shadow-xl shadow-blue-500/20 gap-3 transition-all active:scale-95 shrink-0"
                 >
-                  {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 rotate-180" />}
-                  إرسال الرد
+                  {sending ? <Loader2 className="w-4 h-4 lg:w-5 lg:h-5 animate-spin" /> : <Send className="w-4 h-4 lg:w-5 lg:h-5 lg:rotate-180" />}
+                  <span className="hidden lg:inline">إرسال الرد</span>
                 </Button>
               </form>
             </div>

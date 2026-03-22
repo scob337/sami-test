@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import { Bell } from 'lucide-react'
+import { SendNotificationModal } from '@/components/admin/send-notification-modal'
 
 interface UserDetail {
   id: number
@@ -31,7 +33,7 @@ interface UserDetail {
   avatarUrl?: string
   isAdmin: boolean
   createdAt: string
-  enrollments: any[]
+  courses: any[]
   attempts: any[]
   chatSessions: any[]
 }
@@ -39,6 +41,7 @@ interface UserDetail {
 export default function AdminUserDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { data: user, error, isLoading } = useSWR<UserDetail>(`/api/admin/users/${id}`, fetcher)
+  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false)
 
   if (isLoading) return (
     <div className="h-full flex items-center justify-center">
@@ -74,7 +77,13 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
           </div>
         </div>
         <div className="flex items-center gap-3">
-           <div className={cn(
+          <Button 
+            onClick={() => setIsNotifyModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-500 text-white rounded-xl gap-2 font-bold h-11 px-6 shadow-lg shadow-blue-500/20"
+          >
+            <Bell className="w-4 h-4" /> إرسال إشعار
+          </Button>
+          <div className={cn(
              "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest flex items-center gap-2",
              user.isAdmin ? "bg-amber-500/10 text-amber-600 border border-amber-500/20" : "bg-blue-500/10 text-blue-600 border border-blue-500/20"
            )}>
@@ -140,7 +149,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
           <div className="grid grid-cols-3 gap-4">
             <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 flex flex-col items-center gap-2">
               <BookOpen className="w-6 h-6 text-blue-500" />
-              <span className="text-2xl font-black">{user.enrollments?.length || 0}</span>
+              <span className="text-2xl font-black">{user.courses?.length || 0}</span>
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">كورس مشترك</span>
             </div>
             <div className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 flex flex-col items-center gap-2">
@@ -162,7 +171,7 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
                 <h3 className="text-lg font-black uppercase tracking-tight">الكورسات المشترك بها</h3>
              </div>
              <div className="grid gap-4">
-               {user.enrollments?.map((enroll: any) => (
+               {user.courses?.map((enroll: any) => (
                  <div key={enroll.id} className="p-6 rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between group hover:border-blue-500/50 transition-all">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden">
@@ -181,11 +190,14 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
                     </div>
                  </div>
                ))}
-               {!user.enrollments?.length && (
+               {!user.courses?.length && (
                  <p className="text-center py-10 text-slate-400 font-bold border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">لم يشترك في أي كورس بعد</p>
                )}
              </div>
           </div>
+
+          {/* Test Attempts */}
+          <div className="space-y-4">
 
               <div className="flex items-center gap-3 mb-2">
                  <ClipboardList className="w-5 h-5 text-emerald-500" />
@@ -224,8 +236,15 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
                   <p className="text-center py-10 text-slate-400 font-bold border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">لم يقم بإجراء أي اختبارات بعد</p>
                 )}
               </div>
+          </div>
         </div>
       </div>
+      
+      <SendNotificationModal 
+        isOpen={isNotifyModalOpen}
+        onClose={() => setIsNotifyModalOpen(false)}
+        user={user ? { id: user.id.toString(), name: user.name } : null}
+      />
     </div>
   )
 }

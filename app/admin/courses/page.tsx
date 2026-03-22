@@ -4,7 +4,7 @@ import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Button } from '@/components/ui/button'
-import { Plus, Edit, Trash2, Video, Users, Eye } from 'lucide-react'
+import { Plus, Edit, Trash2, Video, Users, Eye, BarChart } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 
@@ -76,6 +76,11 @@ export default function AdminCoursesPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Link href={`/admin/courses/${course.id}/stats`}>
+                <Button variant="outline" className="rounded-xl gap-2 font-bold h-11 border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/5">
+                  <BarChart className="w-4 h-4" /> إحصائيات
+                </Button>
+              </Link>
               <Link href={`/admin/courses/${course.id}/episodes`}>
                 <Button variant="outline" className="rounded-xl gap-2 font-bold h-11 border-blue-500/20 text-blue-500 hover:bg-blue-500/5">
                   <Video className="w-4 h-4" /> الحلقات

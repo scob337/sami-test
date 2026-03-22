@@ -24,7 +24,7 @@ export async function GET(
     const targetUser = await (prisma as any).user.findUnique({
       where: { id: numericId },
       include: {
-        enrollments: {
+        courses: {
           include: { course: { select: { title: true, image: true, price: true } } }
         },
         attempts: { // Use 'attempts' or 'testAttempts' based on schema

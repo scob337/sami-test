@@ -103,7 +103,7 @@ export default function RootLayout({
             </AuthInitializer>
           </div>
 
-          <Toaster position="top-center" richColors />
+          <Toaster position="bottom-right" richColors />
           <Footer/>
         </ThemeProvider>
       </body>

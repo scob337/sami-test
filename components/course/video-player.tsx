@@ -195,14 +195,27 @@ export function VideoPlayer({
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
         <AnimatePresence>
             {!isPlaying && !isBuffering && (
-                <motion.div 
-                    initial={{ scale: 0.8, opacity: 0 }}
+                <motion.button 
+                    initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 1.2, opacity: 0 }}
-                    className="w-20 h-20 rounded-full bg-blue-600/80 text-white flex items-center justify-center backdrop-blur-md shadow-2xl border border-white/20"
+                    exit={{ scale: 1.3, opacity: 0 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+                    className="relative group pointer-events-auto flex items-center justify-center focus:outline-none"
                 >
-                    <Play className="w-10 h-10 fill-current translate-x-1" />
-                </motion.div>
+                    {/* Glowing Pulse Rings */}
+                    <div className="absolute inset-0 rounded-full bg-blue-500/20 animate-ping duration-1000 group-hover:bg-blue-400/30" />
+                    <div className="absolute w-[150%] h-[150%] rounded-full bg-gradient-to-tr from-blue-600/20 to-cyan-400/20 blur-2xl group-hover:blur-3xl transition-all duration-500" />
+                    
+                    {/* Main Premium Button */}
+                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-xl border-2 border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex items-center justify-center overflow-hidden group-hover:border-white/40 group-hover:shadow-[0_8px_32px_rgba(59,130,246,0.3)] transition-all duration-300">
+                        {/* Dynamic Inner Gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/50 to-cyan-400/50 opacity-60 group-hover:opacity-90 transition-opacity duration-300" />
+                        
+                        <Play className="w-8 h-8 sm:w-10 sm:h-10 text-white fill-white translate-x-1 drop-shadow-lg relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                    </div>
+                </motion.button>
             )}
         </AnimatePresence>
       </div>

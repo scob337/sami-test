@@ -91,7 +91,7 @@ function CheckoutContent() {
   }, [])
 
   useEffect(() => {
-    if (item && (window as any).Moyasar) {
+    if (item && (window as any).Moyasar && finalPrice > 0) {
         const amount = finalPrice * 100 // Moyasar uses subunits
         const callbackUrl = `${window.location.origin}/api/payment/verify`
         
@@ -261,7 +261,49 @@ function CheckoutContent() {
                     </div>
                   </div>
                   
-                  <div className="mysr-form min-h-[300px] w-full overflow-hidden"></div>
+                  {finalPrice === 0 ? (
+                      <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-3xl">
+                          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                          </div>
+                          <div className="text-center space-y-2">
+                              <h3 className="text-xl font-black text-slate-900 dark:text-white">طلب مجاني بالكامل</h3>
+                              <p className="text-sm font-bold text-slate-500">تم تطبيق الخصم 100%. يمكنك إتمام الطلب مجانًا الآن.</p>
+                          </div>
+                          <Button
+                              size="lg"
+                              className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto px-12 h-14 rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1"
+                              disabled={isLoading}
+                              onClick={async () => {
+                                  try {
+                                      setIsLoading(true);
+                                      const res = await fetch('/api/payment/free', {
+                                          method: 'POST',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify({
+                                              attemptId: id,
+                                              itemId: id,
+                                              testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
+                                              userId: user?.id,
+                                              kind: item.kind,
+                                              discountCodeId: appliedDiscount?.id || null
+                                          })
+                                      });
+                                      if (!res.ok) throw new Error();
+                                      const { redirectUrl } = await res.json();
+                                      if (redirectUrl) router.push(redirectUrl);
+                                  } catch (e) {
+                                      toast.error('حدث خطأ أثناء إتمام الطلب');
+                                      setIsLoading(false);
+                                  }
+                              }}
+                          >
+                              {isLoading ? <LoadingSpinner size="sm" /> : 'الحصول على الخدمة مجانًا'}
+                          </Button>
+                      </div>
+                  ) : (
+                      <div className="mysr-form min-h-[300px] w-full overflow-hidden"></div>
+                  )}
 
                   <div className="flex items-start gap-3 md:gap-4 p-5 md:p-6 rounded-2xl md:rounded-3xl bg-blue-500/5 border border-blue-500/10 text-blue-300">
                     <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5" />

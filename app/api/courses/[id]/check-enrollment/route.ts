@@ -15,6 +15,13 @@ export async function GET(
     }
 
     const { id } = await params;
+    
+    let courseId = parseInt(id);
+    if (isNaN(courseId)) {
+      const course = await prisma.course.findUnique({ where: { slug: id }, select: { id: true } });
+      if (!course) return NextResponse.json({ isEnrolled: false });
+      courseId = course.id;
+    }
 
     const dbUser = await prisma.user.findUnique({
       where: { email: user.email },
@@ -29,7 +36,7 @@ export async function GET(
     const enrollment = await prisma.payment.findFirst({
       where: {
         userId: dbUser.id,
-        courseId: parseInt(id),
+        courseId: courseId,
         status: 'COMPLETED'
       }
     })
@@ -39,7 +46,7 @@ export async function GET(
       where: {
         userId_courseId: {
           userId: dbUser.id,
-          courseId: parseInt(id)
+          courseId: courseId
         }
       }
     })

@@ -8,8 +8,12 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const courseId = parseInt(id)
-    if (isNaN(courseId)) return new NextResponse('Invalid ID', { status: 400 })
+    let courseId = parseInt(id)
+    if (isNaN(courseId)) {
+      const course = await prisma.course.findUnique({ where: { slug: id }, select: { id: true } })
+      if (!course) return new NextResponse('Invalid ID or Slug', { status: 400 })
+      courseId = course.id
+    }
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -71,8 +75,12 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const courseId = parseInt(id)
-    if (isNaN(courseId)) return new NextResponse('Invalid ID', { status: 400 })
+    let courseId = parseInt(id)
+    if (isNaN(courseId)) {
+      const course = await prisma.course.findUnique({ where: { slug: id }, select: { id: true } })
+      if (!course) return new NextResponse('Invalid ID or Slug', { status: 400 })
+      courseId = course.id
+    }
 
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()

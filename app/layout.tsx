@@ -9,7 +9,6 @@ const cairo = Cairo({
   display: 'swap',
   weight: ['300', '400', '500', '600', '700', '800', '900'],
 })
-import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthInitializer } from '@/components/providers/auth-initializer'
@@ -105,7 +104,6 @@ export default function RootLayout({
           </div>
 
           <Toaster position="top-center" richColors />
-          <Analytics />
           <Footer/>
         </ThemeProvider>
       </body>

@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        message: 'تم التسجيل بنجاح. يرجى التحقق من رقم الهاتف',
+        message: 'تم التسجيل بنجاح',
         user: authData.user,
         session: authData.session,
       },

@@ -9,7 +9,7 @@ export default function AboutPage() {
           <div className="prose prose-invert max-w-none text-center">
             <h1 className="text-4xl md:text-5xl font-black mb-8">حول الخدمة</h1>
             <p className="text-xl text-blue-100 leading-relaxed mb-12">
-              سامي تست هو منصة متقدمة تهدف إلى مساعدتك في اكتشاف نمط شخصيتك وتطوير مهاراتك من خلال اختبارات علمية دقيقة وكورسات تعليمية متخصصة.
+              7Types هو منصة متقدمة تهدف إلى مساعدتك في اكتشاف نمط شخصيتك وتطوير مهاراتك من خلال اختبارات علمية دقيقة وكورسات تعليمية متخصصة.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-right">
               <div className="bg-white/5 p-8 rounded-2xl border border-white/10">

@@ -2,13 +2,13 @@ import { Metadata } from 'next'
 import { HeroSection } from '@/components/home/hero-section'
 
 export const metadata: Metadata = {
-  title: 'Sami-Test - اكتشف نمط شخصيتك بعمق',
+  title: '7Types - اكتشف نمط شخصيتك بعمق',
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على أحدث المناهج العلمية. احصل على تقرير شامل وتوصيات مخصصة من الخبراء.',
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://Sami-Test.app',
-    title: 'Sami-Test - اكتشف نمط شخصيتك بعمق',
+    url: 'https://7types.app',
+    title: '7Types - اكتشف نمط شخصيتك بعمق',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم بإشراف الخبراء',
   },
 }

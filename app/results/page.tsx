@@ -1,7 +1,6 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { Footer } from '@/components/layout/footer'
 import { useTestStore } from '@/lib/store/test-store'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import Link from 'next/link'
@@ -368,7 +367,6 @@ export default function ResultsPage() {
 
         </div>
       </div>
-      <Footer />
 
       {/* Share Popup */}
       <AnimatePresence>

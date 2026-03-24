@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
 import { Card } from '@/components/ui/card'
@@ -139,7 +138,6 @@ export default function BooksPage() {
           </div>
         </Container>
       </Section>
-      <Footer />
     </main>
   )
 }

@@ -29,12 +29,13 @@ export function HeroSection() {
                 {/* Typography */}
                 <div className="space-y-4">
                     <motion.h1
+                    dir='ltr'
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-5xl md:text-6xl font-bold text-white tracking-tight"
                     >
-                        اختبار سامي
+                        7 Types
                     </motion.h1>
                     <motion.h2
                         initial={{ y: 20, opacity: 0 }}

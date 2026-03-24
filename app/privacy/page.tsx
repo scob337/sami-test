@@ -1,10 +1,9 @@
-import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'سياسة الخصوصية - Sami-Test',
+  title: 'سياسة الخصوصية - 7Types',
   description: 'سياسة الخصوصية والحماية الخاصة بنا',
 }
 
@@ -65,7 +64,7 @@ export default function PrivacyPage() {
                 <h2 className="text-2xl font-bold mb-4">حقوقك</h2>
                 <p className="text-muted-foreground leading-relaxed">
                   لديك الحق في الوصول إلى بيانات شخصية وتصحيحها وحذفها. للقيام بذلك،
-                  يرجى الاتصال بنا على support@Sami-Test.app
+                  يرجى الاتصال بنا على support@7types.app
                 </p>
               </div>
 
@@ -80,7 +79,6 @@ export default function PrivacyPage() {
           </div>
         </Container>
       </Section>
-      <Footer />
     </main>
   )
 }

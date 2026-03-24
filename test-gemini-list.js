@@ -1,28 +1,15 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
 const dotenv = require('dotenv');
 dotenv.config();
 
 async function listModels() {
+  const apiKey = process.env.GOOGLE_AI_API_KEY;
   try {
-    const apiKey = "AIzaSyCyyNMN7MfpzTMZktK_ViQLtUaxzl-A2T8";
-    const genAI = new GoogleGenerativeAI(apiKey);
-    
-    // There isn't a simple listModels in the main genAI object usually in this way
-    // but we can try a simple query with gemini-1.5-flash-latest or gemini-pro
-    
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    const result = await model.generateContent("Hi");
-    console.log("Success with gemini-1.5-flash");
-  } catch (error) {
-    console.error('Error:', error.message);
-    try {
-        const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-        const result = await model.generateContent("Hi");
-        console.log("Success with gemini-pro");
-    } catch (e2) {
-        console.error('Error with gemini-pro:', e2.message);
-    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+    const res = await axios.get(url);
+    console.log('Available Models:', JSON.stringify(res.data, null, 2));
+  } catch (e) {
+    console.log(`[FAIL] ListModels: ${e.response?.status} ${JSON.stringify(e.response?.data?.error || e.message)}`);
   }
 }
-
 listModels();

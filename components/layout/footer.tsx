@@ -32,9 +32,12 @@ export function Footer() {
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
-            <p className="text-white/60 text-xs font-semibold tracking-wider">
-              {currentYear} Sami-Test
-            </p>
+            <div className="flex items-center gap-3">
+              <img src="/icon.png" alt="SAMI Test" className="w-8 h-8 rounded-lg shadow-lg shadow-blue-500/20" />
+              <p className="text-white/60 text-xs font-semibold tracking-wider">
+                {currentYear} 7Types
+              </p>
+            </div>
             <div className="flex gap-6 text-white/60 text-xs font-semibold tracking-wider">
               <Link href="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link>
               <Link href="/terms" className="hover:text-white transition-colors">شروط الخدمة</Link>

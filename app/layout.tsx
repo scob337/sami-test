@@ -27,26 +27,31 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Sami-Test - اختبر شخصيتك الآن',
+  title: '7Types - اختبر شخصيتك الآن',
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي. احصل على تقرير شامل وتوصيات مخصصة.',
   generator: 'Next.js 16',
-  keywords: ['اختبار الشخصية', 'تحليل الشخصية', 'AI', 'الذكاء الاصطناعي', 'personality test'],
-  authors: [{ name: 'Sami-Test Team' }],
-  creator: 'Sami-Test',
-  publisher: 'Sami-Test',
+  keywords: ['اختبار الشخصية', 'تحليل الشخصية', '7Types', 'الذكاء الاصطناعي', 'personality test'],
+  authors: [{ name: '7Types Team' }],
+  creator: '7Types',
+  publisher: '7Types',
   robots: 'index, follow',
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://Sami-Test.app',
-    siteName: 'Sami-Test',
-    title: 'Sami-Test - اختبر شخصيتك الآن',
+    url: 'https://7types.app',
+    siteName: '7Types',
+    title: '7Types - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sami-Test - اختبر شخصيتك الآن',
+    title: '7Types - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
+  },
+  icons: {
+    icon: '/icon.png',
+    shortcut: '/icon.png',
+    apple: '/icon.png',
   },
 }
 
@@ -103,7 +108,7 @@ export default function RootLayout({
             </AuthInitializer>
           </div>
 
-          <Toaster position="bottom-right" richColors />
+          <Toaster position="bottom-left" dir="rtl" richColors />
           <Footer/>
         </ThemeProvider>
       </body>

@@ -17,7 +17,7 @@ export default function FeaturesPage() {
       <Section size="lg">
         <Container>
           <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-black mb-6">مميزات سامي تست</h1>
+            <h1 className="text-4xl md:text-5xl font-black mb-6">مميزات 7Types</h1>
             <p className="text-xl text-blue-100 max-w-2xl mx-auto">نقدم لك مجموعة متكاملة من الأدوات لفهم شخصيتك وتطوير ذاتك.</p>
           </div>
           

@@ -3,23 +3,22 @@
 import { useEffect, useState, Suspense, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Footer } from '@/components/layout/footer'
 import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-
 import {
   CreditCard,
-  ShieldCheck,
   Zap,
   BookOpen,
   ChevronRight,
   Lock,
-  CheckCircle2
+  CheckCircle2,
+  Star
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/auth-store'
+import { CustomPaymentForm } from '@/components/checkout/custom-payment-form'
 
 type ItemType = 'book' | 'test' | 'course'
 
@@ -34,7 +33,7 @@ interface CheckoutItem {
 export default function CheckoutPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center bg-[#050B1A]">
         <LoadingSpinner size="lg" />
       </div>
     }>
@@ -66,69 +65,6 @@ function CheckoutContent() {
     }
     return Math.max(0, item.price - appliedDiscount.amount)
   }, [item, appliedDiscount])
-
-  useEffect(() => {
-    // Load Moyasar Script
-
-    const moyasarScript = document.createElement('script')
-    moyasarScript.src = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.js'
-    moyasarScript.async = true
-    document.head.appendChild(moyasarScript)
-
-    const moyasarStyle = document.createElement('link')
-    moyasarStyle.rel = 'stylesheet'
-    moyasarStyle.href = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.css'
-    document.head.appendChild(moyasarStyle)
-
-    return () => {
-      document.head.removeChild(moyasarScript)
-      document.head.removeChild(moyasarStyle)
-    }
-  }, [])
-
-  useEffect(() => {
-    let initTimeout: NodeJS.Timeout;
-    if (item && (window as any).Moyasar && finalPrice > 0) {
-        initTimeout = setTimeout(() => {
-            if (!document.querySelector('.mysr-form')) return;
-
-            const amount = finalPrice * 100 // Moyasar uses subunits
-            const callbackUrl = `${window.location.origin}/api/payment/verify`
-            
-            try {
-                (window as any).Moyasar.init({
-                    element: '.mysr-form',
-                    amount: Math.round(amount),
-                    currency: 'SAR',
-                    language: 'ar',
-                    description: item.title,
-                    publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
-                    callback_url: callbackUrl,
-                    methods: ['creditcard', 'applepay', 'stcpay'],
-                    apple_pay: {
-                        label: 'SAMI Test',
-                        validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
-                        country: 'SA' // typically SA for Moyasar Apple Pay
-                    },
-                metadata: {
-                    attemptId: id,
-                    itemId: id,
-                    testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
-                    userId: user?.id,
-                    kind: item.kind,
-                    discountCodeId: appliedDiscount?.id || null
-                }
-            })
-        } catch (err) {
-            console.error('Moyasar Init Error:', err)
-        }
-        }, 100);
-    }
-    
-    return () => {
-        if (initTimeout) clearTimeout(initTimeout);
-    }
-  }, [item, finalPrice, id, user, appliedDiscount])
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -213,229 +149,254 @@ function CheckoutContent() {
 
   if (!item) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#050B1A]">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
+  const benefits = [
+    'وصول فوري: كل أدوات الذكاء الاصطناعي في مكان واحد.',
+    'بلا مخاطرة: ضمان استرجاع الأموال خلال ٧ أيام.',
+    'حرية كاملة: إلغاء الاشتراك في أي وقت بضغطة زر.'
+  ]
+
   return (
-    <main className="min-h-screen flex flex-col bg-slate-50 dark:bg-[#050B1A] relative overflow-hidden" dir="rtl">
-      
-      {/* Premium Background Ornaments */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[5%] left-[-10%] w-[500px] h-[500px] bg-purple-600/10 blur-[100px] rounded-full" />
-        <div className="absolute top-[30%] left-[20%] w-[300px] h-[300px] bg-emerald-500/5 blur-[80px] rounded-full" />
-      </div>
-
-      <div className="flex-1 relative z-10 pt-32 pb-20">
-        <Container>
-          <div className="max-w-6xl mx-auto">
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="grid lg:grid-cols-12 gap-8 items-start"
-            >
-              <div className="lg:col-span-7 space-y-6 md:space-y-8 order-last lg:order-first">
-                <div className="space-y-4 md:space-y-6">
-                  <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-slate-400 hover:text-blue-400 font-bold transition-all group w-fit text-sm"
-                  >
-                    <ChevronRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
-                    العودة
-                  </button>
-                  <div className="space-y-2">
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
-                        إتمام <span className="text-blue-500">الطلب</span>
-                    </h1>
-                    <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 font-medium max-w-xl leading-relaxed">
-                        أنت على بعد لحظات من الحصول على تحليلك العميق. بياناتك مشفرة وآمنة تماماً.
-                    </p>
-                  </div>
+    <main className="min-h-screen flex flex-col bg-[#050B1A] font-cairo" dir="rtl">
+      <div className="flex-1 py-12 px-4 md:py-20 flex flex-col items-center">
+        {/* Progress Bar Component */}
+        <div className="w-full max-w-[480px] mb-12 flex items-center justify-between px-2">
+            <div className="relative group">
+                <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-black text-lg shadow-lg shadow-amber-500/30 transition-transform hover:scale-110">2</div>
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 font-black tracking-widest uppercase whitespace-nowrap">الدفاع عن الذات</div>
+            </div>
+            <div className="flex-1 h-1.5 mx-4 bg-slate-800 rounded-full overflow-hidden">
+                <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: '100%' }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
+                />
+            </div>
+            <div className="relative group">
+                <div className="w-10 h-10 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center text-amber-500/50 font-black text-lg">
+                    <CheckCircle2 className="w-6 h-6" />
                 </div>
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-black tracking-widest uppercase opacity-50">تمت</div>
+            </div>
+        </div>
 
-                <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/[0.08] shadow-2xl shadow-black/5 dark:shadow-black/40 space-y-8 md:space-y-10">
-                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/5 pb-6 md:pb-8">
-                    <div className="flex items-center gap-3 md:gap-4">
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                        <CreditCard className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
-                      </div>
-                      <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white">طريقة الدفع</h3>
-                    </div>
-                  </div>
-                  
-                  {!user ? (
-                      <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-slate-50 dark:bg-white/5 rounded-3xl border border-slate-200 dark:border-white/10 text-center">
-                          <Lock className="w-12 h-12 text-slate-400" />
-                          <div className="space-y-2">
-                              <h3 className="text-xl font-black text-slate-900 dark:text-white">تسجيل الدخول مطلوب</h3>
-                              <p className="text-sm font-bold text-slate-500 max-w-sm mx-auto">سجل دخولك أو أنشئ حساباً جديداً لإتمام عملية الدفع والوصول إلى المحتوى.</p>
-                          </div>
-                          <Button
-                              size="lg"
-                              className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto px-10 h-14 rounded-2xl font-black text-lg shadow-xl shadow-blue-600/20"
-                              onClick={() => {
-                                  const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                                  router.push(`/auth/login?redirect=${currentUrl}`);
-                              }}
-                          >
-                              تسجيل الدخول
-                          </Button>
-                      </div>
-                  ) : finalPrice === 0 ? (
-                      <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 border border-emerald-500/20 rounded-3xl">
-                          <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
-                              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                          </div>
-                          <div className="text-center space-y-2">
-                              <h3 className="text-xl font-black text-slate-900 dark:text-white">طلب مجاني بالكامل</h3>
-                              <p className="text-sm font-bold text-slate-500">تم تطبيق الخصم 100%. يمكنك إتمام الطلب مجانًا الآن.</p>
-                          </div>
-                          <Button
-                              size="lg"
-                              className="bg-emerald-500 hover:bg-emerald-600 w-full sm:w-auto px-12 h-14 rounded-2xl font-black text-lg shadow-xl shadow-emerald-500/20 transition-all hover:-translate-y-1"
-                              disabled={isLoading}
-                              onClick={async () => {
-                                  try {
-                                      setIsLoading(true);
-                                      const res = await fetch('/api/payment/free', {
-                                          method: 'POST',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify({
-                                              attemptId: id,
-                                              itemId: id,
-                                              testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
-                                              userId: user?.id,
-                                              kind: item.kind,
-                                              discountCodeId: appliedDiscount?.id || null
-                                          })
-                                      });
-                                      if (!res.ok) throw new Error();
-                                      const { redirectUrl } = await res.json();
-                                      if (redirectUrl) router.push(redirectUrl);
-                                  } catch (e) {
-                                      toast.error('حدث خطأ أثناء إتمام الطلب');
-                                      setIsLoading(false);
-                                  }
-                              }}
-                          >
-                              {isLoading ? <LoadingSpinner size="sm" /> : 'الحصول على الخدمة مجانًا'}
-                          </Button>
-                      </div>
-                  ) : (
-                      <div className="mysr-form min-h-[300px] w-full overflow-hidden"></div>
-                  )}
+        {/* Header Section */}
+        <div className="text-center space-y-4 mb-12">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">جاهز لبداية التجربة؟</h1>
+            <p className="text-slate-400 font-bold text-lg md:text-xl italic max-w-2xl mx-auto">
+                مرحباً <span className="text-amber-500">{user?.name?.split(' ')[0] || 'Sam'}</span>! خطوة واحدة وتبدأ فوراً في رحلة تطوير ذاتك.
+            </p>
+        </div>
 
-                  <div className="flex items-start gap-3 md:gap-4 p-5 md:p-6 rounded-2xl md:rounded-3xl bg-blue-500/5 border border-blue-500/10 text-blue-300">
-                    <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 shrink-0 mt-0.5" />
-                    <div className="space-y-1">
-                        <p className="text-xs md:text-sm font-black">حماية فائقة للبيانات</p>
-                        <p className="text-[10px] md:text-xs font-bold leading-relaxed opacity-70">يتم معالجة كافة المدفوعات عبر بوابات مشفرة بمعايير عالمية.</p>
-                    </div>
-                  </div>
+        {/* Main Checkout Card */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="w-full max-w-[580px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[48px] p-8 md:p-12 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] space-y-10 relative overflow-hidden"
+        >
+          {/* Decorative Corner Glow */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+
+          {/* Benefits Section */}
+          <div className="space-y-5">
+            {benefits.map((benefit, i) => (
+              <motion.div 
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + 0.1 * i }}
+                className="flex items-start gap-4"
+              >
+                <div className="mt-1 w-6 h-6 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0 border border-emerald-500/20">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                 </div>
-              </div>
-
-              <div className="lg:col-span-5 pb-12 lg:pb-0 order-first lg:order-none">
-                <div className="lg:sticky lg:top-32 space-y-6">
-                  <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] border border-slate-200 dark:border-white/[0.08] shadow-2xl shadow-black/5 dark:shadow-black/40 space-y-6 md:space-y-8">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">ملخص الطلب</h2>
-                        <span className="bg-blue-500/10 text-blue-500 dark:text-blue-400 px-3 py-1 rounded-full text-[10px] md:text-xs font-black">قيد التنفيذ</span>
-                    </div>
-
-                    <div className="p-4 md:p-6 rounded-2xl md:rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 space-y-4 md:space-y-6">
-                      <div className="flex items-start gap-4 md:gap-5">
-                        <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-blue-400 shrink-0 border border-white/5">
-                          {item.kind === 'test' ? <Zap className="w-6 h-6 md:w-8 md:h-8" /> : item.kind === 'course' ? <BookOpen className="w-6 h-6 md:w-8 md:h-8 text-emerald-400" /> : <BookOpen className="w-6 h-6 md:w-8 md:h-8" />}
-                        </div>
-                        <div className="space-y-1 pt-1">
-                          <div className="font-black text-base md:text-lg text-slate-900 dark:text-white leading-tight">{item.title}</div>
-                          <div className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
-                            {item.description}
-                          </div>
-                        </div>
-                      </div>
-
-                      {item.kind === 'book' && item.data?.tests && (
-                        <div className="space-y-3 md:space-y-4 pt-4 border-t border-white/5">
-                          <label className="text-[9px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">اختر الاختبار المرتبط</label>
-                          <div className="grid gap-2">
-                            {item.data.tests.map((test: any) => (
-                              <button
-                                key={test.id}
-                                onClick={() => setSelectedTestId(test.id)}
-                                className={cn(
-                                  "flex items-center justify-between p-3 md:p-4 rounded-xl md:rounded-2xl border-2 transition-all font-bold text-xs md:text-sm",
-                                  selectedTestId === test.id
-                                    ? "border-blue-500 bg-blue-500/10 text-blue-500 dark:text-blue-400 shadow-lg shadow-blue-500/5"
-                                    : "border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/10"
-                                )}
-                              >
-                                <span>{test.name}</span>
-                                {selectedTestId === test.id && <CheckCircle2 className="w-3 h-3 md:w-4 md:h-4" />}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4 pt-4 md:pt-6 border-t border-slate-200 dark:border-white/5">
-                        <label className="text-[10px] font-black text-slate-600 dark:text-slate-500 uppercase tracking-widest">كود الخصم</label>
-                        <div className="flex gap-2">
-                            <input 
-                                type="text"
-                                placeholder="ادخل الكود هنا..."
-                                value={discountCode}
-                                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                                className="flex-1 h-12 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 text-slate-900 dark:text-white font-bold outline-none focus:border-blue-500 transition-all"
-                            />
-                            <Button 
-                                onClick={handleApplyDiscount}
-                                disabled={isValidatingDiscount || !discountCode}
-                                className="h-12 px-6 bg-blue-600 rounded-xl font-black"
-                            >
-                                {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق'}
-                            </Button>
-                        </div>
-                        {appliedDiscount && (
-                            <div className="flex items-center justify-between text-xs font-bold text-emerald-400 bg-emerald-500/10 p-3 rounded-xl">
-                                <span>تم تطبيق خصم: {appliedDiscount.amount}{appliedDiscount.type === 'PERCENTAGE' ? '%' : ' ر.س'}</span>
-                                <button onClick={() => setAppliedDiscount(null)} className="text-white/50 hover:text-white">إلغاء</button>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="space-y-3 md:space-y-4 font-bold text-slate-700 dark:text-slate-300 text-sm md:text-base">
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">سعر الخدمة</span>
-                        <span className={cn("text-slate-900 dark:text-white", appliedDiscount && "line-through opacity-50")}>{item.price} ر.س</span>
-                      </div>
-                      {appliedDiscount && (
-                        <div className="flex justify-between items-center text-emerald-500 dark:text-emerald-400">
-                            <span>الخصم</span>
-                            <span>-{Math.round(item.price - finalPrice)} ر.س</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">الضريبة (15%)</span>
-                        <span className="text-slate-900 dark:text-white">0.00 ر.س</span>
-                      </div>
-                      <div className="pt-4 md:pt-6 border-t border-slate-200 dark:border-white/5 flex justify-between items-center">
-                        <span className="text-lg md:text-xl font-black text-slate-900 dark:text-white">الإجمالي النهائي</span>
-                        <span className="text-2xl md:text-3xl font-black text-blue-500">{Math.round(finalPrice)} ر.س</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+                <p className="text-sm md:text-lg font-bold text-slate-200 leading-relaxed">{benefit}</p>
+              </motion.div>
+            ))}
           </div>
-        </Container>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
+
+          {/* Pricing Summary Box */}
+          <div className="w-full bg-slate-900/40 border border-white/5 rounded-3xl p-6 text-center space-y-1 transform hover:scale-[1.02] transition-transform">
+            <p className="text-slate-400 text-sm font-bold tracking-widest uppercase">المبلغ الإجمالي</p>
+            <div className="flex items-center justify-center gap-2">
+                <h2 className="text-4xl md:text-5xl font-black text-amber-500 tracking-tighter">{Math.round(finalPrice)}.00</h2>
+                <span className="text-xl font-black text-amber-500/70 pt-2">ر.س</span>
+            </div>
+          </div>
+
+          {!user ? (
+              <div className="flex flex-col items-center justify-center p-10 space-y-6 bg-white/5 rounded-[32px] border border-white/10 text-center">
+                  <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
+                    <Lock className="w-10 h-10 text-slate-400" />
+                  </div>
+                  <div className="space-y-2">
+                      <h3 className="text-2xl font-black text-white">تسجيل الدخول مطلوب</h3>
+                      <p className="text-base font-bold text-slate-400 max-w-[280px]">سجل دخولك أو أنشئ حساباً جديداً لإتمام عملية الدفع والوصول لتقريرك.</p>
+                  </div>
+                  <Button
+                      size="lg"
+                      className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto px-12 h-16 rounded-2xl font-black text-xl shadow-xl shadow-blue-600/20 transition-all active:scale-95"
+                      onClick={() => {
+                          const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
+                          router.push(`/auth/login?redirect=${currentUrl}`);
+                      }}
+                  >
+                      تسجيل الدخول الآن
+                  </Button>
+              </div>
+          ) : finalPrice === 0 ? (
+              <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[32px]">
+                  <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 animate-pulse">
+                      <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                  </div>
+                  <div className="text-center space-y-2">
+                      <h3 className="text-2xl font-black text-white">طلب مجاني بالكامل</h3>
+                      <p className="text-base font-bold text-slate-400">تم تطبيق الخصم 100%. يمكنك الحصول على التقرير فوراً.</p>
+                  </div>
+                  <Button
+                      size="lg"
+                      className="bg-emerald-500 hover:bg-emerald-600 w-full px-12 h-16 rounded-2xl font-black text-xl shadow-xl shadow-emerald-500/20 transition-all"
+                      disabled={isLoading}
+                      onClick={async () => {
+                          try {
+                              setIsLoading(true);
+                              const res = await fetch('/api/payment/free', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                      attemptId: id,
+                                      itemId: id,
+                                      testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
+                                      userId: user?.id,
+                                      kind: item.kind,
+                                      discountCodeId: appliedDiscount?.id || null
+                                  })
+                              });
+                              if (!res.ok) throw new Error();
+                              const { redirectUrl } = await res.json();
+                              if (redirectUrl) router.push(redirectUrl);
+                          } catch (e) {
+                              toast.error('حدث خطأ أثناء إتمام الطلب');
+                              setIsLoading(false);
+                          }
+                      }}
+                  >
+                      {isLoading ? <LoadingSpinner size="sm" /> : 'ابدأ الآن مجاناً'}
+                  </Button>
+              </div>
+          ) : (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+                <div className="flex items-center gap-3 text-white">
+                    <CreditCard className="w-7 h-7 text-amber-500" />
+                    <span className="text-xl font-black tracking-tight">بيانات البطاقة البنكية</span>
+                </div>
+
+                <CustomPaymentForm 
+                  amount={finalPrice}
+                  description={item.title}
+                  metadata={{
+                    attemptId: id,
+                    itemId: id,
+                    testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
+                    userId: user?.id,
+                    kind: item.kind,
+                    discountCodeId: appliedDiscount?.id || null
+                  }}
+                  onSuccess={(payment) => {
+                    toast.success('تمت عملية الدفع بنجاح!')
+                    router.push(`/api/payment/verify?id=${payment.id}&status=${payment.status}`)
+                  }}
+                />
+                
+                <div className="flex flex-col items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500 opacity-80">
+                    <span>مدفوعات مشفرة وآمنة تماماً عبر</span>
+                    <div className="flex items-center gap-1.5 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
+                        <span className="text-slate-200 font-black text-sm tracking-tighter">Stripe</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          )}
+
+          {/* Review Section */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-[32px] p-8 md:p-10 space-y-6 relative group">
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                <div className="flex flex-col items-center md:items-start space-y-1">
+                    <div className="flex gap-1 mb-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className="w-5 h-5 fill-amber-500 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                        ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-2xl font-black text-white">4.9/5</span>
+                        <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">(+450 مستخدم راضٍ)</span>
+                    </div>
+                </div>
+                <div className="h-10 w-px bg-white/10 hidden md:block" />
+                <div className="flex -space-x-3 space-x-reverse">
+                    {[1,2,3,4].map(i => (
+                        <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050B1A] bg-slate-800 overflow-hidden">
+                            <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" className="w-full h-full object-cover" />
+                        </div>
+                    ))}
+                    <div className="w-10 h-10 rounded-full border-2 border-[#050B1A] bg-amber-500 flex items-center justify-center text-[10px] font-black text-slate-900">+4</div>
+                </div>
+            </div>
+            
+            <div className="relative z-10 space-y-4">
+                <p className="text-center md:text-right text-base md:text-lg font-bold text-slate-200 italic leading-relaxed">
+                    "ما توقعت هذه الدقة في النتائج! التقرير ساعدني جداً في فهم نقاط قوتي وكأنه جلسة استشارية حقيقية."
+                </p>
+                <div className="flex justify-center md:justify-end items-center gap-3">
+                    <div className="text-center md:text-right">
+                        <p className="text-sm font-black text-white">إبراهيم م.</p>
+                        <p className="text-[11px] font-bold text-slate-500">مدير مشاريع</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                        <Star className="w-5 h-5 text-blue-400 fill-blue-400" />
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          {/* Refund policy footer info */}
+          <div className="flex items-center justify-center gap-3 text-slate-400 opacity-60">
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            <p className="text-xs md:text-sm font-black text-center">
+                ضمان استرداد الأموال خلال 7 أيام — بدون أسئلة
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Promo Code Section */}
+        <div className="mt-12 w-full max-w-[580px] p-2 bg-white/[0.02] border border-white/5 rounded-3xl flex gap-3 items-center">
+            <input 
+                type="text"
+                placeholder="هل لديك كود خصم؟"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                className="flex-1 h-14 bg-transparent border-none px-6 text-white font-bold outline-none placeholder:text-slate-600 focus:ring-0 transition-all"
+            />
+            <Button 
+                onClick={handleApplyDiscount}
+                disabled={isValidatingDiscount || !discountCode}
+                className="h-14 px-10 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black border border-white/10 transition-all hover:border-amber-500/50 active:scale-95"
+            >
+                {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق الخصم'}
+            </Button>
+        </div>
       </div>
       <Footer />
     </main>

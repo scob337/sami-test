@@ -1,10 +1,9 @@
-import { Footer } from '@/components/layout/footer'
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'الشروط والأحكام - Sami-Test',
+  title: 'الشروط والأحكام - 7Types',
   description: 'الشروط والأحكام الخاصة بنا',
 }
 
@@ -25,7 +24,7 @@ export default function TermsPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-4">1. قبول الشروط</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  باستخدام موقع Sami-Test، فإنك توافق على الالتزام بهذه الشروط والأحكام.
+                  باستخدام موقع 7Types، فإنك توافق على الالتزام بهذه الشروط والأحكام.
                   إذا كنت لا توافق على أي جزء من هذه الشروط، فيرجى عدم استخدام الموقع.
                 </p>
               </div>
@@ -86,15 +85,13 @@ export default function TermsPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-4">8. التواصل</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  إذا كان لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على
-                  support@Sami-Test.app
+                  إذا كان لديك أي أسئلة حول هذه الشروط، يرجى الاتصال بنا على support@7types.app
                 </p>
               </div>
             </div>
           </div>
         </Container>
       </Section>
-      <Footer />
     </main>
   )
 }

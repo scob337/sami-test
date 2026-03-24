@@ -167,11 +167,6 @@ function CheckoutContent() {
     )
   }
 
-  const benefits = [
-    'وصول فوري: كل أدوات الذكاء الاصطناعي في مكان واحد.',
-    'بلا مخاطرة: ضمان استرجاع الأموال خلال ٧ أيام.',
-    'حرية كاملة: إلغاء الاشتراك في أي وقت بضغطة زر.'
-  ]
 
   return (
     <main className="min-h-screen flex flex-col bg-[#050B1A] font-cairo" dir="rtl">
@@ -327,7 +322,6 @@ function CheckoutContent() {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <div className="flex items-center gap-3 text-white">
                     <CreditCard className="w-7 h-7 text-amber-500" />
-                    <span className="text-xl font-black tracking-tight">بوابة الدفع - Moyasar</span>
                 </div>
 
                 <CustomPaymentForm 
@@ -379,12 +373,7 @@ function CheckoutContent() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-3 text-slate-400 opacity-60">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <p className="text-xs md:text-sm font-black text-center">
-                ضمان استرداد الأموال خلال 7 أيام — بدون أسئلة
-            </p>
-          </div>
+
         </motion.div>
       </div>
     </main>

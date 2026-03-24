@@ -69,7 +69,7 @@ export function CustomPaymentForm({
       description: description,
       publishable_api_key: publishableKey,
       callback_url: `${window.location.origin}/api/payment/verify`,
-      methods: ['creditcard', 'applepay'],
+      methods: ['creditcard', 'stcpay'],
       metadata: metadata,
       on_completed: (payment: any) => {
         if (onSuccess) onSuccess(payment)

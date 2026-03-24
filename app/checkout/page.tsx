@@ -398,7 +398,6 @@ function CheckoutContent() {
             </Button>
         </div>
       </div>
-      <Footer />
     </main>
   )
 }

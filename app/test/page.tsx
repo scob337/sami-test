@@ -5,7 +5,7 @@ import ClientPage from './client-page'
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ testId?: string }> }): Promise<Metadata> {
   const sp = await searchParams
   const testId = sp.testId
-  if (!testId) return { title: 'الاختبارات - Sami-Test' }
+  if (!testId) return { title: 'الاختبارات - 7Types' }
   
   const test = await (prisma as any).test.findFirst({
     where: {
@@ -16,10 +16,10 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     }
   })
 
-  if (!test) return { title: 'الاختبار غير موجود - Sami-Test' }
+  if (!test) return { title: 'الاختبار غير موجود - 7Types' }
 
   return {
-    title: test.seoTitle || `${test.name} - Sami-Test`,
+    title: test.seoTitle || `${test.name} - 7Types`,
     description: test.seoDescription || test.description?.substring(0, 160) || undefined,
     keywords: test.seoKeywords || undefined,
     openGraph: {

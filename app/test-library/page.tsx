@@ -158,8 +158,6 @@ export default function TestLibraryPage() {
               </div>
           </div>
       </section>
-
-      <Footer />
     </main>
   )
 }

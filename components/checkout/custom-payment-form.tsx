@@ -24,248 +24,85 @@ export function CustomPaymentForm({
   onSuccess,
   onError
 }: CustomPaymentFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: '',
-    number: '',
-    expiry: '',
-    cvc: ''
-  })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isLoading, setIsLoading] = useState(true)
+  const [isReady, setIsReady] = useState(false)
 
-  // Format Card Number: 0000 0000 0000 0000
-  const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    const matches = v.match(/\d{4,16}/g)
-    const match = (matches && matches[0]) || ''
-    const parts = []
+  useEffect(() => {
+    const scriptId = 'moyasar-js'
+    const styleId = 'moyasar-css'
 
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
+    // Load CSS
+    if (!document.getElementById(styleId)) {
+      const link = document.createElement('link')
+      link.id = styleId
+      link.rel = 'stylesheet'
+      link.href = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.css'
+      document.head.appendChild(link)
     }
 
-    if (parts.length) {
-      return parts.join(' ')
+    // Load JS
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement('script')
+      script.id = scriptId
+      script.src = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.js'
+      script.async = true
+      script.onload = () => setIsReady(true)
+      document.body.appendChild(script)
     } else {
-      return v
+      setIsReady(true)
     }
-  }
+  }, [])
 
-  // Format Expiry: MM / YY
-  const formatExpiry = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    if (v.length >= 2) {
-      return `${v.substring(0, 2)} / ${v.substring(2, 4)}`
-    }
-    return v
-  }
+  useEffect(() => {
+    if (!isReady || !window.Moyasar) return
 
-  const validate = () => {
-    const newErrors: Record<string, string> = {}
-    
-    // Name validation
-    if (!formData.name.trim()) newErrors.name = 'اسم حامل البطاقة مطلوب'
-    
-    // Card number validation (Luhn)
-    const rawNumber = formData.number.replace(/\s/g, '')
-    if (!rawNumber || rawNumber.length < 16) {
-      newErrors.number = 'رقم البطاقة غير مكتمل'
-    } else if (!luhnCheck(rawNumber)) {
-      newErrors.number = 'رقم البطاقة غير صحيح'
-    }
+    const publishableKey = process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY
 
-    // Expiry validation
-    const expiryParts = formData.expiry.split('/')
-    if (expiryParts.length !== 2) {
-      newErrors.expiry = 'التاريخ غير صحيح'
-    } else {
-      const month = parseInt(expiryParts[0].trim())
-      const year = parseInt('20' + expiryParts[1].trim())
-      const now = new Date()
-      const expiryDate = new Date(year, month - 1, 1)
-      
-      if (isNaN(month) || month < 1 || month > 12) {
-        newErrors.expiry = 'الشهر غير صحيح'
-      } else if (expiryDate < new Date(now.getFullYear(), now.getMonth(), 1)) {
-        newErrors.expiry = 'البطاقة منتهية الصلاحية'
+    // Clear existing form if any
+    const container = document.querySelector('.mysr-form')
+    if (container) container.innerHTML = ''
+
+    window.Moyasar.init({
+      element: '.mysr-form',
+      amount: Math.round(amount * 100),
+      currency: 'SAR',
+      description: description,
+      publishable_api_key: publishableKey,
+      callback_url: `${window.location.origin}/api/payment/verify`,
+      methods: ['creditcard', 'applepay'],
+      metadata: metadata,
+      on_completed: (payment: any) => {
+        if (onSuccess) onSuccess(payment)
+      },
+      on_error: (error: any) => {
+        if (onError) onError(error)
       }
-    }
-
-    // CVC validation
-    if (formData.cvc.length < 3) {
-      newErrors.cvc = 'CVC غير صحيح'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const luhnCheck = (num: string) => {
-    let arr = (num + '')
-      .split('')
-      .reverse()
-      .map((x) => parseInt(x))
-    let lastDigit = arr.splice(0, 1)[0]
-    let sum = arr.reduce((acc, val, i) => (i % 2 !== 0 ? acc + val : acc + ((val * 2) % 9 || 9)), 0)
-    sum += lastDigit
-    return sum % 10 === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
-
-    setIsLoading(true)
-    try {
-      const publishableKey = process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY
-      const expiryParts = formData.expiry.split('/')
-      const month = expiryParts[0].trim()
-      const year = '20' + expiryParts[1].trim()
-
-      const paymentData = {
-        amount: Math.round(amount * 100), // Moyasar uses subunits
-        currency: 'SAR',
-        description: description,
-        callback_url: `${window.location.origin}/api/payment/verify`,
-        source: {
-          type: 'creditcard',
-          name: formData.name,
-          number: formData.number.replace(/\s/g, ''),
-          cvc: formData.cvc,
-          month: month,
-          year: year
-        },
-        metadata: metadata
-      }
-
-      const response = await fetch('https://api.moyasar.com/v1/payments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${btoa(publishableKey + ':')}`
-        },
-        body: JSON.stringify(paymentData)
-      })
-
-      const result = await response.json()
-
-      if (!response.ok) {
-        throw new Error(result.message || 'فشلت عملية الدفع')
-      }
-
-      // Handle 3D Secure redirection
-      if (result.source.transaction_url) {
-        window.location.href = result.source.transaction_url
-      } else if (onSuccess) {
-        onSuccess(result)
-      }
-
-    } catch (error: any) {
-      console.error('Payment Error:', error)
-      toast.error(error.message || 'حدث خطأ أثناء معالجة الدفع')
-      if (onError) onError(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    })
+    setIsLoading(false)
+  }, [isReady, amount, description, metadata, onSuccess, onError])
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-4">
-        {/* Card Holder Name */}
-        <div className="space-y-2">
-          <Label className="text-sm font-bold text-slate-400">اسم حامل البطاقة</Label>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="الاسم كما هو مكتوب على البطاقة"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className={cn(
-                "h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-amber-500/50 text-white font-bold transition-all",
-                errors.name && "border-red-500/50 focus:ring-red-500/50"
-              )}
-            />
+    <div className="space-y-6">
+      <div className="relative min-h-[300px] w-full bg-white/[0.02] border border-white/5 rounded-[32px] p-2 overflow-hidden">
+        {isLoading && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050B1A]/80 backdrop-blur-sm gap-4">
+            <LoadingSpinner size="lg" />
+            <p className="text-slate-400 font-bold animate-pulse">جاري تحميل بوابة الدفع...</p>
           </div>
-          {errors.name && <p className="text-red-400 text-xs font-bold">{errors.name}</p>}
-        </div>
-
-        {/* Card Number */}
-        <div className="space-y-2">
-          <Label className="text-sm font-bold text-slate-400">رقم البطاقة</Label>
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="0000 0000 0000 0000"
-              maxLength={19}
-              value={formData.number}
-              onChange={(e) => setFormData({ ...formData, number: formatCardNumber(e.target.value) })}
-              className={cn(
-                "h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-amber-500/50 text-white font-bold transition-all pr-12",
-                errors.number && "border-red-500/50 focus:ring-red-500/50"
-              )}
-            />
-            <CreditCard className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-          </div>
-          {errors.number && <p className="text-red-400 text-xs font-bold">{errors.number}</p>}
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {/* Expiry */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-400">تاريخ الانتهاء</Label>
-            <Input
-              type="text"
-              placeholder="MM / YY"
-              maxLength={7}
-              value={formData.expiry}
-              onChange={(e) => setFormData({ ...formData, expiry: formatExpiry(e.target.value) })}
-              className={cn(
-                "h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-amber-500/50 text-white font-bold transition-all text-center",
-                errors.expiry && "border-red-500/50 focus:ring-red-500/50"
-              )}
-            />
-            {errors.expiry && <p className="text-red-400 text-xs font-bold">{errors.expiry}</p>}
-          </div>
-
-          {/* CVC */}
-          <div className="space-y-2">
-            <Label className="text-sm font-bold text-slate-400">رمز CVC</Label>
-            <Input
-              type="text"
-              placeholder="123"
-              maxLength={4}
-              value={formData.cvc}
-              onChange={(e) => setFormData({ ...formData, cvc: e.target.value.replace(/[^0-9]/g, '') })}
-              className={cn(
-                "h-14 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-amber-500/50 text-white font-bold transition-all text-center",
-                errors.cvc && "border-red-500/50 focus:ring-red-500/50"
-              )}
-            />
-            {errors.cvc && <p className="text-red-400 text-xs font-bold">{errors.cvc}</p>}
-          </div>
-        </div>
+        )}
+        <div className="mysr-form !w-full !max-w-none"></div>
       </div>
-
+      
       <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold justify-center opacity-60">
         <Lock className="w-3 h-3" />
-        <span>تشفير SSL آمن بمعايير PCI-DSS</span>
+        <span>تشفير SSL آمن بالكامل عبر Moyasar</span>
       </div>
-
-      <Button
-        type="submit"
-        disabled={isLoading}
-        className="w-full h-16 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-slate-900 font-black text-xl rounded-2xl shadow-xl shadow-amber-500/20 transition-all hover:-translate-y-1 active:scale-[0.98]"
-      >
-        {isLoading ? (
-          <div className="flex items-center gap-3">
-            <LoadingSpinner size="sm" />
-            <span>جاري المعالجة...</span>
-          </div>
-        ) : (
-          `ابدأ الآن | ${Math.round(amount)} ر.س`
-        )}
-      </Button>
-    </form>
+    </div>
   )
+}
+
+declare global {
+  interface Window {
+    Moyasar: any
+  }
 }

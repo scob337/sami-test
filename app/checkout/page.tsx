@@ -126,26 +126,38 @@ function CheckoutContent() {
     fetchItem()
   }, [type, id])
 
-  const handleApplyDiscount = async () => {
-    if (!discountCode.trim()) return
+  const handleApplyDiscount = async (codeOverride?: string) => {
+    const codeToUse = codeOverride !== undefined ? codeOverride : discountCode
+    if (!codeToUse.trim()) return
     try {
       setIsValidatingDiscount(true)
       const res = await fetch('/api/user/discount/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: discountCode, userId: user?.id, courseId: type === 'course' ? id : null })
+        body: JSON.stringify({ code: codeToUse, userId: user?.id, courseId: type === 'course' ? id : null })
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'كود غير صالح')
       setAppliedDiscount(data)
       toast.success('تم تطبيق الخصم بنجاح')
     } catch (error: any) {
-      toast.error(error.message)
+      // Don't toast for auto-validation unless specifically requested, or keep it quiet
+      if (codeOverride === undefined) toast.error(error.message)
       setAppliedDiscount(null)
     } finally {
       setIsValidatingDiscount(false)
     }
   }
+
+  // Auto-apply discount code
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        if (discountCode.length >= 3 && !appliedDiscount) {
+            handleApplyDiscount(discountCode)
+        }
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [discountCode])
 
   if (!item) {
     return (
@@ -168,7 +180,7 @@ function CheckoutContent() {
         <div className="w-full max-w-[480px] mb-12 flex items-center justify-between px-2">
             <div className="relative group">
                 <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-black text-lg shadow-lg shadow-amber-500/30 transition-transform hover:scale-110">2</div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 font-black tracking-widest uppercase whitespace-nowrap">الدفاع عن الذات</div>
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 font-black tracking-widest uppercase whitespace-nowrap">الدفع</div>
             </div>
             <div className="flex-1 h-1.5 mx-4 bg-slate-800 rounded-full overflow-hidden">
                 <motion.div 
@@ -182,16 +194,34 @@ function CheckoutContent() {
                 <div className="w-10 h-10 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center text-amber-500/50 font-black text-lg">
                     <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-black tracking-widest uppercase opacity-50">تمت</div>
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-black tracking-widest uppercase opacity-50">التقرير</div>
             </div>
         </div>
 
         {/* Header Section */}
         <div className="text-center space-y-4 mb-12">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">جاهز لبداية التجربة؟</h1>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">إتمام الطلب</h1>
             <p className="text-slate-400 font-bold text-lg md:text-xl italic max-w-2xl mx-auto">
-                مرحباً <span className="text-amber-500">{user?.name?.split(' ')[0] || 'Sam'}</span>! خطوة واحدة وتبدأ فوراً في رحلة تطوير ذاتك.
+                مرحباً <span className="text-amber-500">{user?.name?.split(' ')[0] || 'Sam'}</span>! أنت على بعد خطوة واحدة من الحصول على تقريرك.
             </p>
+        </div>
+
+        {/* Promo Code Section (Moved to Top) */}
+        <div className="mb-8 w-full max-w-[580px] p-2 bg-white/[0.02] border border-white/5 rounded-3xl flex gap-3 items-center">
+            <input 
+                type="text"
+                placeholder="هل لديك كود خصم؟"
+                value={discountCode}
+                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                className="flex-1 h-14 bg-transparent border-none px-6 text-white font-bold outline-none placeholder:text-slate-600 focus:ring-0 transition-all"
+            />
+            <Button 
+                onClick={() => handleApplyDiscount()}
+                disabled={isValidatingDiscount || !discountCode}
+                className="h-14 px-10 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black border border-white/10 transition-all hover:border-amber-500/50 active:scale-95"
+            >
+                {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق'}
+            </Button>
         </div>
 
         {/* Main Checkout Card */}
@@ -205,32 +235,31 @@ function CheckoutContent() {
           <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
 
-          {/* Benefits Section */}
-          <div className="space-y-5">
-            {benefits.map((benefit, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + 0.1 * i }}
-                className="flex items-start gap-4"
-              >
-                <div className="mt-1 w-6 h-6 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0 border border-emerald-500/20">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                </div>
-                <p className="text-sm md:text-lg font-bold text-slate-200 leading-relaxed">{benefit}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent w-full" />
-
-          {/* Pricing Summary Box */}
-          <div className="w-full bg-slate-900/40 border border-white/5 rounded-3xl p-6 text-center space-y-1 transform hover:scale-[1.02] transition-transform">
-            <p className="text-slate-400 text-sm font-bold tracking-widest uppercase">المبلغ الإجمالي</p>
-            <div className="flex items-center justify-center gap-2">
-                <h2 className="text-4xl md:text-5xl font-black text-amber-500 tracking-tighter">{Math.round(finalPrice)}.00</h2>
-                <span className="text-xl font-black text-amber-500/70 pt-2">ر.س</span>
+          {/* Item Details Summary Section */}
+          <div className="bg-white/5 rounded-3xl p-6 border border-white/10 space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
+                {item.kind === 'test' ? <Zap className="w-8 h-8 text-amber-500" /> : <BookOpen className="w-8 h-8 text-amber-500" />}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-black text-white">{item.title}</h3>
+                <p className="text-sm font-bold text-slate-400 line-clamp-1">{item.description}</p>
+              </div>
+            </div>
+            <div className="h-px bg-white/5 w-full" />
+            <div className="flex justify-between items-center text-sm font-bold">
+               <span className="text-slate-400">سعر المنتج</span>
+               <span className="text-white">{item.price} ر.س</span>
+            </div>
+            {appliedDiscount && (
+              <div className="flex justify-between items-center text-sm font-bold text-emerald-500">
+                <span>خصم ({appliedDiscount.id})</span>
+                <span>-{item.price - finalPrice} ر.س</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-xl font-black text-amber-500 pt-2 border-t border-white/5 mt-2">
+               <span>المجموع النهائي</span>
+               <span>{Math.round(finalPrice)} ر.س</span>
             </div>
           </div>
 
@@ -298,7 +327,7 @@ function CheckoutContent() {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
                 <div className="flex items-center gap-3 text-white">
                     <CreditCard className="w-7 h-7 text-amber-500" />
-                    <span className="text-xl font-black tracking-tight">بيانات البطاقة البنكية</span>
+                    <span className="text-xl font-black tracking-tight">بوابة الدفع - Moyasar</span>
                 </div>
 
                 <CustomPaymentForm 
@@ -317,15 +346,6 @@ function CheckoutContent() {
                     router.push(`/api/payment/verify?id=${payment.id}&status=${payment.status}`)
                   }}
                 />
-                
-                <div className="flex flex-col items-center gap-3 pt-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500 opacity-80">
-                    <span>مدفوعات مشفرة وآمنة تماماً عبر</span>
-                    <div className="flex items-center gap-1.5 grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
-                        <span className="text-slate-200 font-black text-sm tracking-tighter">Stripe</span>
-                    </div>
-                  </div>
-                </div>
               </div>
           )}
 
@@ -344,15 +364,6 @@ function CheckoutContent() {
                         <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">(+450 مستخدم راضٍ)</span>
                     </div>
                 </div>
-                <div className="h-10 w-px bg-white/10 hidden md:block" />
-                <div className="flex -space-x-3 space-x-reverse">
-                    {[1,2,3,4].map(i => (
-                        <div key={i} className="w-10 h-10 rounded-full border-2 border-[#050B1A] bg-slate-800 overflow-hidden">
-                            <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" className="w-full h-full object-cover" />
-                        </div>
-                    ))}
-                    <div className="w-10 h-10 rounded-full border-2 border-[#050B1A] bg-amber-500 flex items-center justify-center text-[10px] font-black text-slate-900">+4</div>
-                </div>
             </div>
             
             <div className="relative z-10 space-y-4">
@@ -364,14 +375,10 @@ function CheckoutContent() {
                         <p className="text-sm font-black text-white">إبراهيم م.</p>
                         <p className="text-[11px] font-bold text-slate-500">مدير مشاريع</p>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
-                        <Star className="w-5 h-5 text-blue-400 fill-blue-400" />
-                    </div>
                 </div>
             </div>
           </div>
 
-          {/* Refund policy footer info */}
           <div className="flex items-center justify-center gap-3 text-slate-400 opacity-60">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <p className="text-xs md:text-sm font-black text-center">
@@ -379,25 +386,8 @@ function CheckoutContent() {
             </p>
           </div>
         </motion.div>
-
-        {/* Promo Code Section */}
-        <div className="mt-12 w-full max-w-[580px] p-2 bg-white/[0.02] border border-white/5 rounded-3xl flex gap-3 items-center">
-            <input 
-                type="text"
-                placeholder="هل لديك كود خصم؟"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                className="flex-1 h-14 bg-transparent border-none px-6 text-white font-bold outline-none placeholder:text-slate-600 focus:ring-0 transition-all"
-            />
-            <Button 
-                onClick={handleApplyDiscount}
-                disabled={isValidatingDiscount || !discountCode}
-                className="h-14 px-10 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black border border-white/10 transition-all hover:border-amber-500/50 active:scale-95"
-            >
-                {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق الخصم'}
-            </Button>
-        </div>
       </div>
     </main>
   )
 }
+  

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import OpenAI from 'openai'
 
 import { PERSONALITY_DETAILED_DATA } from '@/lib/constants/personality-data'
 
@@ -66,17 +66,16 @@ export async function POST(request: Request) {
       return `السؤال: ${a.questionText || 'ID:' + a.questionId}\nالإجابة: ${a.optionText || 'ID:' + a.optionId}`
     }).join('\n\n')
 
-    // 3. Generate report with Gemini
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || '')
-    // Use canonical model names for 1.5
-    let modelName = 'gemini-1.5-flash'
-    let model = genAI.getGenerativeModel({ model: modelName })
+    // 3. Generate report with OpenAI (ChatGPT)
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY || ''
+    })
+    
+    // Primary model: gpt-4o, Fallback: gpt-4o-mini
+    let modelName = 'gpt-4o'
+    console.log('[GENERATE_REPORT] Calling ChatGPT:', modelName)
 
-    console.log('[GENERATE_REPORT] Calling Gemini:', modelName)
-
-    const fullPrompt = `
-${systemPrompt}
-
+    const userPrompt = `
 بيانات المستخدم:
 الاسم: ${realUserName}
 الجنس: ${userData?.user_metadata?.gender || 'غير معروف'}
@@ -87,29 +86,37 @@ ${patternContext}
 نتائج الاختبار التفصيلية (إجابات المستخدم):
 ${formattedAnswers}
 
-قواعد التقرير المطلوبة:
-${reportRules}
-
 الرجاء كتابة التقرير باللغة العربية بشكل احترافي ومنسق بناءً على الأنماط والبيانات المذكورة أعلاه.
 `
 
     let generatedReport = ''
     try {
-      const resultAI = await model.generateContent(fullPrompt)
-      const responseAI = await resultAI.response
-      generatedReport = responseAI.text()
-      console.log('[GENERATE_REPORT] Gemini Success:', modelName)
+      const completion = await openai.chat.completions.create({
+        model: modelName,
+        messages: [
+          { role: 'system', content: `${systemPrompt}\n\nقواعد التقرير المطلوبة:\n${reportRules}` },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7,
+      })
+      generatedReport = completion.choices[0]?.message?.content || ''
+      console.log('[GENERATE_REPORT] ChatGPT Success:', modelName)
     } catch (err: any) {
-      console.error(`[GENERATE_REPORT] Gemini ${modelName} failed:`, err.message)
-      modelName = 'gemini-1.5-pro'
-      model = genAI.getGenerativeModel({ model: modelName })
+      console.error(`[GENERATE_REPORT] ChatGPT ${modelName} failed:`, err.message)
+      modelName = 'gpt-4o-mini'
       try {
-        const resultAI = await model.generateContent(fullPrompt)
-        const responseAI = await resultAI.response
-        generatedReport = responseAI.text()
-        console.log('[GENERATE_REPORT] Gemini Success (Fallback):', modelName)
+        const fallbackCompletion = await openai.chat.completions.create({
+          model: modelName,
+          messages: [
+            { role: 'system', content: `${systemPrompt}\n\nقواعد التقرير المطلوبة:\n${reportRules}` },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.7,
+        })
+        generatedReport = fallbackCompletion.choices[0]?.message?.content || ''
+        console.log('[GENERATE_REPORT] ChatGPT Success (Fallback):', modelName)
       } catch (fallbackErr: any) {
-        console.error(`[GENERATE_REPORT] Gemini ${modelName} fallback also failed:`, fallbackErr.message)
+        console.error(`[GENERATE_REPORT] ChatGPT ${modelName} fallback also failed:`, fallbackErr.message)
         throw fallbackErr
       }
     }

@@ -16,6 +16,7 @@ interface Book {
   createdAt: Date
 }
 
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://7types.online'
 

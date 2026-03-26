@@ -154,16 +154,16 @@ export function SupportButton() {
   const isClosed = session?.isActive === false
 
   return (
-    <div className="fixed bottom-8 left-8 z-[9999] flex flex-col items-end gap-4 pointer-events-auto">
+    <div className="fixed bottom-5 left-8 max-sm:bottom-4 max-sm:left-4 z-[9999] flex flex-col items-end gap-4 pointer-events-auto">
       <AnimatePresence>
         {isOpen && (
           <motion.div 
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="w-[400px] h-[600px] bg-[#050B1A] border border-white/10 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden mb-4"
+            className="w-[400px] max-sm:w-[calc(100vw-2rem)] h-[600px] max-sm:h-[500px] max-sm:max-h-[80vh] bg-[#050B1A] border border-white/10 rounded-[2.5rem] max-sm:rounded-[1.5rem] shadow-2xl flex flex-col overflow-hidden mb-4"
           >
-            <div className="p-6 bg-[#0D1B36] border-b border-white/5 flex items-center justify-between">
+            <div className="p-6 max-sm:p-4 bg-[#0D1B36] border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {showHistory ? (
                   <Button variant="ghost" size="icon" className="text-white opacity-60 hover:opacity-100" onClick={() => setShowHistory(false)}>
@@ -239,7 +239,7 @@ export function SupportButton() {
                 {/* Messages */}
                 <div 
                   ref={scrollRef}
-                  className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/20"
+                  className="flex-1 overflow-y-auto p-6 max-sm:p-4 space-y-4 bg-black/20"
                 >
                   {messages?.map((msg: any) => (
                     <div 
@@ -290,7 +290,7 @@ export function SupportButton() {
                 </div>
 
                 {/* Input & Previews */}
-                <div className="p-6 bg-[#0D1B36] border-t border-white/5 space-y-4">
+                <div className="p-6 max-sm:p-4 bg-[#0D1B36] border-t border-white/5 space-y-4">
                   {isClosed && (
                     <div className="text-center py-2">
                       <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest">

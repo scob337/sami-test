@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://7types.app'),
+  metadataBase: new URL('https://7types.online'),
   title: {
     default: '7Types - اختبر شخصيتك الآن',
     template: '%s | 7Types'
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   applicationName: '7Types',
   referrer: 'origin-when-cross-origin',
   keywords: ['اختبار الشخصية', 'تحليل الشخصية', '7Types', 'الذكاء الاصطناعي', 'personality test', 'نمط الشخصية', 'اكتشف نفسك'],
-  authors: [{ name: '7Types Team', url: 'https://7types.app' }],
+  authors: [{ name: '7Types Team', url: 'https://7types.online' }],
   creator: '7Types',
   publisher: '7Types',
   formatDetection: {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://7types.app',
+    url: 'https://7types.online',
     siteName: '7Types',
     title: '7Types - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
@@ -131,8 +131,8 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "Organization",
               "name": "7Types",
-              "url": "https://7types.app",
-              "logo": "https://7types.app/icon.png",
+              "url": "https://7types.online",
+              "logo": "https://7types.online/icon.png",
               "sameAs": [
                 "https://twitter.com/7types_app",
                 "https://www.facebook.com/7types.app"
@@ -144,10 +144,10 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": "WebSite",
               "name": "7Types",
-              "url": "https://7types.app",
+              "url": "https://7types.online",
               "potentialAction": {
                 "@type": "SearchAction",
-                "target": "https://7types.app/courses?q={search_term_string}",
+                "target": "https://7types.online/courses?q={search_term_string}",
                 "query-input": "required name=search_term_string"
               }
             }}

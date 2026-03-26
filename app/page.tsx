@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
-    url: 'https://7types.app',
+    url: 'https://7types.online',
     title: '7Types - اكتشف نمط شخصيتك بعمق',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم بإشراف الخبراء',
   },

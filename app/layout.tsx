@@ -27,14 +27,35 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: '7Types - اختبر شخصيتك الآن',
+  metadataBase: new URL('https://7types.app'),
+  title: {
+    default: '7Types - اختبر شخصيتك الآن',
+    template: '%s | 7Types'
+  },
   description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي. احصل على تقرير شامل وتوصيات مخصصة.',
-  generator: 'Next.js 16',
-  keywords: ['اختبار الشخصية', 'تحليل الشخصية', '7Types', 'الذكاء الاصطناعي', 'personality test'],
-  authors: [{ name: '7Types Team' }],
+  generator: 'Next.js',
+  applicationName: '7Types',
+  referrer: 'origin-when-cross-origin',
+  keywords: ['اختبار الشخصية', 'تحليل الشخصية', '7Types', 'الذكاء الاصطناعي', 'personality test', 'نمط الشخصية', 'اكتشف نفسك'],
+  authors: [{ name: '7Types Team', url: 'https://7types.app' }],
   creator: '7Types',
   publisher: '7Types',
-  robots: 'index, follow',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     type: 'website',
     locale: 'ar_SA',
@@ -42,17 +63,28 @@ export const metadata: Metadata = {
     siteName: '7Types',
     title: '7Types - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: '7Types - ابدأ رحلة اكتشاف ذاتك',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: '7Types - اختبر شخصيتك الآن',
     description: 'اكتشف شخصيتك الحقيقية من خلال اختبار متقدم يعتمد على الذكاء الاصطناعي',
+    creator: '@7types_app',
+    images: ['/og-image.png'],
   },
   icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',
     apple: '/icon.png',
   },
+  manifest: '/site.webmanifest',
 }
 
 export const viewport: Viewport = {
@@ -79,6 +111,7 @@ export default function RootLayout({
       dir="rtl"
     >
       <head>
+        <meta name="google-site-verification" content="gDWBh4IxFs8bIqbDHDvMHqrBAb0zLFju5kHupaiQ-_U" />
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#3B82F6" />
       </head>
@@ -92,6 +125,34 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* SEO Structured Data */}
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "7Types",
+              "url": "https://7types.app",
+              "logo": "https://7types.app/icon.png",
+              "sameAs": [
+                "https://twitter.com/7types_app",
+                "https://www.facebook.com/7types.app"
+              ]
+            }}
+          />
+          <JsonLd
+            data={{
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "7Types",
+              "url": "https://7types.app",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://7types.app/courses?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            }}
+          />
+
           {/* Ambient Aurora Background */}
           <div className="aurora-bg">
             <div className="aurora-dot w-[500px] h-[500px] bg-primary/20 -top-48 -left-48" />
@@ -109,7 +170,7 @@ export default function RootLayout({
           </div>
 
           <Toaster position="bottom-left" dir="rtl" richColors />
-          <Footer/>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
@@ -118,4 +179,5 @@ export default function RootLayout({
 
 import { NavbarWrapper } from '@/components/layout/navbar-wrapper'
 import { Footer } from '@/components/layout/footer'
+import { JsonLd } from '@/components/seo/JsonLd'
 

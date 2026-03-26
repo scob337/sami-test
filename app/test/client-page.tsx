@@ -10,7 +10,7 @@ import { ProgressBar } from '@/components/ui/progress-bar'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
-import { ChevronLeft, ChevronRight, Brain } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/lib/store/auth-store'
@@ -139,7 +139,7 @@ function TestPageContent() {
       <main className="min-h-screen flex flex-col bg-[#0A1A3B] items-center justify-center p-6 text-center" dir="rtl">
         <div className="max-w-md space-y-8 relative z-10">
           <div className="w-20 h-20 bg-blue-600 rounded-3xl mx-auto flex items-center justify-center shadow-2xl shadow-blue-500/20">
-            <Brain className="w-10 h-10 text-white" />
+            <img src="/Logo.png" alt="7Types" className="w-10 h-10 object-contain" />
           </div>
           <div className="space-y-4">
             <h2 className="text-3xl font-black text-white">عذراً، يجب تسجيل الدخول أولاً</h2>
@@ -164,7 +164,7 @@ function TestPageContent() {
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#0A1A3B]" dir="rtl">
         <div className="relative z-10 flex flex-col items-center space-y-8 p-4">
           <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity }} className="w-24 h-24 mb-6 rounded-full bg-[#10B981] flex items-center justify-center shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-            <Brain className="w-12 h-12 text-white" />
+            <img src="/Logo.png" alt="7Types" className="w-12 h-12 object-contain" />
           </motion.div>
           <div className="space-y-4 text-center">
             <h2 className="text-3xl font-black text-white">جاري صياغة تقرير شخصيتك...</h2>

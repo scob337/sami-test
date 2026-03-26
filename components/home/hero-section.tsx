@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/store/auth-store'
-import { Brain, Sparkles, Lock, Timer, BarChart3 } from 'lucide-react'
+import { Sparkles, Lock, Timer, BarChart3 } from 'lucide-react'
 
 export function HeroSection() {
     const router = useRouter()

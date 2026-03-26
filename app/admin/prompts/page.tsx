@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
-import { Save, RefreshCw, MessageSquare, AlertCircle, Info, Brain, Sparkles, Wand2 } from 'lucide-react'
+import { Save, RefreshCw, MessageSquare, AlertCircle, Info, Sparkles, Wand2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -91,8 +91,8 @@ export default function PromptsPage() {
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-[20px] bg-[#15283c] flex items-center justify-center shadow-lg shadow-[#15283c]/20">
-            <Brain className="w-8 h-8 text-[#ff5722]" />
+          <div className="w-14 h-14 rounded-[20px] bg-[#15283c] flex items-center justify-center shadow-lg shadow-[#15283c]/20 p-2">
+            <img src="/Logo.png" alt="7Types" className="w-10 h-10 object-contain" />
           </div>
           <div>
             <h2 className="text-3xl font-black text-slate-800 tracking-tight">إدارة البرومبتات (AI)</h2>

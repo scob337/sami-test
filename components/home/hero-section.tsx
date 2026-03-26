@@ -16,14 +16,17 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(25,75,155,0.2)_0%,transparent_60%)]" />
             
             <div className="relative z-10 flex flex-col items-center max-w-2xl mx-auto space-y-8">
-                {/* Brain Logo */}
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="w-24 h-24 mb-4 rounded-full bg-[#1A56DB] flex items-center justify-center shadow-lg shadow-blue-900/50"
+                    className="w-24 h-24 mb-4 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center shadow-lg shadow-blue-900/50 overflow-hidden border border-white/10"
                 >
-                    <Brain className="w-12 h-12 text-white" />
+                    <img 
+                      src="/Logo.png" 
+                      alt="7Types Logo" 
+                      className="w-16 h-16 object-contain"
+                    />
                 </motion.div>
 
                 {/* Typography */}

@@ -196,7 +196,7 @@ export default function DeepNavyDashboard() {
                 </div>
               </motion.div>
 
-              <div className="flex gap-2 p-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl">
+              <div className="flex gap-2 p-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-x-auto scrollbar-hide no-scrollbar flex-nowrap min-w-full">
                 {[
                   { id: 'overview', name: 'نظرة عامة', icon: Zap },
                   { id: 'courses', name: 'دوراتي', icon: BookOpen },
@@ -207,7 +207,7 @@ export default function DeepNavyDashboard() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all",
+                      "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap shrink-0",
                       activeTab === tab.id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/5"
                     )}
                   >

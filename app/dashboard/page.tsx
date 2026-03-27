@@ -490,6 +490,7 @@ export default function DeepNavyDashboard() {
               <Input
                 value={editName}
                 onChange={e => setEditName(e.target.value)}
+                dir="auto"
                 className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50"
               />
             </div>
@@ -552,8 +553,8 @@ export default function DeepNavyDashboard() {
                 <Input
                   value={editPhone}
                   onChange={e => setEditPhone(e.target.value)}
-                  dir="ltr"
-                  className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50 text-right"
+                  dir="auto"
+                  className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50"
                 />
               </div>
               <div className="space-y-2">

@@ -88,7 +88,7 @@ export default function RegisterPage() {
                 placeholder="أدخل اسمك الثلاثي"
                 {...register('fullName')}
                 disabled={isLoading}
-                dir="ltr"
+                dir="auto"
                 className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
               />
               {errors.fullName && (
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 placeholder="05xxxxxxxx"
                 {...register('phone')}
                 disabled={isLoading}
-                dir="ltr"
+                dir="auto"
                 className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
               />
               {errors.phone && (
@@ -118,7 +118,7 @@ export default function RegisterPage() {
                 placeholder="example@mail.com"
                 {...register('email')}
                 disabled={isLoading}
-                dir="ltr"
+                dir="auto"
                 className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
               />
               {errors.email && (
@@ -135,7 +135,7 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     {...register('password')}
                     disabled={isLoading}
-                    dir="ltr"
+                    dir="auto"
                     className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all pr-12"
                   />
                   <button
@@ -158,7 +158,7 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     {...register('confirmPassword')}
                     disabled={isLoading}
-                    dir="ltr"
+                    dir="auto"
                     className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all pr-12"
                   />
                   <button

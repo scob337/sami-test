@@ -21,6 +21,7 @@ export async function GET() {
       email: dbUser.email,
       phone: dbUser.phone,
       isAdmin: dbUser.isAdmin,
+      avatarUrl: dbUser.avatarUrl,
     })
   } catch (error) {
     console.error('[AUTH_ME]', error)

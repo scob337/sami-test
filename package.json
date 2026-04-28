@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "NEXT_DISABLE_TURBOPACK=1 prisma generate && next build",
+    "build": "cross-env NEXT_DISABLE_TURBOPACK=1 prisma generate && next build",
     "vercel-build": "pnpm install --no-frozen-lockfile && pnpm run build",
     "start": "next start",
     "lint": "eslint .",
@@ -54,6 +54,7 @@
     "@vercel/blob": "^0.23.4",
     "autoprefixer": "^10.4.20",
     "axios": "^1.6.2",
+    "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.1.1",
@@ -66,6 +67,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.2",
     "input-otp": "1.4.2",
+    "jose": "^5.9.6",
     "lucide-react": "^0.564.0",
     "next": "16.2.1",
     "next-international": "^1.0.0",
@@ -88,9 +90,7 @@
     "twilio": "^4.10.0",
     "vaul": "^1.1.2",
     "zod": "^3.24.1",
-    "zustand": "^4.4.0",
-    "bcryptjs": "^2.4.3",
-    "jose": "^5.9.6"
+    "zustand": "^4.4.0"
   },
   "devDependencies": {
     "@prisma/config": "^7.5.0",
@@ -98,6 +98,7 @@
     "@types/node": "^22",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "cross-env": "^10.1.0",
     "dotenv": "^17.3.1",
     "postcss": "^8.5",
     "prisma": "^7.5.0",

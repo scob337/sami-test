@@ -320,9 +320,9 @@ export default function CourseSinglePage({ params }: { params: Promise<{ id: str
 
             <div className="flex gap-4">
               <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center font-black text-blue-500 shrink-0 overflow-hidden border border-white/10">
-                {user?.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : user?.user_metadata?.full_name?.[0] || user?.email?.[0] || <User className="w-6 h-6" />}
+                {user?.avatarUrl ? (
+                  <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : user?.name?.[0] || user?.email?.[0] || <User className="w-6 h-6" />}
               </div>
               <div className="flex-1 space-y-3">
                 <textarea

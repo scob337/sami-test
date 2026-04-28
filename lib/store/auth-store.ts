@@ -6,6 +6,7 @@ export interface AuthUser {
   phone?: string | null
   name?: string | null
   isAdmin?: boolean
+  avatarUrl?: string | null
 }
 
 interface AuthStore {

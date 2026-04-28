@@ -147,7 +147,7 @@ export default function ResultsPage() {
             initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
             className="text-4xl md:text-5xl font-black text-white leading-tight"
           >
-            تحليل شخصية {user?.user_metadata?.fullName || user?.email?.split('@')[0] || 'المبدع'}
+            تحليل شخصية {user?.name || user?.email?.split('@')[0] || 'المبدع'}
           </motion.h1>
           <motion.div 
             initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 0.2 }}

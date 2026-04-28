@@ -20,7 +20,7 @@ export function Header() {
 
   const { data: notificationsData } = useSWR<any>(
     user 
-      ? `/api/user/dashboard?userId=${user.id}&email=${encodeURIComponent(user.email || '')}&phone=${encodeURIComponent(user.user_metadata?.phone || '')}` 
+      ? `/api/user/dashboard?userId=${user.id}&email=${encodeURIComponent(user.email || '')}&phone=${encodeURIComponent(user.phone || '')}` 
       : null,
     fetcher
   )

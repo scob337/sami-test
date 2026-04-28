@@ -68,7 +68,7 @@ export default function DeepNavyDashboard() {
   const userId = authUser?.id
   const { data, isLoading: isLoadingData, mutate } = useSWR<any>(
     authUser
-      ? `/api/user/dashboard?userId=${userId}&email=${encodeURIComponent(authUser.email || '')}&phone=${encodeURIComponent(authUser.user_metadata?.phone || '')}`
+      ? `/api/user/dashboard?userId=${userId}&email=${encodeURIComponent(authUser.email || '')}&phone=${encodeURIComponent(authUser.phone || '')}`
       : null,
     fetcher
   )
@@ -100,6 +100,7 @@ export default function DeepNavyDashboard() {
 
   const handleUpdateProfile = async () => {
     if (!editName.trim()) { toast.error('يرجى إدخال الاسم'); return }
+    if (!authUser?.id) { toast.error('تعذر تحديث البيانات، أعد تسجيل الدخول'); return }
     try {
       setIsUpdating(true)
       const res = await fetch('/api/user/profile', {
@@ -116,8 +117,12 @@ export default function DeepNavyDashboard() {
       if (!res.ok) throw new Error('Update failed')
       
       setUser({
-        ...authUser,
+        id: authUser.id,
         name: editName,
+        email: editEmail || authUser.email || null,
+        phone: editPhone || authUser.phone || null,
+        avatarUrl: editAvatar || authUser.avatarUrl || null,
+        isAdmin: authUser.isAdmin,
       })
 
       mutate()

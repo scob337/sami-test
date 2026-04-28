@@ -15,9 +15,9 @@ export default function SettingsPage() {
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    fullName: user?.user_metadata?.fullName || '',
+    fullName: user?.name || '',
     email: user?.email || '',
-    phone: user?.user_metadata?.phone || '',
+    phone: user?.phone || '',
   })
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function GET(
   req: Request,
@@ -8,15 +8,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
-    
-    const adminUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { isAdmin: true }
-    })
-    if (!adminUser?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const numericId = parseInt(id)
     if (isNaN(numericId)) return new NextResponse('Invalid ID', { status: 400 })

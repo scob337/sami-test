@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { useTestStore } from '@/lib/store/test-store'
 import { useUploadStore } from '@/lib/store/upload-store'
-import { supabaseClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import {
   Download,
@@ -116,22 +115,10 @@ export default function DeepNavyDashboard() {
       })
       if (!res.ok) throw new Error('Update failed')
       
-      if (authUser) {
-        await supabaseClient.auth.updateUser({
-          data: {
-            name: editName,
-            avatar_url: editAvatar
-          }
-        })
-        setUser({
-          ...authUser,
-          user_metadata: {
-            ...authUser.user_metadata,
-            name: editName,
-            avatar_url: editAvatar
-          }
-        })
-      }
+      setUser({
+        ...authUser,
+        name: editName,
+      })
 
       mutate()
       toast.success('تم تحديث ملفك الشخصي')

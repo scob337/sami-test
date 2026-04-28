@@ -1,0 +1,18 @@
+بيانات ال VPS للدخول عن طريق الTerminal 
+لتعديل الاكواد او لرفع ملفات جديدة
+اسم ال Directory الخاص بموقع الاختبارات sami-test
+
+ID : ssh root@82.25.119.130
+Password: Sami23902390&
+
+
+الدخول الي هوستنجر بالبريد الخاص بكم 
+Samialmoamer@gmail.com
+
+
+
+بيانات بوابة الدفع 
+
+البريد: Samialmoamer@gmail.com
+
+الباسورد:Scob1337@

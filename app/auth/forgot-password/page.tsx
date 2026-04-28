@@ -6,8 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Header as Navbar } from '@/components/layout/header'
-import { createClient } from '@/lib/supabase/client'
 import { ChevronRight, Mail, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -15,7 +13,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSent, setIsSent] = useState(false)
-  const supabase = createClient()
 
   const handleResetRequest = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,11 +23,14 @@ export default function ForgotPasswordPage() {
 
     try {
       setIsLoading(true)
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
       })
 
-      if (error) throw error
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'فشل إرسال الطلب')
 
       setIsSent(true)
       toast.success('تم إرسال رابط استعادة كلمة المرور')

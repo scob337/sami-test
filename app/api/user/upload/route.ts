@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Use the service role key to bypass RLS policies
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { writeFile, mkdir } from 'fs/promises'
+import { join } from 'path'
 
 export async function POST(request: Request) {
   try {
@@ -17,22 +12,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+
     const fileExt = file.name.split('.').pop()
-    const path = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
+    
+    // Define the upload path
+    const uploadDir = join(process.cwd(), 'public', 'uploads', bucket)
+    const filePath = join(uploadDir, fileName)
 
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, {
-        cacheControl: '3600',
-        upsert: true,
-      })
+    // Ensure the directory exists
+    await mkdir(uploadDir, { recursive: true })
 
-    if (error) {
-      console.error('Supabase upload error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    // Write the file
+    await writeFile(filePath, buffer)
 
-    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
+    // Return the public URL
+    const publicUrl = `/uploads/${bucket}/${fileName}`
+    
     return NextResponse.json({ url: publicUrl })
 
   } catch (error: any) {

@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    if (!authUser || !authUser.email) return new NextResponse('Unauthorized', { status: 401 })
-    
-    const dbAdmin = await prisma.user.findUnique({
-      where: { email: authUser.email },
-      select: { isAdmin: true }
-    })
-    if (!dbAdmin?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const { userId, title, content, type } = await req.json()
     if (!userId || !title || !content) {

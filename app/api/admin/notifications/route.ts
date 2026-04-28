@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
-    
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { isAdmin: true }
-    })
-    if (!dbUser?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const { title, content, type } = await req.json()
 
@@ -58,15 +51,8 @@ export async function GET(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
-    
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { isAdmin: true }
-    })
-    if (!dbUser?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')

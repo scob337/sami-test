@@ -1,42 +1,24 @@
 'use client'
 
 import { useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { mutate } from 'swr'
 import { fetcher } from '@/lib/fetcher'
 
 export function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { setUser, setLoading } = useAuthStore()
-  const supabase = createClient()
 
   useEffect(() => {
     const initializeAuth = async () => {
       try {
         setLoading(true)
-        const { data: { session } } = await supabase.auth.getSession()
+        const res = await fetch(`/api/auth/me`)
         
-        if (session?.user) {
-          // Fetch isAdmin and name from DB
-          try {
-            const res = await fetch(`/api/auth/me`)
-            if (res.ok) {
-              const dbUser = await res.json()
-              const enrichedUser = {
-                ...session.user,
-                isAdmin: dbUser.isAdmin || false,
-                name: dbUser.name || session.user.user_metadata?.full_name || ''
-              }
-              setUser(enrichedUser)
-
-              // Prefetch and cache chat sessions + notifications
-              prefetchUserData(enrichedUser)
-            } else {
-              setUser(session.user)
-            }
-          } catch {
-            setUser(session.user)
-          }
+        if (res.ok) {
+          const dbUser = await res.json()
+          setUser(dbUser)
+          // Prefetch and cache chat sessions + notifications
+          prefetchUserData(dbUser)
         } else {
           setUser(null)
         }
@@ -49,38 +31,7 @@ export function AuthInitializer({ children }: { children: React.ReactNode }) {
     }
 
     initializeAuth()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          try {
-            const res = await fetch(`/api/auth/me`)
-            if (res.ok) {
-              const dbUser = await res.json()
-              const enrichedUser = {
-                ...session.user,
-                isAdmin: dbUser.isAdmin || false,
-                name: dbUser.name || session.user.user_metadata?.full_name || ''
-              }
-              setUser(enrichedUser)
-              prefetchUserData(enrichedUser)
-            } else {
-              setUser(session.user)
-            }
-          } catch {
-            setUser(session.user)
-          }
-        } else {
-          setUser(null)
-        }
-        setLoading(false)
-      }
-    )
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [setUser, setLoading, supabase])
+  }, [setUser, setLoading])
 
   return <>{children}</>
 }
@@ -95,6 +46,6 @@ function prefetchUserData(user: any) {
   }
 
   // Prefetch notifications (for Header bell icon)
-  const notifUrl = `/api/user/dashboard?userId=${user.id}&email=${encodeURIComponent(user.email || '')}`
-  mutate(notifUrl, fetcher(notifUrl), { revalidate: false })
+  // const notifUrl = `/api/user/dashboard?userId=${user.id}&email=${encodeURIComponent(user.email || '')}`
+  // mutate(notifUrl, fetcher(notifUrl), { revalidate: false })
 }

@@ -15,16 +15,8 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next()
     }
 
-    // Check for Supabase authentication cookies
-    const cookieNames = request.cookies.getAll().map((c) => c.name)
-    const hasSupabaseCookie = cookieNames.some((name) => {
-      return name === 'sb-access-token' || 
-             name === 'supabase-auth-token' || 
-             name.includes('auth-token') ||
-             name.startsWith('sb-')
-    })
-    
-    const hasSession = Boolean(hasSupabaseCookie)
+    // JWT cookie used by our auth layer
+    const hasSession = Boolean(request.cookies.get('token')?.value)
 
     // const protectedRoutes = ['/dashboard', '/checkout', '/admin']
     // const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function GET(request: Request) {
   try {
@@ -12,8 +12,7 @@ export async function GET(request: Request) {
     }
 
     // Get current user to check for re-access
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
     // 1. Fetch the attempt to get the testId and userId
     const attempt = await prisma.attempt.findUnique({
@@ -33,26 +32,19 @@ export async function GET(request: Request) {
     let isPaid = !!currentPayment
 
     // 3. If not paid, check if this user has ALREADY paid for this test before (re-access)
-    if (!isPaid && user?.email) {
-        // Find the Prisma user by email
-        const prismaUser = await prisma.user.findUnique({
-            where: { email: user.email }
+    if (!isPaid && user) {
+        // Check for any completed payment for THIS test by THIS user
+        const previousPayment = await prisma.payment.findFirst({
+            where: {
+                userId: user.id,
+                status: 'COMPLETED',
+                OR: [
+                    { testId: attempt.testId },
+                    { attempt: { testId: attempt.testId } }
+                ]
+            } as any
         })
-
-        if (prismaUser) {
-            // Check for any completed payment for THIS test by THIS user
-            const previousPayment = await prisma.payment.findFirst({
-                where: {
-                    userId: prismaUser.id,
-                    status: 'COMPLETED',
-                    OR: [
-                        { testId: attempt.testId },
-                        { attempt: { testId: attempt.testId } }
-                    ]
-                } as any
-            })
-            if (previousPayment) isPaid = true
-        }
+        if (previousPayment) isPaid = true
     }
 
     const report = await prisma.report.findFirst({

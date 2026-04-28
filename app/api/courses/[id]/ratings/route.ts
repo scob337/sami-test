@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function POST(
   req: Request,
@@ -15,10 +15,9 @@ export async function POST(
       courseId = course.id
     }
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
-    if (!user || !user.email) {
+    if (!user) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
@@ -27,18 +26,10 @@ export async function POST(
       return new NextResponse('Invalid rating value', { status: 400 })
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email }
-    })
-
-    if (!dbUser) {
-      return new NextResponse('User not found', { status: 404 })
-    }
-
     // Check if user already rated this course
     const existingRating = await (prisma as any).rating.findFirst({
       where: {
-        userId: dbUser.id,
+        userId: user.id,
         courseId
       }
     })
@@ -56,7 +47,7 @@ export async function POST(
         data: {
           value,
           comment: comment || null,
-          userId: dbUser.id,
+          userId: user.id,
           courseId
         }
       })
@@ -82,24 +73,15 @@ export async function GET(
       courseId = course.id
     }
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
-    if (!user || !user.email) {
-      return NextResponse.json({ userRating: null })
-    }
-
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email }
-    })
-
-    if (!dbUser) {
+    if (!user) {
       return NextResponse.json({ userRating: null })
     }
 
     const userRating = await (prisma as any).rating.findFirst({
       where: {
-        userId: dbUser.id,
+        userId: user.id,
         courseId
       }
     })

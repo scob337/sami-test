@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
-import { supabaseClient } from '@/lib/supabase/client'
 import {
   LayoutDashboard,
   BookOpen,
@@ -39,7 +38,7 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
 
   const handleLogout = async () => {
     try {
-      await supabaseClient.auth.signOut()
+      await fetch('/api/auth/logout', { method: 'POST' })
       router.push('/')
       router.refresh()
     } catch (error) {

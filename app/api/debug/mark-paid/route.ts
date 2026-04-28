@@ -1,35 +1,16 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const manualAttemptId = searchParams.get('attemptId')
 
-    const supabase = await createClient()
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
-    if (!authUser && !manualAttemptId) {
+    if (!user && !manualAttemptId) {
       return NextResponse.json({ error: 'Not authenticated and no attemptId provided' }, { status: 401 })
-    }
-
-    // 1. Get/Create Prisma User for current auth user
-    let prismaUser = null
-    if (authUser?.email) {
-      prismaUser = await prisma.user.findUnique({
-        where: { email: authUser.email }
-      })
-      
-      if (!prismaUser) {
-        prismaUser = await prisma.user.create({
-          data: {
-            email: authUser.email,
-            name: authUser.user_metadata?.fullName || authUser.email.split('@')[0],
-            phone: authUser.user_metadata?.phone || ''
-          }
-        })
-      }
     }
 
     // 2. Find the attempt
@@ -39,9 +20,9 @@ export async function GET(request: Request) {
         where: { id: parseInt(manualAttemptId) },
         include: { test: true }
       })
-    } else if (prismaUser) {
+    } else if (user) {
       attemptToMark = await prisma.attempt.findFirst({
-        where: { userId: prismaUser.id },
+        where: { userId: user.id },
         orderBy: { startedAt: 'desc' },
         include: { test: true }
       })
@@ -50,17 +31,17 @@ export async function GET(request: Request) {
     if (!attemptToMark) {
       return NextResponse.json({ 
         error: 'Attempt not found', 
-        debug: { authEmail: authUser?.email, prismaUserId: prismaUser?.id } 
+        debug: { authEmail: user?.email, prismaUserId: user?.id } 
       }, { status: 404 })
     }
 
     // 3. OWNERSHIP TRANSFER: If current prisma user exists, force this attempt to THEM
-    if (prismaUser && attemptToMark.userId !== prismaUser.id) {
+    if (user && attemptToMark.userId !== user.id) {
        await prisma.attempt.update({
          where: { id: attemptToMark.id },
-         data: { userId: prismaUser.id }
+         data: { userId: user.id }
        })
-       attemptToMark.userId = prismaUser.id
+       attemptToMark.userId = user.id
     }
 
     // 4. Mark as paid + Link Book
@@ -93,7 +74,7 @@ export async function GET(request: Request) {
         attemptId: attemptToMark.id,
         testName: test.name,
         bookId: test.bookId,
-        userEmail: authUser?.email,
+        userEmail: user?.email,
         prismaUserId: attemptToMark.userId,
         paymentId: payment.id
       }

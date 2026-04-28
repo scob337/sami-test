@@ -1,21 +1,17 @@
-import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
 
 export async function GET() {
   try {
-    const supabase = await createClient()
-
-    const { data: questions, error } = await supabase
-      .from('questions')
-      .select('*')
-      .order('order', { ascending: true })
-
-    if (error) {
-      return NextResponse.json(
-        { error: 'فشل تحميل الأسئلة' },
-        { status: 400 }
-      )
-    }
+    const questions = await prisma.question.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+      include: {
+        options: {
+          orderBy: { sortOrder: 'asc' }
+        }
+      }
+    })
 
     return NextResponse.json(
       { questions },

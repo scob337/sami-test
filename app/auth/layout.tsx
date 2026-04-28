@@ -1,20 +1,14 @@
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
-import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getSession } from '@/lib/jwt'
 
 export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (user) {
+    const session = await getSession()
+    if (session?.id) {
       redirect('/dashboard')
     }
   } catch (err) {

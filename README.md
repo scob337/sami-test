@@ -1,203 +1,110 @@
-# Sami-Test - منصة اختبارات الشخصية الذكية
+# Sami-Test
 
-منصة متقدمة لاختبارات الشخصية مدعومة بالذكاء الاصطناعي، توفر تقارير شاملة وتوصيات مخصصة.
+منصة اختبارات شخصية مبنية على `Next.js` مع باك إند يعتمد على `PostgreSQL` بشكل مباشر عبر `pg` (node-postgres) مع `JWT` للمصادقة.
 
-## المميزات
+## نظرة سريعة
 
-- **اختبار ذكي**: 14 سؤال متخصص مع تحليل متقدم
-- **تقارير شاملة**: تقارير مفصلة عن نوع الشخصية والقدرات
-- **مكتبة موارد**: كتب وموارد مخصصة لكل نوع شخصية
-- **دعم الدفع**: تكامل Stripe للعضويات المميزة
-- **OTP via SMS**: التحقق الآمن برسائل نصية عبر Twilio
-- **لوحة تحكم**: لإدارة النتائج والإعدادات
-- **تصميم عصري**: واجهة مستخدم جميلة بـ Framer Motion animations
-- **متجاوب**: دعم كامل للهواتف والأجهزة اللوحية
-
-## التكنولوجيا المستخدمة
-
-### Frontend
-- **Next.js 16**: إطار عمل React الحديث
-- **TypeScript**: للكود أكثر أماناً وموثوقية
-- **Tailwind CSS 4**: نظام تنسيق قوي
-- **Framer Motion**: رسوم متحركة سلسة واحترافية
-- **SWR**: جلب البيانات والتخزين المؤقت
-
-### Backend & Database
-- **Supabase**: قاعدة بيانات PostgreSQL مع Authentication
-- **Row Level Security (RLS)**: أمان البيانات على مستوى الصفوف
-- **Vercel Blob**: تخزين الملفات (PDFs)
-
-### Integrations
-- **Stripe**: معالجة الدفع آمن
-- **Twilio**: إرسال OTP عبر SMS
-- **OpenAI**: تحليل البيانات (إذا كان مفعل)
-- **n8n**: أتمتة العمليات
-
-### State Management & Validation
-- **Zustand**: إدارة الحالة خفيفة وفعالة
-- **React Hook Form**: إدارة النماذج
-- **Zod**: التحقق من البيانات بشكل آمن
+- الباك إند يعمل على PostgreSQL عبر طبقتين:
+- `Prisma` موجود للتعامل مع أجزاء من النظام.
+- `pg` مفعّل لطبقة SQL المباشرة (خصوصًا مسارات المصادقة والترحيل).
+- المصادقة قائمة على `JWT` محفوظ في `HttpOnly cookie` باسم `token`.
+- رفع الملفات يتم محليًا في `public/uploads/*` عبر API داخلي.
 
 ## البنية
 
-```
-project/
-├── app/                      # Next.js App Router
-│   ├── (public)/            # صفحات عامة
-│   │   ├── page.tsx        # الرئيسية
-│   │   ├── privacy/        # سياسة الخصوصية
-│   │   └── terms/          # الشروط والأحكام
-│   ├── auth/               # صفحات الدخول والتسجيل
-│   │   ├── login/
-│   │   ├── register/
-│   │   └── otp/
-│   ├── test/               # صفحات الاختبار
-│   ├── results/            # عرض النتائج
-│   ├── checkout/           # الدفع
-│   ├── dashboard/          # لوحة المستخدم
-│   ├── books/              # المكتبة
-│   ├── settings/           # الإعدادات
-│   ├── api/                # API Routes
-│   │   ├── auth/
-│   │   └── test/
-│   └── layout.tsx          # Root layout
-├── components/             # مكونات React
-│   ├── layout/            # مكونات التخطيط
-│   ├── auth/              # مكونات المصادقة
-│   ├── test/              # مكونات الاختبار
-│   ├── home/              # مكونات الرئيسية
-│   └── ui/                # مكونات واجهة المستخدم
-├── lib/                    # وظائف وأدوات
-│   ├── supabase/          # عملاء Supabase
-│   ├── store/             # Zustand stores
-│   ├── validations/       # Zod schemas
-│   ├── animations.ts      # Framer Motion presets
-│   ├── config.ts          # إعدادات المشروع
-│   └── utils.ts           # وظائف مساعدة
-├── types/                  # TypeScript types
-│   └── supabase.ts        # Database types
-├── scripts/               # Database migrations
-└── public/                # الملفات الثابتة
+```text
+app/
+  api/
+    auth/           # login/register/me/logout/forgot/reset
+lib/
+  db/
+    pool.ts         # PostgreSQL connection pooling
+    auth-repository.ts # SQL queries for auth flows
+  auth.ts           # password + cookie helpers
+  jwt.ts            # sign/verify session token
+scripts/
+  migrate-supabase-to-postgres.mjs # نقل البيانات من مصدر Supabase إلى PostgreSQL
+  setup-buckets.mjs # تجهيز مجلدات الرفع المحلية
+tests/
+  unit/
+  integration/
 ```
 
-## البدء السريع
+## التشغيل المحلي
 
-### المتطلبات
-- Node.js 18+
-- pnpm (أو npm/yarn)
-- حساب Supabase
-- مفاتيح API للخدمات الخارجية
+1. تثبيت الحزم:
 
-### التثبيت
-
-1. استنساخ المستودع:
-```bash
-git clone <repository-url>
-cd Sami-Test
-```
-
-2. تثبيت المكتبات:
 ```bash
 pnpm install
 ```
 
-3. إعداد المتغيرات البيئية:
+2. إنشاء ملف البيئة:
+
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
-4. ملء قيم المتغيرات البيئية في `.env.local`
+3. تنفيذ migrations:
 
-5. تشغيل المشروع:
+```bash
+pnpm prisma migrate deploy
+```
+
+4. تشغيل التطبيق:
+
 ```bash
 pnpm dev
 ```
 
-6. افتح `http://localhost:3000` في المتصفح
-
-## إعداد قاعدة البيانات
-
-قم بتنفيذ ملف migration:
-
-```bash
-# استخدم Supabase CLI أو SQL Editor مباشرة
-psql -h your-supabase-url -U postgres < scripts/setup_db.sql
-```
-
-## متغيرات البيئة المطلوبة
+## متغيرات البيئة
 
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# Stripe
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-
-# Twilio (SMS OTP)
-TWILIO_ACCOUNT_SID=
-TWILIO_AUTH_TOKEN=
-TWILIO_PHONE_NUMBER=
-
-# OpenAI
-OPENAI_API_KEY=
-
-# n8n
-N8N_WEBHOOK_URL=
-
-# Vercel Blob
-BLOB_READ_WRITE_TOKEN=
-
-# App
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DB_NAME
+DIRECT_URL=postgresql://USER:PASSWORD@HOST:5432/DB_NAME
+JWT_SECRET=replace-with-strong-secret
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NODE_ENV=development
+
+# Optional for data migration source
+SUPABASE_DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/postgres
+MIGRATION_TRUNCATE=false
 ```
 
-## الميزات المستقبلية
+## ترحيل البيانات من Supabase
 
-- [ ] دعم اللغات المتعددة (إنجليزي)
-- [ ] لوحة تحكم Admin متقدمة
-- [ ] تقارير PDF قابلة للتحميل
-- [ ] مشاركة النتائج عبر وسائل التواصل
-- [ ] اختبارات الدقة المتقدمة
-- [ ] تحليل OpenAI المتقدم
-- [ ] نسخ احتياطية تلقائية
-- [ ] Analytics شامل
+- جهز قاعدة PostgreSQL الهدف بنفس schema.
+- عيّن:
+- `SUPABASE_DATABASE_URL` لمصدر البيانات.
+- `DATABASE_URL` لقاعدة الهدف.
+- نفّذ:
 
-## دليل التطوير
-
-### إضافة ميزة جديدة
-
-1. أنشئ فرع جديد:
 ```bash
-git checkout -b feature/feature-name
+pnpm db:migrate:data
 ```
 
-2. اتبع البنية الحالية والأنماط
-3. اختبر التغييرات محلياً
-4. أرسل pull request
+> إذا أردت إعادة تعبئة الجداول من الصفر، فعّل `MIGRATION_TRUNCATE=true`.
 
-### معايير الكود
+## المصادقة
 
-- استخدم TypeScript في كل مكان
-- اتبع نمط Functional Components
-- استخدم hooks بدل class components
-- أضف Zod validation للبيانات الخارجية
-- كتب الاختبارات للـ utils المهمة
+- تسجيل الدخول والتسجيل يعملان عبر SQL مباشر على جدول `User`.
+- الجلسة تُدار بواسطة JWT داخل Cookie آمنة.
+- التحقق من الجلسة يتم من `lib/jwt.ts` و `lib/auth.ts`.
 
-## الترخيص
+## إدارة الملفات
 
-هذا المشروع مرخص تحت رخصة MIT.
+- API الرفع: `POST /api/user/upload`
+- التخزين: `public/uploads/<bucket>/...`
+- تجهيز مجلدات الرفع:
 
-## التواصل والدعم
+```bash
+pnpm storage:prepare
+```
 
-للمشاكل والاقتراحات:
-- البريد الإلكتروني: support@Sami-Test.app
-- الهاتف: +966 55 000 0000
+## الاختبارات
 
----
+```bash
+pnpm test:unit
+pnpm test:integration
+pnpm test
+```
 
-صُنع بـ ❤️ باستخدام Next.js و TypeScript
+ملاحظة: اختبارات التكامل تحتاج قاعدة بيانات متاحة عبر `TEST_DATABASE_URL` أو `DATABASE_URL`.

@@ -28,7 +28,7 @@ export default function SettingsPage() {
   const handleSaveProfile = async () => {
     try {
       setIsLoading(true)
-      // TODO: Update user profile in Supabase
+      // TODO: Update user profile via PostgreSQL-backed API
       console.log('Updating profile:', formData)
       toast.success('تم حفظ التغييرات بنجاح')
     } catch (error) {

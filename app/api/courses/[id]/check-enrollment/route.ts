@@ -1,16 +1,15 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await getAuthenticatedUser()
 
-    if (!user || !user.email) {
+    if (!user) {
       return NextResponse.json({ isEnrolled: false })
     }
 
@@ -23,19 +22,10 @@ export async function GET(
       courseId = course.id;
     }
 
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { id: true }
-    })
-
-    if (!dbUser) {
-      return NextResponse.json({ isEnrolled: false })
-    }
-
     // Check if user has a completed payment for this course
     const enrollment = await prisma.payment.findFirst({
       where: {
-        userId: dbUser.id,
+        userId: user.id,
         courseId: courseId,
         status: 'COMPLETED'
       }
@@ -45,7 +35,7 @@ export async function GET(
     const userCourse = await prisma.userCourse.findUnique({
       where: {
         userId_courseId: {
-          userId: dbUser.id,
+          userId: user.id,
           courseId: courseId
         }
       }

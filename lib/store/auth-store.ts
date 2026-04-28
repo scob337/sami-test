@@ -1,10 +1,11 @@
 import { create } from 'zustand'
-import type { User } from '@supabase/supabase-js'
-import { supabaseClient } from '@/lib/supabase/client'
 
-export interface AuthUser extends User {
+export interface AuthUser {
+  id: number | string
+  email?: string | null
+  phone?: string | null
+  name?: string | null
   isAdmin?: boolean
-  name?: string
 }
 
 interface AuthStore {
@@ -26,11 +27,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   setError: (error) => set({ error }),
   logout: async () => {
     try {
-      // Call server logout to clear Supabase server cookies
+      // Call server logout to clear JWT cookie
       await fetch('/api/auth/logout', { method: 'POST' })
-
-      // Sign out from client properly
-      await supabaseClient.auth.signOut()
 
       // Clear client-side storages
       try { localStorage.clear() } catch {}

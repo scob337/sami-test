@@ -1,13 +1,19 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import pg from 'pg'
-import * as dotenv from 'dotenv'
+import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 
 dotenv.config()
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL })
-const adapter = new PrismaPg(pool as any)
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  console.error('DATABASE_URL is missing in environment variables.')
+  process.exit(1)
+}
+
+const pool = new pg.Pool({ connectionString })
+const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
@@ -43,9 +49,9 @@ async function main() {
     console.log(`- البريد: ${admin.email}`)
     console.log(`- الصلاحية: ${admin.isAdmin ? 'مدير (Admin)' : 'مستخدم عادي'}`)
     console.log(`- كلمة المرور: ${adminPassword}`)
-    console.log('\n💡 يمكنك الآن تسجيل الدخول بهذا البريد في لوحة التحكم.')
   } catch (error) {
     console.error('❌ حدث خطأ أثناء إنشاء الحساب:', error)
+    process.exitCode = 1
   } finally {
     await prisma.$disconnect()
     await pool.end()

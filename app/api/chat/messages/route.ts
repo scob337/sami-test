@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
+    const user = await getAuthenticatedUser()
+    if (!user) return new NextResponse('Unauthorized', { status: 401 })
     
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { id: true, isAdmin: true }
-    })
-    if (!dbUser) return new NextResponse('User not found in DB', { status: 404 })
-
     const { sessionId, content, isAdmin } = await req.json()
 
     // Block messages on closed sessions
@@ -27,9 +20,9 @@ export async function POST(req: Request) {
     const message = await (prisma as any).message.create({
       data: {
         sessionId: parseInt(sessionId),
-        senderId: dbUser.id,
+        senderId: user.id,
         content,
-        isAdmin: !!dbUser.isAdmin && !!isAdmin
+        isAdmin: !!user.isAdmin && !!isAdmin
       }
     })
 
@@ -52,16 +45,9 @@ export async function GET(req: Request) {
     const sessionId = searchParams.get('sessionId')
     if (!sessionId) return new NextResponse('Missing sessionId', { status: 400 })
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
+    const user = await getAuthenticatedUser()
+    if (!user) return new NextResponse('Unauthorized', { status: 401 })
     
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { id: true, isAdmin: true }
-    })
-    if (!dbUser) return new NextResponse('User not found in DB', { status: 404 })
-
     const messages = await (prisma as any).message.findMany({
       where: { sessionId: parseInt(sessionId) },
       include: {
@@ -73,11 +59,10 @@ export async function GET(req: Request) {
     })
 
     // Mark as read if user is the opposite role of the last unread message
-    // Simplistic: mark all read by others as read by me
     await (prisma as any).message.updateMany({
       where: { 
         sessionId: parseInt(sessionId),
-        isAdmin: !dbUser.isAdmin,
+        isAdmin: !user.isAdmin,
         isRead: false
       },
       data: { isRead: true }

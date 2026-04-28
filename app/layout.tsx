@@ -1,30 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono, Cairo } from 'next/font/google'
 import { SupportButton } from '@/components/chat/SupportButton'
 import { NotificationToast } from '@/components/notifications/NotificationToast'
-
-const cairo = Cairo({
-  subsets: ["arabic", "latin"],
-  variable: '--font-cairo',
-  display: 'swap',
-  weight: ['300', '400', '500', '600', '700', '800', '900'],
-})
 import { Toaster } from 'sonner'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthInitializer } from '@/components/providers/auth-initializer'
 import './globals.css'
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: '--font-sans',
-  display: 'swap',
-})
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  variable: '--font-mono',
-  display: 'swap',
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://7types.online'),
@@ -107,7 +87,7 @@ export default function RootLayout({
     <html
       lang="ar"
       suppressHydrationWarning
-      className={`${geist.variable} ${geistMono.variable} ${cairo.variable}`}
+      className="antialiased"
       dir="rtl"
     >
       <head>
@@ -180,4 +160,3 @@ export default function RootLayout({
 import { NavbarWrapper } from '@/components/layout/navbar-wrapper'
 import { Footer } from '@/components/layout/footer'
 import { JsonLd } from '@/components/seo/JsonLd'
-

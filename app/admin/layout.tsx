@@ -2,31 +2,23 @@ import { Sidebar } from '@/components/admin/sidebar'
 import { Header } from '@/components/admin/header'
 import { UploadManager } from '@/components/admin/upload-manager'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import prisma from '@/lib/prisma'
+import { getSession } from '@/lib/jwt'
+import { findUserById } from '@/lib/db/auth-repository'
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
+  const session = await getSession()
+  if (!session?.id) {
     redirect('/auth/login')
   }
 
   let isAdmin = false
   try {
-    if (user.email) {
-      // Check admin status in DB
-      const dbUser = await prisma.user.findUnique({
-        where: { email: user.email },
-        select: { isAdmin: true }
-      })
-      isAdmin = dbUser?.isAdmin || false
-    }
+    const dbUser = await findUserById(Number(session.id))
+    isAdmin = dbUser?.isAdmin || false
   } catch (error) {
     console.error('Database connection error in AdminLayout:', error)
     // If DB check fails in production (e.g. env vars issue), 

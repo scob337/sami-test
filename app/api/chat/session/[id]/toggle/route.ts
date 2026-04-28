@@ -1,21 +1,14 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
-    
-    const dbUser = await prisma.user.findUnique({
-      where: { email: user.email },
-      select: { id: true, isAdmin: true }
-    })
-    if (!dbUser?.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const { id } = await params
 
@@ -38,7 +31,7 @@ export async function PATCH(
       await messageModel.create({
         data: {
           sessionId: parseInt(id),
-          senderId: dbUser.id,
+          senderId: user.id,
           content: '⛔ تم إنهاء هذه المحادثة من قبل الإدارة. لا يمكن إرسال رسائل جديدة.',
           isAdmin: true,
           isRead: false

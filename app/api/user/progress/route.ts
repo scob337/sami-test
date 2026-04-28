@@ -1,22 +1,18 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
-
-    const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
-    if (!dbUser) return new NextResponse('User not found', { status: 404 })
+    const user = await getAuthenticatedUser()
+    if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
     const { episodeId, lastPos, isWatched } = await req.json()
 
     const progress = await prisma.userEpisodeProgress.upsert({
       where: {
         userId_episodeId: {
-          userId: dbUser.id,
+          userId: user.id,
           episodeId: parseInt(episodeId)
         }
       },
@@ -25,7 +21,7 @@ export async function POST(req: Request) {
         isWatched: isWatched || false
       },
       create: {
-        userId: dbUser.id,
+        userId: user.id,
         episodeId: parseInt(episodeId),
         lastPos: lastPos || 0,
         isWatched: isWatched || false
@@ -44,17 +40,13 @@ export async function GET(req: Request) {
      const { searchParams } = new URL(req.url)
      const episodeId = searchParams.get('episodeId')
      
-     const supabase = await createClient()
-     const { data: { user } } = await supabase.auth.getUser()
-     if (!user || !user.email) return new NextResponse('Unauthorized', { status: 401 })
- 
-     const dbUser = await prisma.user.findUnique({ where: { email: user.email } })
-     if (!dbUser) return new NextResponse('User not found', { status: 404 })
+     const user = await getAuthenticatedUser()
+     if (!user) return new NextResponse('Unauthorized', { status: 401 })
  
      const progress = await prisma.userEpisodeProgress.findUnique({
        where: {
          userId_episodeId: {
-           userId: dbUser.id,
+           userId: user.id,
            episodeId: parseInt(episodeId || '0')
          }
        }

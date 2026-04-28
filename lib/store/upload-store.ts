@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import axios, { AxiosProgressEvent, CancelTokenSource } from 'axios'
-import { supabaseClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 export interface UploadItem {
@@ -42,22 +41,11 @@ export const useUploadStore = create<UploadState>((set, get) => ({
     
     const startUpload = async () => {
       try {
-        const fileExt = file.name.split('.').pop()
-        const path = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-        
-        const { data: { session } } = await supabaseClient.auth.getSession()
-        const token = session?.access_token || supabaseKey
-        const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${path}`
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('bucket', bucket)
 
-        await axios.post(uploadUrl, file, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'apikey': supabaseKey,
-            'Content-Type': file.type,
-            'x-upsert': 'true'
-          },
+        const response = await axios.post('/api/user/upload', formData, {
           onUploadProgress: (progressEvent) => {
             if (progressEvent.total) {
               const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total)
@@ -72,7 +60,10 @@ export const useUploadStore = create<UploadState>((set, get) => ({
           cancelToken: cancelToken.token
         })
 
-        const { data: { publicUrl } } = supabaseClient.storage.from(bucket).getPublicUrl(path)
+        const publicUrl = response?.data?.url as string | undefined
+        if (!publicUrl) {
+          throw new Error('Upload API did not return file URL')
+        }
 
         set((state) => ({
           uploads: {

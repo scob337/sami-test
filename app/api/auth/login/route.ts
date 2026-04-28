@@ -1,6 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
 import { loginSchema } from '@/lib/validations'
 import { NextRequest, NextResponse } from 'next/server'
+import { comparePassword, setAuthCookie } from '@/lib/auth'
+import { findUserByIdentifier } from '@/lib/db/auth-repository'
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,71 +10,47 @@ export async function POST(request: NextRequest) {
     // Validate input
     const validatedData = loginSchema.parse(body)
 
-    const prisma = (await import('@/lib/prisma')).default
-    let emailForAuth = validatedData.identifier
+    // Find user by email or phone
+    const user = await findUserByIdentifier(validatedData.identifier)
 
-    // If identifier doesn't look like an email, assume it's a phone number and look up the email
-    if (!emailForAuth.includes('@')) {
-      const dbUser = await prisma.user.findFirst({
-        where: { phone: validatedData.identifier },
-        select: { email: true }
-      })
-
-      if (dbUser && dbUser.email) {
-        emailForAuth = dbUser.email
-      } else {
-        return NextResponse.json(
-          { error: 'لم يتم العثور على حساب بهذا الرقم', code: 'user_not_found' },
-          { status: 404 }
-        )
-      }
-    }
-
-    // Initialize Supabase
-    const supabase = await createClient()
-
-    // Sign in with Supabase Auth
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: emailForAuth,
-      password: validatedData.password,
-    })
-
-    if (error) {
-      console.error('Supabase auth error:', error)
+    if (!user || !user.password) {
       return NextResponse.json(
-        { error: error.message || 'بيانات الدخول غير صحيحة', code: (error as any)?.status || null },
+        { error: 'بيانات الدخول غير صحيحة', code: 'invalid_credentials' },
         { status: 401 }
       )
     }
 
-    // Ensure user exists in Prisma and sync their metadata
-    const prismaUser = await prisma.user.upsert({
-      where: { email: emailForAuth },
-      update: {
-        name: data.user.user_metadata?.fullName || data.user.user_metadata?.name || undefined,
-        phone: data.user.user_metadata?.phone || data.user.phone || undefined,
-      },
-      create: {
-        email: emailForAuth,
-        name: data.user.user_metadata?.fullName || data.user.user_metadata?.name || '',
-        phone: data.user.user_metadata?.phone || data.user.phone || '',
-        isAdmin: false
-      }
-    })
+    // Compare password
+    const isPasswordValid = await comparePassword(validatedData.password, user.password)
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { error: 'بيانات الدخول غير صحيحة', code: 'invalid_credentials' },
+        { status: 401 }
+      )
+    }
+
+    // Set auth cookie
+    await setAuthCookie(user)
 
     return NextResponse.json(
       {
         message: 'تم الدخول بنجاح',
         user: {
-          ...data.user,
-          isAdmin: prismaUser.isAdmin
-        },
-        session: data.session,
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          isAdmin: user.isAdmin
+        }
       },
       { status: 200 }
     )
-  } catch (error) {
+  } catch (error: any) {
     console.error('Login error:', error)
+    if (error.name === 'ZodError') {
+      return NextResponse.json({ error: 'بيانات غير صالحة' }, { status: 400 })
+    }
     return NextResponse.json(
       { error: 'حدث خطأ أثناء الدخول' },
       { status: 500 }

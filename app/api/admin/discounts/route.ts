@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { getAuthenticatedUser } from '@/lib/auth'
 
 export async function GET() {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+
     const codes = await (prisma as any).discountCode.findMany({
       orderBy: { createdAt: 'desc' }
     })
@@ -15,6 +18,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const user = await getAuthenticatedUser()
+    if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
+
     const body = await req.json()
     const { code, discount, type, expiresAt, isActive, courseId } = body
 

@@ -1,13 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Header as Navbar } from '@/components/layout/header'
-import { createClient } from '@/lib/supabase/client'
 import { Lock, CheckCircle2, AlertCircle } from 'lucide-react'
 
 export default function ResetPasswordPage() {
@@ -15,27 +13,26 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
   const router = useRouter()
-  const supabase = createClient()
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token')
 
   useEffect(() => {
-    // Check if we have a session or if the link is valid
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
-      if (error || !session) {
-        setError('انتهت صلاحية الرابط أو أنه غير صالح. يرجى طلب رابط جديد.')
-      }
-      setIsVerifying(false)
+    if (!token) {
+      setError('رابط غير صالح. يرجى طلب رابط جديد.')
     }
-    checkSession()
-  }, [supabase])
+  }, [token])
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (!token) {
+      toast.error('الرابط غير صالح')
+      return
+    }
+
     if (password.length < 6) {
       toast.error('يجب أن تكون كلمة المرور 6 أحرف على الأقل')
       return
@@ -48,18 +45,17 @@ export default function ResetPasswordPage() {
 
     try {
       setIsLoading(true)
-      const { error } = await supabase.auth.updateUser({
-        password: password
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password })
       })
 
-      if (error) throw error
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'فشل تحديث كلمة المرور')
 
       setIsSuccess(true)
       toast.success('تم تحديث كلمة المرور بنجاح')
-      
-      // Clear session after password reset to force re-login if desired,
-      // or just redirect to login. Usually better to redirect to login.
-      await supabase.auth.signOut()
       
       setTimeout(() => {
         router.push('/auth/login')
@@ -72,17 +68,8 @@ export default function ResetPasswordPage() {
     }
   }
 
-  if (isVerifying) {
-    return (
-      <div className="min-h-screen bg-[#0A1A3B] flex items-center justify-center">
-        <LoadingSpinner size="lg" className="text-blue-500" />
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-[#0A1A3B] flex flex-col font-sans selection:bg-blue-500/30" dir="rtl">
-      <Navbar />
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
         {/* Background Decorations */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />

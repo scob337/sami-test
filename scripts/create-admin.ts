@@ -11,10 +11,10 @@ const adapter = new PrismaPg(pool as any)
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@admin.com'
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1337@'
-  const adminName = process.env.ADMIN_NAME || 'مدير النظام'
-  const adminPhone = process.env.ADMIN_PHONE || '00000000'
+  const adminEmail = 'Samialmoamer@gmail.com'
+  const adminPassword ='Scob1337@'
+  const adminName = 'مدير النظام'
+  const adminPhone =  '01255'
 
   console.log(`🚀 البدء في إنشاء حساب أدمن: ${adminEmail}...`)
 

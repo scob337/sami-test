@@ -8,6 +8,11 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
   },
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '500mb',
+    },
+  },
   poweredByHeader: false,
   headers: async () => {
     return [

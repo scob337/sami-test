@@ -33,10 +33,10 @@ export function FileUploadField({
   const activeUpload = currentUploadId ? uploads[currentUploadId] : null
 
   useEffect(() => {
-    if (activeUpload?.status === 'completed' && activeUpload.url) {
+    if (activeUpload?.status === 'completed' && activeUpload.url && activeUpload.url !== value) {
       onChange(activeUpload.url)
     }
-  }, [activeUpload?.status, activeUpload?.url, onChange])
+  }, [activeUpload?.status, activeUpload?.url, onChange, value])
 
   const formatDuration = (seconds: number) => {
     const min = Math.floor(seconds / 60)

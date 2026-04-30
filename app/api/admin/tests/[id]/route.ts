@@ -29,7 +29,7 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { name, bookId, isActive, slug } = body
+    const { name, bookId, isActive, slug, seoTitle, seoDescription, seoKeywords } = body
 
     if (!name || !bookId) {
       return NextResponse.json({ error: 'Name and bookId are required' }, { status: 400 })
@@ -43,6 +43,9 @@ export async function PUT(
         slug: slug || (name ? slugify(name) : undefined),
         bookId: parseInt(bookId),
         isActive: isActive ?? true,
+        seoTitle,
+        seoDescription,
+        seoKeywords
       },
       include: { book: true },
     })

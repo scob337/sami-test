@@ -21,8 +21,12 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { title, slug, price, description, image, introVideoUrl, videoUrl720, videoUrl1080, introThumbnailUrl, isActive } = body
-
+    const { 
+      title, slug, price, description, image, introVideoUrl, 
+      videoUrl720, videoUrl1080, introThumbnailUrl, isActive,
+      seoTitle, seoDescription, seoKeywords
+    } = body
+ 
     const course = await prisma.course.create({
       data: {
         title,
@@ -35,6 +39,9 @@ export async function POST(req: Request) {
         videoUrl1080,
         introThumbnailUrl,
         isActive: isActive ?? true,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
         episodes: {
           create: (body.episodes || []).map((ep: any, idx: number) => ({
             title: ep.title || `Episode ${idx + 1}`,

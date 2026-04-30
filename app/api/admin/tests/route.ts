@@ -21,7 +21,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, bookId } = body
+    const { name, bookId, isActive, seoTitle, seoDescription, seoKeywords } = body
 
     if (!name || !bookId) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
@@ -32,6 +32,10 @@ export async function POST(request: Request) {
         name,
         slug: slugify(name),
         bookId: parseInt(bookId),
+        isActive: isActive ?? true,
+        seoTitle,
+        seoDescription,
+        seoKeywords
       }
     })
 

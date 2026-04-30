@@ -149,6 +149,43 @@ export function TestFormModal({ open, onClose, onSuccess, editTest }: TestFormMo
               </div>
             </div>
           </div>
+
+          <div className="pt-6 border-t border-slate-100 dark:border-slate-800/50 space-y-6">
+            <Label className="text-xs font-black text-[#ff5722] uppercase tracking-[2px] mr-2">إعدادات محركات البحث (SEO)</Label>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-slate-500 mr-2">عنوان الـ SEO (Meta Title)</Label>
+                <Input
+                  value={seoTitle}
+                  onChange={e => setSeoTitle(e.target.value)}
+                  placeholder="اتركه فارغاً لاستخدام اسم الاختبار"
+                  className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 mr-2">الوصف (Meta Description)</Label>
+                  <Input
+                    value={seoDescription}
+                    onChange={e => setSeoDescription(e.target.value)}
+                    placeholder="وصف مختصر للبحث"
+                    className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-slate-500 mr-2">الكلمات المفتاحية (Keywords)</Label>
+                  <Input
+                    value={seoKeywords}
+                    onChange={e => setSeoKeywords(e.target.value)}
+                    placeholder="كورس، تدريب، إلخ..."
+                    className="h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <DialogFooter className="p-8 pt-0 flex flex-col sm:flex-row-reverse gap-4">

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
-import { ArrowRight, Save, Image as ImageIcon, PlayCircle, Tag, Plus, Trash2, Percent, DollarSign, Video, X } from 'lucide-react'
+import { ArrowRight, Save, Image as ImageIcon, PlayCircle, Tag, Plus, Trash2, Percent, DollarSign, Video, X, Edit } from 'lucide-react'
 import Link from 'next/link'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
@@ -156,6 +156,8 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
   // Episode management
   const [newEpisodes, setNewEpisodes] = useState<any[]>([])
   const [addingEpisode, setAddingEpisode] = useState(false)
+  const [editingEpisode, setEditingEpisode] = useState<any | null>(null)
+  const [isUpdatingEpisode, setIsUpdatingEpisode] = useState(false)
 
   const addNewEpisodeRow = () => {
     setNewEpisodes([...newEpisodes, { title: '', slug: '', videoUrl: '', videoUrl720: '', videoUrl1080: '', thumbnail: '', duration: '', isFree: false }])
@@ -197,6 +199,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
   }
 
   const deleteEpisode = async (episodeId: number) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الحلقة؟')) return
     try {
       const res = await fetch(`/api/admin/episodes/${episodeId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
@@ -204,6 +207,26 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
       mutateEpisodes()
     } catch {
       toast.error('فشل الحذف')
+    }
+  }
+
+  const handleUpdateEpisode = async () => {
+    if (!editingEpisode) return
+    setIsUpdatingEpisode(true)
+    try {
+      const res = await fetch(`/api/admin/episodes/${editingEpisode.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingEpisode)
+      })
+      if (!res.ok) throw new Error()
+      toast.success('تم تحديث الحلقة بنجاح')
+      setEditingEpisode(null)
+      mutateEpisodes()
+    } catch {
+      toast.error('فشل تحديث الحلقة')
+    } finally {
+      setIsUpdatingEpisode(false)
     }
   }
 
@@ -335,27 +358,87 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
           {existingEpisodes && existingEpisodes.length > 0 && (
             <div className="space-y-3">
               {existingEpisodes.map((ep, idx) => (
-                <div key={ep.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 group hover:border-indigo-500/50 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-black text-sm">
-                      {idx + 1}
+                <div key={ep.id} className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 group hover:border-indigo-500/50 transition-all">
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 font-black text-sm">
+                        {idx + 1}
+                      </div>
+                      <div>
+                        <p className="font-black text-sm">{ep.title}</p>
+                        <p className="text-xs font-bold text-slate-500">
+                          {ep.duration || '—'} • {ep.isFree ? <span className="text-emerald-500">مجانية</span> : <span className="text-amber-500">مدفوعة</span>}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-black text-sm">{ep.title}</p>
-                      <p className="text-xs font-bold text-slate-500">
-                        {ep.duration || '—'} • {ep.isFree ? 'مجانية' : 'مدفوعة'}
-                      </p>
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-xl"
+                        onClick={() => setEditingEpisode(ep)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl"
+                        onClick={() => deleteEpisode(ep.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all"
-                    onClick={() => deleteEpisode(ep.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+
+                  {editingEpisode?.id === ep.id && (
+                    <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-6 animate-in slide-in-from-top-2">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs font-bold">عنوان الحلقة</Label>
+                          <Input 
+                            value={editingEpisode.title}
+                            className="rounded-xl"
+                            onChange={(e) => setEditingEpisode({ ...editingEpisode, title: e.target.value })}
+                          />
+                        </div>
+                        <div className="flex items-center gap-4 pt-6">
+                          <Switch 
+                            checked={editingEpisode.isFree}
+                            onCheckedChange={(checked) => setEditingEpisode({ ...editingEpisode, isFree: checked })}
+                          />
+                          <Label className="text-xs font-bold">حلقة مجانية</Label>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FileUploadField 
+                          label="تعديل الفيديو"
+                          value={editingEpisode.videoUrl}
+                          onChange={(url) => setEditingEpisode({ ...editingEpisode, videoUrl: url })}
+                          onDurationChange={(dur) => setEditingEpisode({ ...editingEpisode, duration: dur })}
+                          accept="video/*"
+                          bucket="videos"
+                          icon="video"
+                        />
+                        <FileUploadField 
+                          label="تعديل الصورة"
+                          value={editingEpisode.thumbnail}
+                          onChange={(url) => setEditingEpisode({ ...editingEpisode, thumbnail: url })}
+                          accept="image/*"
+                          bucket="thumbnails"
+                          icon="image"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-3">
+                        <Button type="button" variant="ghost" onClick={() => setEditingEpisode(null)} className="rounded-xl">إلغاء</Button>
+                        <Button type="button" onClick={handleUpdateEpisode} disabled={isUpdatingEpisode} className="bg-indigo-600 text-white rounded-xl h-10 px-6 font-bold">
+                          {isUpdatingEpisode ? <LoadingSpinner size="sm" /> : 'حفظ التغييرات'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

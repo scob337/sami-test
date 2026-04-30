@@ -3,275 +3,249 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-}
-
-enum PatternType {
-  ASSERTIVE   // الحازمة
-  PRECISE     // المدققة
-  CALM        // الهادئة
-  WISE        // الحكيمة
-  SPONTANEOUS // العفوية
-  OPEN        // المنفتحة
-  THINKER     // المفكرة
-}
-
-enum AttemptStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
-  CANCELLED
+  provider = "postgresql"
 }
 
 model User {
-  id          Int        @id @default(autoincrement())
-  name        String?
-  phone       String?    @unique
-  email       String?    @unique
-  password    String?
-  resetToken       String?   @unique
+  id               Int                   @id @default(autoincrement())
+  name             String?
+  phone            String?               @unique
+  email            String?               @unique
+  verifiedAt       DateTime?
+  createdAt        DateTime              @default(now())
+  isAdmin          Boolean               @default(false)
+  avatarUrl        String?
+  password         String?
+  resetToken       String?
   resetTokenExpiry DateTime?
-  avatarUrl   String?
-  isAdmin     Boolean    @default(false)
-  verifiedAt  DateTime?
-  createdAt   DateTime   @default(now())
-
-  otpCodes    OtpCode[]
-  attempts    Attempt[]
-  payments    Payment[]
-  comments    Comment[]
-  ratings     Rating[]
-  courses     UserCourse[]
-  chatSessions ChatSession[]
-  messages    Message[]
-  episodeProgress UserEpisodeProgress[]
-  notifications   UserNotification[]
+  attempts         Attempt[]
+  chatSessions     ChatSession[]
+  comments         Comment[]
+  messages         Message[]
+  otpCodes         OtpCode[]
+  payments         Payment[]
+  ratings          Rating[]
+  courses          UserCourse[]
+  episodeProgress  UserEpisodeProgress[]
+  notifications    UserNotification[]
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   title       String
-  slug        String   @unique
-  description String?  @db.Text
-  filePdf     String   // URL to PDF
-  price       Float    @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  tests     Test[]
-  payments  Payment[]
+  description String?
+  filePdf     String
+  price       Float     @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  slug        String    @unique
+  payments    Payment[]
+  tests       Test[]
 }
 
 model Test {
-  id             Int      @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   name           String
-  slug           String   @unique
-  description    String?  @db.Text
-  book           Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   bookId         Int
-  isActive       Boolean  @default(true)
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  description    String?
+  seoDescription String?
+  seoKeywords    String?
   seoTitle       String?
-  seoDescription String?  @db.Text
-  seoKeywords    String?  @db.Text
-  createdAt      DateTime @default(now())
-
-  questions Question[]
-  attempts  Attempt[]
-  aiPrompts AiPrompt[]
-  payments  Payment[]
+  slug           String     @unique
+  aiPrompts      AiPrompt[]
+  attempts       Attempt[]
+  payments       Payment[]
+  questions      Question[]
+  book           Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
 }
 
 model AiPrompt {
   id           Int      @id @default(autoincrement())
-  test         Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
   testId       Int
-  systemPrompt String   @db.Text
-  reportRules  String   @db.Text
+  systemPrompt String
+  reportRules  String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  test         Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
 }
 
 model OtpCode {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     Int
-  code       String
-  expiresAt  DateTime
-  usedAt     DateTime?
-  createdAt  DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  code      String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Question {
   id           Int              @id @default(autoincrement())
-  test         Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
-  testId       Int
   questionText String
   sortOrder    Int              @default(0)
   isActive     Boolean          @default(true)
-
-  options      QuestionOption[]
+  testId       Int
   answers      Answer[]
+  test         Test             @relation(fields: [testId], references: [id], onDelete: Cascade)
+  options      QuestionOption[]
 }
 
 model QuestionOption {
   id         Int           @id @default(autoincrement())
-  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
   optionText String
   sortOrder  Int           @default(0)
-
-  scores     OptionScore[]
   answers    Answer[]
+  scores     OptionScore[]
+  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model OptionScore {
-  id        Int         @id @default(autoincrement())
-  option    QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  optionId  Int
-  pattern   PatternType
-  score     Int
+  id       Int            @id @default(autoincrement())
+  optionId Int
+  pattern  PatternType
+  score    Int
+  option   QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
 }
 
 model Attempt {
-  id          Int        @id @default(autoincrement())
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int           @id @default(autoincrement())
   userId      Int
-  test        Test       @relation(fields: [testId], references: [id], onDelete: Cascade)
-  testId      Int
-  startedAt   DateTime   @default(now())
+  startedAt   DateTime      @default(now())
   completedAt DateTime?
   status      AttemptStatus @default(IN_PROGRESS)
-
+  testId      Int
   answers     Answer[]
-  result      Result?
+  test        Test          @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   payment     Payment?
+  result      Result?
 }
 
 model Answer {
-  id         Int           @id @default(autoincrement())
-  attempt    Attempt       @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  id         Int            @id @default(autoincrement())
   attemptId  Int
-  question   Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId Int
-  option     QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
   optionId   Int
+  attempt    Attempt        @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  option     QuestionOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  question   Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model Result {
-  id              Int       @id @default(autoincrement())
-  attempt         Attempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  attemptId       Int       @unique
-  primaryPattern  PatternType
+  id               Int          @id @default(autoincrement())
+  attemptId        Int          @unique
+  primaryPattern   PatternType
   secondaryPattern PatternType?
-  scoresJson      Json
-  createdAt       DateTime  @default(now())
-
-  report          Report?
+  scoresJson       Json
+  createdAt        DateTime     @default(now())
+  report           Report?
+  attempt          Attempt      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
 }
 
 model Report {
-  id         Int     @id @default(autoincrement())
-  result     Result  @relation(fields: [resultId], references: [id], onDelete: Cascade)
-  resultId   Int     @unique
-  reportText String  @db.Text
+  id         Int      @id @default(autoincrement())
+  resultId   Int      @unique
+  reportText String
   createdAt  DateTime @default(now())
+  result     Result   @relation(fields: [resultId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  book      Book?    @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  bookId    Int?
-  test      Test?    @relation(fields: [testId], references: [id], onDelete: Cascade)
-  testId    Int?
-  attempt   Attempt? @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  attemptId Int?     @unique
-  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId  Int?
-  amount    Float
-  status    String   @default("PENDING") // PENDING, COMPLETED, FAILED
-  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  id             Int           @id @default(autoincrement())
+  userId         Int
+  bookId         Int?
+  amount         Float
+  status         String        @default("PENDING")
+  createdAt      DateTime      @default(now())
+  attemptId      Int?          @unique
+  courseId       Int?
   discountCodeId Int?
-  createdAt DateTime @default(now())
+  testId         Int?
+  attempt        Attempt?      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  book           Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  course         Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
+  test           Test?         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Course {
-  id               Int       @id @default(autoincrement())
-  title            String
-  slug             String    @unique
-  description      String?   @db.Text
-  image            String?   // Main Thumbnail
-  introVideoUrl    String?   // Free Intro Video
-  introThumbnailUrl String?  // Intro Video Thumbnail
-  videoUrl720      String?   // 720p Intro Video
-  videoUrl1080     String?   // 1080p Intro Video
-  price            Float     @default(0)
-  isActive         Boolean   @default(true)
-  seoTitle         String?
-  seoDescription   String?   @db.Text
-  seoKeywords      String?   @db.Text
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-
-  episodes      Episode[]
-  ratings       Rating[]
-  enrollments   UserCourse[]
-  payments      Payment[]
-  discountCodes DiscountCode[]
+  id                Int            @id @default(autoincrement())
+  title             String
+  slug              String         @unique
+  description       String?
+  image             String?
+  introVideoUrl     String?
+  introThumbnailUrl String?
+  videoUrl720       String?
+  videoUrl1080      String?
+  price             Float          @default(0)
+  isActive          Boolean        @default(true)
+  seoTitle          String?
+  seoDescription    String?
+  seoKeywords       String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  discountCodes     DiscountCode[]
+  episodes          Episode[]
+  payments          Payment[]
+  ratings           Rating[]
+  enrollments       UserCourse[]
 }
 
 model Episode {
-  id          Int      @id @default(autoincrement())
-  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  courseId    Int
-  title       String
-  slug        String?  // Realistic URL name
-  description String?  @db.Text
-  videoUrl    String   // Direct link
-  videoUrl720 String?  // 720p link
-  videoUrl1080 String? // 1080p link
-  thumbnail   String?  // Episode Thumbnail
-  duration    String?  // Video duration (e.g. "10:25")
-  sortOrder   Int      @default(0)
-  isFree      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-
-  comments    Comment[]
-  ratings     Rating[]
-  progress    UserEpisodeProgress[]
+  id           Int                   @id @default(autoincrement())
+  courseId     Int
+  title        String
+  slug         String?
+  description  String?
+  videoUrl     String
+  videoUrl720  String?
+  videoUrl1080 String?
+  thumbnail    String?
+  duration     String?
+  sortOrder    Int                   @default(0)
+  isFree       Boolean               @default(false)
+  createdAt    DateTime              @default(now())
+  comments     Comment[]
+  course       Course                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  ratings      Rating[]
+  progress     UserEpisodeProgress[]
 }
 
 model Comment {
   id        Int      @id @default(autoincrement())
-  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   episodeId Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  content   String   @db.Text
+  content   String
   createdAt DateTime @default(now())
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Rating {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId  Int?
-  episode   Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   episodeId Int?
-  value     Int      // 1-5
-  comment   String?  @db.Text
+  value     Int
+  comment   String?
   createdAt DateTime @default(now())
+  course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  episode   Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserCourse {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId  Int
   createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
 }
@@ -279,79 +253,94 @@ model UserCourse {
 model ChatSession {
   id        Int       @id @default(autoincrement())
   userId    Int
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  messages  Message[]
   isActive  Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  Message[]
 
   @@index([userId])
 }
 
 model Message {
-  id            Int         @id @default(autoincrement())
-  sessionId     Int
-  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  senderId      Int
-  sender        User        @relation(fields: [senderId], references: [id])
-  content       String      @db.Text
-  fileUrl       String?
-  fileType      String?     // 'image' or 'video'
-  isAdmin       Boolean     @default(false)
-  isRead        Boolean     @default(false)
-  createdAt     DateTime    @default(now())
+  id        Int         @id @default(autoincrement())
+  sessionId Int
+  senderId  Int
+  content   String
+  fileUrl   String?
+  fileType  String?
+  isAdmin   Boolean     @default(false)
+  isRead    Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  sender    User        @relation(fields: [senderId], references: [id])
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([senderId])
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  title       String
-  content     String   @db.Text
-  type      String   @default("info") // info, warning, success
-  link      String?  // Optional click-through URL
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-
+  id        Int                @id @default(autoincrement())
+  title     String
+  content   String
+  type      String             @default("info")
+  link      String?
+  isActive  Boolean            @default(true)
+  createdAt DateTime           @default(now())
   users     UserNotification[]
 }
 
 model UserNotification {
   id             Int          @id @default(autoincrement())
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         Int
-  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
   notificationId Int
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, notificationId])
 }
 
 model DiscountCode {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  discount  Float    // Percentage or fixed amount
-  type      String   @default("PERCENT") // PERCENT, FIXED
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  discount  Float
+  type      String    @default("PERCENT")
   courseId  Int?
-  course   Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
-  isActive  Boolean  @default(true)
+  isActive  Boolean   @default(true)
   expiresAt DateTime?
-  createdAt DateTime @default(now())
-
+  createdAt DateTime  @default(now())
+  course    Course?   @relation(fields: [courseId], references: [id])
   payments  Payment[]
 }
 
 model UserEpisodeProgress {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   episodeId Int
   isWatched Boolean  @default(false)
-  lastPos   Int?     // Last watched position in seconds
+  lastPos   Int?
   updatedAt DateTime @updatedAt
+  episode   Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, episodeId])
+}
+
+enum PatternType {
+  ASSERTIVE
+  PRECISE
+  CALM
+  WISE
+  SPONTANEOUS
+  OPEN
+  THINKER
+}
+
+enum AttemptStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }

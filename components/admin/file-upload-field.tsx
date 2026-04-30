@@ -18,17 +18,18 @@ interface FileUploadFieldProps {
   icon?: 'video' | 'image' | 'file'
 }
 
-export function FileUploadField({ 
-  label, 
-  value, 
-  onChange, 
+export function FileUploadField({
+  label,
+  value,
+  onChange,
   onDurationChange,
-  accept, 
+  accept,
   bucket = 'general',
   icon = 'file'
 }: FileUploadFieldProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { addUpload, uploads } = useUploadStore()
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
   const [currentUploadId, setCurrentUploadId] = useState<string | null>(null)
   const activeUpload = currentUploadId ? uploads[currentUploadId] : null
 
@@ -37,6 +38,15 @@ export function FileUploadField({
       onChange(activeUpload.url)
     }
   }, [activeUpload?.status, activeUpload?.url, onChange, value])
+
+  // Clean up object URLs to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (localPreview) {
+        URL.revokeObjectURL(localPreview)
+      }
+    }
+  }, [localPreview])
 
   const formatDuration = (seconds: number) => {
     const min = Math.floor(seconds / 60)
@@ -59,6 +69,11 @@ export function FileUploadField({
       video.src = URL.createObjectURL(file)
     }
 
+    if (accept.includes('image') || accept.includes('video')) {
+      const objectUrl = URL.createObjectURL(file)
+      setLocalPreview(objectUrl)
+    }
+
     try {
       const id = await addUpload(file, bucket)
       setCurrentUploadId(id)
@@ -74,10 +89,14 @@ export function FileUploadField({
       <div className="flex justify-between items-center">
         <label className="text-sm font-bold text-slate-700 dark:text-slate-300">{label}</label>
         {value && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => { onChange(''); setCurrentUploadId(null); }}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              onChange('');
+              setCurrentUploadId(null);
+              setLocalPreview(null);
+            }}
             className="h-8 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 text-xs font-bold"
           >
             إزالة الملف
@@ -85,12 +104,12 @@ export function FileUploadField({
         )}
       </div>
 
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        onChange={handleFileChange} 
-        accept={accept} 
-        className="hidden" 
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept={accept}
+        className="hidden"
       />
 
       {!activeUpload && !value && (
@@ -123,10 +142,22 @@ export function FileUploadField({
 
       {(value || (activeUpload && activeUpload.status === 'completed')) && (
         <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/20 flex flex-col gap-3">
-          {(accept.includes('image') && (value || activeUpload?.url)) ? (
-            <img src={value || activeUpload?.url} alt="Preview" className="w-full h-32 object-cover rounded-xl" />
-          ) : (accept.includes('video') && (value || activeUpload?.url)) ? (
-            <video src={value || activeUpload?.url} controls className="w-full h-32 object-cover rounded-xl bg-black" />
+          {(accept.includes('image') && (localPreview || value || activeUpload?.url)) ? (
+            <img
+              src={localPreview || value || activeUpload?.url || ''}
+              alt="Preview"
+              className="w-full h-32 object-cover rounded-xl"
+            />
+          ) : (accept.includes('video') && (localPreview || value || activeUpload?.url)) ? (
+            <video
+              src={localPreview || value || activeUpload?.url || ''}
+              controls
+              className="w-full h-32 object-cover rounded-xl bg-black"
+            />
+          ) : accept.includes('pdf') && (value || activeUpload?.url) ? (
+            <div className="w-full h-32 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl">
+              <FileUp className="w-12 h-12 text-slate-400" />
+            </div>
           ) : null}
           <div className="flex items-center gap-3 w-full">
             <div className="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
@@ -149,13 +180,13 @@ export function FileUploadField({
           </div>
           <div className="flex-1">
             <span className="text-xs font-bold text-rose-600 dark:text-rose-400">فشل الرفع، حاول مرة أخرى</span>
-            <Button 
-                variant="link" 
-                size="sm" 
-                onClick={() => fileInputRef.current?.click()}
-                className="h-auto p-0 text-rose-500 font-black text-[10px]"
+            <Button
+              variant="link"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-auto p-0 text-rose-500 font-black text-[10px]"
             >
-                إعادة المحاولة
+              إعادة المحاولة
             </Button>
           </div>
         </div>

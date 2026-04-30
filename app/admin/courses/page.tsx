@@ -12,6 +12,7 @@ interface Course {
   id: number
   title: string
   price: number
+  image: string
   isActive: boolean
   _count: {
     episodes: number
@@ -55,8 +56,12 @@ export default function AdminCoursesPage() {
         {courses?.map((course) => (
           <div key={course.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-center gap-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center gap-6">
-              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                <Video className="w-8 h-8 text-blue-500" />
+              <div className="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 overflow-hidden">
+                {course.image ? (
+                  <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
+                ) : (
+                  <Video className="w-8 h-8 text-blue-500" />
+                )}
               </div>
               <div>
                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{course.title}</h3>

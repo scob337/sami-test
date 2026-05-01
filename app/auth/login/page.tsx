@@ -108,7 +108,7 @@ function LoginContent() {
                   placeholder="••••••••"
                   {...register('password')}
                   disabled={isLoading}
-                  dir="auto"
+                  dir="ltr"
                   className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all pr-12"
                 />
                 <button
@@ -124,13 +124,8 @@ function LoginContent() {
               )}
             </div>
 
-            <div className="flex items-center justify-end px-2">
-              <a 
-                href="/auth/forgot-password" 
-                className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                نسيت كلمة المرور؟
-              </a>
+              <div className="flex items-center justify-end px-2">
+              {/* Forgot password removed as it is not implemented */}
             </div>
 
             <Button

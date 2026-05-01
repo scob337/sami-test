@@ -176,8 +176,8 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
                   value={price}
                   onChange={e => setPrice(e.target.value)}
                   placeholder="0.00"
-                  min={0}
                   className="text-right h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all"
+                  dir="ltr"
                 />
               </div>
             </div>

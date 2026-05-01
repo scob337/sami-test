@@ -131,6 +131,7 @@ export default function AddCoursePage() {
                 errors.price && "border-rose-500 focus:ring-rose-500/20"
               )}
               placeholder="0 للمجاني"
+              dir="ltr"
               value={formData.price}
               onChange={(e) => {
                 setFormData(prev => ({ ...prev, price: e.target.value }))

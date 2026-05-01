@@ -263,6 +263,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
               type="number"
               required
               className="h-12 rounded-xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500/20"
+              dir="ltr"
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             />
@@ -571,6 +572,7 @@ export default function EditCoursePage({ params }: { params: Promise<{ id: strin
                   placeholder={newType === 'PERCENT' ? "مثال: 20" : "مثال: 50"}
                   value={newDiscount}
                   onChange={(e) => setNewDiscount(e.target.value)}
+                  dir="ltr"
                   className="h-12 rounded-xl bg-white dark:bg-slate-900"
                 />
               </div>

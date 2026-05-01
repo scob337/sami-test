@@ -71,7 +71,7 @@ export function SendNotificationModal({ isOpen, onClose, user }: SendNotificatio
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] rounded-[2rem] border-none p-8" dir="rtl">
+      <DialogContent className="sm:max-w-[425px] rounded-[2rem] border-none p-6 sm:p-8" dir="rtl">
         <DialogHeader>
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center mb-4">
             <Bell className="w-6 h-6 text-blue-500" />

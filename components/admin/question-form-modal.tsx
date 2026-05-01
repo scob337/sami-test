@@ -153,7 +153,7 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-4xl bg-white dark:bg-slate-900 border-none rounded-[32px] overflow-hidden p-0 shadow-2xl h-[90vh] flex flex-col" dir="rtl">
         {/* Header with Background */}
-        <div className="bg-[#15283c] p-8 text-white shrink-0">
+        <div className="bg-[#15283c] p-6 sm:p-8 text-white shrink-0">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
               <FileQuestion className="w-6 h-6 text-[#ff5722]" />
@@ -169,7 +169,7 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8 custom-scrollbar">
           {/* Question Text */}
           <div className="space-y-4">
             <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">نص السؤال الاستقصائي</Label>
@@ -274,7 +274,7 @@ export function QuestionFormModal({ open, onClose, onSuccess, testId, editQuesti
           </div>
         </div>
 
-        <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 shrink-0 flex flex-col sm:flex-row-reverse gap-4">
+        <DialogFooter className="p-6 sm:p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 shrink-0 flex flex-col sm:flex-row-reverse gap-4">
           <Button
             onClick={handleSave}
             disabled={isSaving}

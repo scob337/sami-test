@@ -120,8 +120,8 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
 
   return (
     <Dialog open={open} onOpenChange={val => !val && onClose()}>
-      <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-none rounded-[32px] p-0 shadow-2xl overflow-y-auto max-h-[95vh] scrollbar-hide" dir="rtl">
-        <div className="bg-[#15283c] p-8 text-white sticky top-0 z-50">
+      <DialogContent className="max-w-2xl bg-white dark:bg-slate-900 border-none rounded-[32px] p-0 shadow-2xl h-[90vh] flex flex-col overflow-hidden" dir="rtl">
+        <div className="bg-[#15283c] p-6 sm:p-8 text-white shrink-0">
           <div className="flex items-center gap-4 mb-2">
             <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-sm">
               <Book className="w-6 h-6 text-[#ff5722]" />
@@ -137,7 +137,7 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
           </div>
         </div>
 
-        <div className="p-8 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
           <div className="space-y-2.5">
             <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">عنوان الكتاب *</Label>
             <div className="relative group">
@@ -274,7 +274,7 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
           </div>
         </div>
 
-        <DialogFooter className="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 sticky bottom-0 z-50 flex flex-col sm:flex-row-reverse gap-4">
+        <DialogFooter className="p-6 sm:p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 shrink-0 flex flex-col sm:flex-row-reverse gap-4">
           <Button
             onClick={handleSave}
             disabled={!!isSaving || !!(activeUpload && activeUpload.status === 'uploading')}

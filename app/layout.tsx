@@ -149,7 +149,7 @@ export default function RootLayout({
             </AuthInitializer>
           </div>
 
-          <Toaster position="bottom-left" dir="rtl" richColors />
+          <Toaster position="bottom-left" dir="rtl" richColors duration={5000} />
           <Footer />
         </ThemeProvider>
       </body>

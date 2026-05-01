@@ -52,7 +52,7 @@ export function NotificationToast() {
             </div>
           </div>
         ), {
-          duration: 8000,
+          duration: 5000,
           position: 'bottom-left'
         })
       }

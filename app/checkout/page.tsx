@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Container } from '@/components/layout/container'
 import { Button } from '@/components/ui/button'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { toast } from 'sonner'
@@ -12,31 +11,37 @@ import {
   CreditCard,
   Zap,
   BookOpen,
-  ChevronRight,
   Lock,
   CheckCircle2,
-  Star
+  Star,
+  Package,
+  Check,
 } from 'lucide-react'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { CustomPaymentForm } from '@/components/checkout/custom-payment-form'
+import { getPackageById, type BookPackage } from '@/lib/book-packages'
 
-type ItemType = 'book' | 'test' | 'course'
+type ItemType = 'book' | 'test' | 'course' | 'package'
 
 interface CheckoutItem {
   kind: ItemType
   title: string
   price: number
   description: string
-  data?: any | string
+  features: string[]
+  packageId?: string
+  data?: any
 }
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#050B1A]">
-        <LoadingSpinner size="lg" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <LoadingSpinner size="lg" />
+        </div>
+      }
+    >
       <CheckoutContent />
     </Suspense>
   )
@@ -50,12 +55,18 @@ function CheckoutContent() {
   const [item, setItem] = useState<CheckoutItem | null>(null)
   const [selectedTestId, setSelectedTestId] = useState<number | null>(null)
   const [discountCode, setDiscountCode] = useState('')
-  const [appliedDiscount, setAppliedDiscount] = useState<{ id: string, amount: number, type: string } | null>(null)
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string
+    amount: number
+    type: string
+  } | null>(null)
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false)
   const { user } = useAuthStore()
 
   const type = (searchParams?.get('type') || 'book') as ItemType
   const id = searchParams?.get('id')
+  const bookId = searchParams?.get('bookId')
+  const packageId = searchParams?.get('package')
 
   const finalPrice = useMemo(() => {
     if (!item) return 0
@@ -69,13 +80,50 @@ function CheckoutContent() {
   useEffect(() => {
     const fetchItem = async () => {
       try {
+        if (type === 'package' && bookId && packageId) {
+          const res = await fetch(`/api/test-library?id=${bookId}`)
+          if (!res.ok) throw new Error()
+          const data = await res.json()
+          const pkg = getPackageById(packageId, {
+            id: data.id,
+            title: data.title,
+            price: data.price ?? 0,
+            reportPrice: data.reportPrice ?? 0,
+            bookOnlyPrice: data.bookOnlyPrice ?? 0,
+            pricingPlans: data.pricingPlans,
+            hasActiveTest: (data.tests?.length ?? 0) > 0,
+          })
+          if (!pkg || pkg.price <= 0) {
+            toast.error('باقة غير صالحة')
+            router.push('/#plans')
+            return
+          }
+          setItem({
+            kind: 'package',
+            title: pkg.name,
+            price: pkg.price,
+            description: buildPackageDescription(pkg),
+            features: pkg.features,
+            packageId: pkg.id,
+            data: { book: data, package: pkg },
+          })
+          if (data.tests?.length > 0) {
+            setSelectedTestId(data.tests[0].id)
+          }
+          return
+        }
+
         if (!id) {
           setItem({
             kind: 'test',
             title: 'تقرير تحليل الشخصية المتقدم',
             price: 199,
-            description:
-              'تقرير شامل يتضمن تحليل لنقاط القوة والضعف وتوصيات مهنية وشخصية.'
+            description: 'تقرير شامل يتضمن تحليل لنقاط القوة والضعف وتوصيات مهنية وشخصية.',
+            features: [
+              'تحليل الشخصية الأساسية والثانوية',
+              'نقاط القوة والتحديات',
+              'توصيات عملية',
+            ],
           })
           return
         }
@@ -89,7 +137,8 @@ function CheckoutContent() {
             title: data.attempt?.test?.name || `تقرير الاختبار #${id}`,
             price: data.attempt?.test?.book?.price || 149,
             description: 'تحليل عميق لشخصيتك بناءً على إجاباتك الأخيرة.',
-            data
+            features: ['تقرير مفصل بعد الاختبار', 'توصيات مخصصة'],
+            data,
           })
         } else if (type === 'course') {
           const res = await fetch(`/api/admin/courses/${id}`)
@@ -100,7 +149,8 @@ function CheckoutContent() {
             title: data.title || `كورس #${id}`,
             price: data.price || 499,
             description: data.description || 'دورة تدريبية متكاملة لتطوير مهاراتك.',
-            data
+            features: ['وصول كامل للدورة', 'محتوى تفاعلي'],
+            data,
           })
         } else {
           const res = await fetch(`/api/test-library?id=${id}`)
@@ -111,9 +161,10 @@ function CheckoutContent() {
             title: data.title || `كتاب #${id}`,
             price: data.price || 89,
             description: data.description || 'دليل شامل لتطوير الذات بناءً على أحدث الأبحاث العلمية.',
-            data
+            features: ['نسخة رقمية PDF', 'شرح الشخصيات السبعة'],
+            data,
           })
-          if (data.tests && data.tests.length > 0) {
+          if (data.tests?.length > 0) {
             setSelectedTestId(data.tests[0].id)
           }
         }
@@ -124,7 +175,7 @@ function CheckoutContent() {
     }
 
     fetchItem()
-  }, [type, id])
+  }, [type, id, bookId, packageId, router])
 
   const handleApplyDiscount = async (codeOverride?: string) => {
     const codeToUse = codeOverride !== undefined ? codeOverride : discountCode
@@ -134,249 +185,240 @@ function CheckoutContent() {
       const res = await fetch('/api/user/discount/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: codeToUse, userId: user?.id, courseId: type === 'course' ? id : null })
+        body: JSON.stringify({
+          code: codeToUse,
+          userId: user?.id,
+          courseId: type === 'course' ? id : null,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'كود غير صالح')
       setAppliedDiscount(data)
       toast.success('تم تطبيق الخصم بنجاح')
-    } catch (error: any) {
-      // Don't toast for auto-validation unless specifically requested, or keep it quiet
-      if (codeOverride === undefined) toast.error(error.message)
+    } catch (error: unknown) {
+      if (codeOverride === undefined) {
+        toast.error(error instanceof Error ? error.message : 'كود غير صالح')
+      }
       setAppliedDiscount(null)
     } finally {
       setIsValidatingDiscount(false)
     }
   }
 
-  // Auto-apply discount code
   useEffect(() => {
     const timer = setTimeout(() => {
-        if (discountCode.length >= 3 && !appliedDiscount) {
-            handleApplyDiscount(discountCode)
-        }
+      if (discountCode.length >= 3 && !appliedDiscount) {
+        handleApplyDiscount(discountCode)
+      }
     }, 800)
     return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [discountCode])
+
+  const paymentMetadata = useMemo(() => {
+    const bookData = item?.data?.book
+    const pkg = item?.data?.package as BookPackage | undefined
+  const resolvedBookId = bookId || id || bookData?.id
+
+    return {
+      attemptId: id,
+      itemId: resolvedBookId,
+      testId:
+        type === 'test'
+          ? item?.data?.attempt?.testId || null
+          : selectedTestId || null,
+      userId: user?.id,
+      kind: item?.kind === 'package' ? (pkg?.includesReport ? 'test' : 'book') : item?.kind,
+      packageId: item?.packageId || null,
+      discountCodeId: appliedDiscount?.id || null,
+    }
+  }, [item, type, id, bookId, selectedTestId, user?.id, appliedDiscount?.id])
 
   if (!item) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050B1A]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingSpinner size="lg" />
       </div>
     )
   }
 
-
   return (
-    <main className="min-h-screen flex flex-col bg-[#050B1A] font-cairo" dir="rtl">
-      <div className="flex-1 py-12 px-4 md:py-20 flex flex-col items-center">
-        {/* Progress Bar Component */}
-        <div className="w-full max-w-[480px] mb-12 flex items-center justify-between px-2">
-            <div className="relative group">
-                <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center text-slate-900 font-black text-lg shadow-lg shadow-amber-500/30 transition-transform hover:scale-110">2</div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-amber-500 font-black tracking-widest uppercase whitespace-nowrap">الدفع</div>
-            </div>
-            <div className="flex-1 h-1.5 mx-4 bg-slate-800 rounded-full overflow-hidden">
-                <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="h-full bg-gradient-to-r from-amber-600 to-amber-400"
-                />
-            </div>
-            <div className="relative group">
-                <div className="w-10 h-10 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center text-amber-500/50 font-black text-lg">
-                    <CheckCircle2 className="w-6 h-6" />
-                </div>
-                <div className="absolute top-12 left-1/2 -translate-x-1/2 text-[10px] text-slate-500 font-black tracking-widest uppercase opacity-50">التقرير</div>
-            </div>
+    <main className="min-h-screen flex flex-col bg-background font-cairo py-12 px-4 md:py-20" dir="rtl">
+      <div className="flex-1 flex flex-col items-center max-w-xl mx-auto w-full">
+        <div className="text-center space-y-3 mb-10">
+          <span className="landing-eyebrow">الخطوة الأخيرة</span>
+          <h1 className="text-3xl md:text-4xl font-black text-foreground">إتمام الطلب</h1>
+          <p className="text-muted-foreground font-bold">
+            مرحباً{' '}
+            <span className="text-primary">{user?.name?.split(' ')[0] || 'بك'}</span> — راجع
+            تفاصيل باقتك قبل الدفع
+          </p>
         </div>
 
-        {/* Header Section */}
-        <div className="text-center space-y-4 mb-12">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight">إتمام الطلب</h1>
-            <p className="text-slate-400 font-bold text-lg md:text-xl italic max-w-2xl mx-auto">
-                مرحباً <span className="text-amber-500">{user?.name?.split(' ')[0] || 'Sam'}</span>! أنت على بعد خطوة واحدة من الحصول على تقريرك.
-            </p>
-        </div>
-
-        {/* Promo Code Section (Moved to Top) */}
-        <div className="mb-8 w-full max-w-[580px] p-2 bg-white/[0.02] border border-white/5 rounded-3xl flex gap-3 items-center">
-            <input 
-                type="text"
-                placeholder="هل لديك كود خصم؟"
-                value={discountCode}
-                onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                className="flex-1 h-14 bg-transparent border-none px-6 text-white font-bold outline-none placeholder:text-slate-600 focus:ring-0 transition-all"
-            />
-            <Button 
-                onClick={() => handleApplyDiscount()}
-                disabled={isValidatingDiscount || !discountCode}
-                className="h-14 px-10 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black border border-white/10 transition-all hover:border-amber-500/50 active:scale-95"
-            >
-                {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق'}
-            </Button>
-        </div>
-
-        {/* Main Checkout Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-full max-w-[580px] bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-[48px] p-8 md:p-12 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.6)] space-y-10 relative overflow-hidden"
+          className="w-full bg-card border border-border rounded-[32px] p-8 md:p-10 shadow-[var(--brand-shadow)] space-y-8"
         >
-          {/* Decorative Corner Glow */}
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
+          {/* Package summary */}
+          <div className="rounded-3xl border border-border bg-[#fff8ea] p-6 space-y-5">
+            <div className="flex items-start gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-primary/15 flex items-center justify-center shrink-0 border border-primary/20">
+                {item.kind === 'package' ? (
+                  <Package className="w-7 h-7 text-primary" />
+                ) : item.kind === 'test' ? (
+                  <Zap className="w-7 h-7 text-primary" />
+                ) : (
+                  <BookOpen className="w-7 h-7 text-primary" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-black text-muted-foreground uppercase tracking-wider mb-1">
+                  {item.kind === 'package' ? 'الباقة المختارة' : 'المنتج'}
+                </p>
+                <h2 className="text-xl font-black text-foreground">{item.title}</h2>
+                <p className="text-sm font-bold text-muted-foreground mt-1">{item.description}</p>
+              </div>
+            </div>
 
-          {/* Item Details Summary Section */}
-          <div className="bg-white/5 rounded-3xl p-6 border border-white/10 space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-amber-500/20 flex items-center justify-center border border-amber-500/30">
-                {item.kind === 'test' ? <Zap className="w-8 h-8 text-amber-500" /> : <BookOpen className="w-8 h-8 text-amber-500" />}
-              </div>
-              <div className="flex-1">
-                <h3 className="text-xl font-black text-white">{item.title}</h3>
-                <p className="text-sm font-bold text-slate-400 line-clamp-1">{item.description}</p>
-              </div>
-            </div>
-            <div className="h-px bg-white/5 w-full" />
-            <div className="flex justify-between items-center text-sm font-bold">
-               <span className="text-slate-400">سعر المنتج</span>
-               <span className="text-white">{item.price} ر.س</span>
-            </div>
-            {appliedDiscount && (
-              <div className="flex justify-between items-center text-sm font-bold text-emerald-500">
-                <span>خصم ({appliedDiscount.id})</span>
-                <span>-{item.price - finalPrice} ر.س</span>
+            {item.features.length > 0 && (
+              <div className="space-y-3 pt-2 border-t border-border">
+                <p className="text-sm font-black text-foreground">يشمل هذا الطلب:</p>
+                <ul className="space-y-2">
+                  {item.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2.5 text-sm font-bold text-[#4c3920]"
+                    >
+                      <span className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                        <Check className="w-3.5 h-3.5 text-primary" />
+                      </span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
-            <div className="flex justify-between items-center text-xl font-black text-amber-500 pt-2 border-t border-white/5 mt-2">
-               <span>المجموع النهائي</span>
-               <span>{Math.round(finalPrice)} ر.س</span>
+
+            <div className="flex justify-between items-center pt-4 border-t border-border">
+              <span className="font-black text-muted-foreground">سعر الباقة</span>
+              <span className="text-2xl font-black text-foreground">{item.price} ر.س</span>
             </div>
+            {appliedDiscount && (
+              <div className="flex justify-between items-center text-sm font-bold text-[var(--brand-green)]">
+                <span>خصم ({appliedDiscount.id})</span>
+                <span>-{Math.round(item.price - finalPrice)} ر.س</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-xl font-black text-primary pt-2">
+              <span>المجموع النهائي</span>
+              <span>{Math.round(finalPrice)} ر.س</span>
+            </div>
+          </div>
+
+          {/* Discount */}
+          <div className="flex gap-2 p-2 bg-muted/50 border border-border rounded-2xl">
+            <input
+              type="text"
+              placeholder="كود الخصم (اختياري)"
+              value={discountCode}
+              onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+              className="flex-1 h-12 bg-transparent border-none px-4 text-foreground font-bold outline-none placeholder:text-muted-foreground"
+            />
+            <Button
+              onClick={() => handleApplyDiscount()}
+              disabled={isValidatingDiscount || !discountCode}
+              variant="outline"
+              className="h-12 px-6 rounded-xl font-black border-border"
+            >
+              {isValidatingDiscount ? <LoadingSpinner size="sm" /> : 'تطبيق'}
+            </Button>
           </div>
 
           {!user ? (
-              <div className="flex flex-col items-center justify-center p-10 space-y-6 bg-white/5 rounded-[32px] border border-white/10 text-center">
-                  <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center border border-white/5">
-                    <Lock className="w-10 h-10 text-slate-400" />
-                  </div>
-                  <div className="space-y-2">
-                      <h3 className="text-2xl font-black text-white">تسجيل الدخول مطلوب</h3>
-                      <p className="text-base font-bold text-slate-400 max-w-[280px]">سجل دخولك أو أنشئ حساباً جديداً لإتمام عملية الدفع والوصول لتقريرك.</p>
-                  </div>
-                  <Button
-                      size="lg"
-                      className="bg-blue-600 hover:bg-blue-700 w-full md:w-auto px-12 h-16 rounded-2xl font-black text-xl shadow-xl shadow-blue-600/20 transition-all active:scale-95"
-                      onClick={() => {
-                          const currentUrl = encodeURIComponent(window.location.pathname + window.location.search);
-                          router.push(`/auth/login?redirect=${currentUrl}`);
-                      }}
-                  >
-                      تسجيل الدخول الآن
-                  </Button>
-              </div>
+            <div className="flex flex-col items-center p-8 space-y-4 bg-muted/30 rounded-3xl border border-dashed border-border text-center">
+              <Lock className="w-10 h-10 text-muted-foreground" />
+              <h3 className="text-xl font-black">تسجيل الدخول مطلوب</h3>
+              <p className="text-muted-foreground font-bold text-sm">
+                سجّل دخولك لإتمام الدفع والوصول لمحتواك
+              </p>
+              <Button
+                className="btn-gold h-12 px-8 border-none"
+                onClick={() => {
+                  const currentUrl = encodeURIComponent(
+                    window.location.pathname + window.location.search
+                  )
+                  router.push(`/auth/login?redirect=${currentUrl}`)
+                }}
+              >
+                تسجيل الدخول
+              </Button>
+            </div>
           ) : finalPrice === 0 ? (
-              <div className="flex flex-col items-center justify-center p-8 space-y-6 bg-emerald-500/5 border border-emerald-500/20 rounded-[32px]">
-                  <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 animate-pulse">
-                      <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-                  </div>
-                  <div className="text-center space-y-2">
-                      <h3 className="text-2xl font-black text-white">طلب مجاني بالكامل</h3>
-                      <p className="text-base font-bold text-slate-400">تم تطبيق الخصم 100%. يمكنك الحصول على التقرير فوراً.</p>
-                  </div>
-                  <Button
-                      size="lg"
-                      className="bg-emerald-500 hover:bg-emerald-600 w-full px-12 h-16 rounded-2xl font-black text-xl shadow-xl shadow-emerald-500/20 transition-all"
-                      disabled={isLoading}
-                      onClick={async () => {
-                          try {
-                              setIsLoading(true);
-                              const res = await fetch('/api/payment/free', {
-                                  method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({
-                                      attemptId: id,
-                                      itemId: id,
-                                      testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
-                                      userId: user?.id,
-                                      kind: item.kind,
-                                      discountCodeId: appliedDiscount?.id || null
-                                  })
-                              });
-                              if (!res.ok) throw new Error();
-                              const { redirectUrl } = await res.json();
-                              if (redirectUrl) router.push(redirectUrl);
-                          } catch (e) {
-                              toast.error('حدث خطأ أثناء إتمام الطلب');
-                              setIsLoading(false);
-                          }
-                      }}
-                  >
-                      {isLoading ? <LoadingSpinner size="sm" /> : 'ابدأ الآن مجاناً'}
-                  </Button>
-              </div>
+            <div className="flex flex-col items-center p-8 space-y-4 bg-[var(--brand-green)]/10 rounded-3xl border border-[var(--brand-green)]/20 text-center">
+              <CheckCircle2 className="w-12 h-12 text-[var(--brand-green)]" />
+              <h3 className="text-xl font-black">طلب مجاني</h3>
+              <Button
+                className="btn-gold w-full h-14 border-none"
+                disabled={isLoading}
+                onClick={async () => {
+                  try {
+                    setIsLoading(true)
+                    const res = await fetch('/api/payment/free', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(paymentMetadata),
+                    })
+                    if (!res.ok) throw new Error()
+                    const { redirectUrl } = await res.json()
+                    if (redirectUrl) router.push(redirectUrl)
+                  } catch {
+                    toast.error('حدث خطأ أثناء إتمام الطلب')
+                    setIsLoading(false)
+                  }
+                }}
+              >
+                {isLoading ? <LoadingSpinner size="sm" /> : 'إتمام الطلب مجاناً'}
+              </Button>
+            </div>
           ) : (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
-                <div className="flex items-center gap-3 text-white">
-                    <CreditCard className="w-7 h-7 text-amber-500" />
-                </div>
-
-                <CustomPaymentForm 
-                  amount={finalPrice}
-                  description={item.title}
-                  metadata={{
-                    attemptId: id,
-                    itemId: id,
-                    testId: type === 'test' ? (item.data?.attempt?.testId || null) : (selectedTestId || null),
-                    userId: user?.id,
-                    kind: item.kind,
-                    discountCodeId: appliedDiscount?.id || null
-                  }}
-                  onSuccess={(payment) => {
-                    toast.success('تمت عملية الدفع بنجاح!')
-                    router.push(`/api/payment/verify?id=${payment.id}&status=${payment.status}`)
-                  }}
-                />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-foreground font-black">
+                <CreditCard className="w-5 h-5 text-primary" />
+                الدفع الآمن
               </div>
+              <CustomPaymentForm
+                amount={finalPrice}
+                description={item.title}
+                metadata={paymentMetadata}
+                onSuccess={(payment) => {
+                  toast.success('تمت عملية الدفع بنجاح!')
+                  router.push(`/api/payment/verify?id=${payment.id}&status=${payment.status}`)
+                }}
+              />
+            </div>
           )}
 
-          {/* Review Section */}
-          <div className="bg-white/[0.02] border border-white/5 rounded-[32px] p-8 md:p-10 space-y-6 relative group">
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] pointer-events-none" />
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
-                <div className="flex flex-col items-center md:items-start space-y-1">
-                    <div className="flex gap-1 mb-1">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                            <Star key={s} className="w-5 h-5 fill-amber-500 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                        ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl font-black text-white">4.9/5</span>
-                        <span className="text-[11px] text-slate-500 font-bold uppercase tracking-widest">(+450 مستخدم راضٍ)</span>
-                    </div>
-                </div>
+          <div className="rounded-2xl border border-border p-5 bg-muted/20">
+            <div className="flex gap-1 mb-2 justify-center">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <Star key={s} className="w-4 h-4 fill-primary text-primary" />
+              ))}
             </div>
-            
-            <div className="relative z-10 space-y-4">
-                <p className="text-center md:text-right text-base md:text-lg font-bold text-slate-200 italic leading-relaxed">
-                    "ما توقعت هذه الدقة في النتائج! التقرير ساعدني جداً في فهم نقاط قوتي وكأنه جلسة استشارية حقيقية."
-                </p>
-                <div className="flex justify-center md:justify-end items-center gap-3">
-                    <div className="text-center md:text-right">
-                        <p className="text-sm font-black text-white">إبراهيم م.</p>
-                        <p className="text-[11px] font-bold text-slate-500">مدير مشاريع</p>
-                    </div>
-                </div>
-            </div>
+            <p className="text-sm font-bold text-muted-foreground text-center italic leading-relaxed">
+              &quot;ما توقعت هذه الدقة في النتائج! التقرير ساعدني جداً في فهم نقاط قوتي.&quot;
+            </p>
           </div>
-
-
         </motion.div>
       </div>
     </main>
   )
 }
-  
+
+function buildPackageDescription(pkg: BookPackage): string {
+  const parts: string[] = []
+  if (pkg.includesBook) parts.push('الكتاب')
+  if (pkg.includesTest) parts.push('الاختبار')
+  if (pkg.includesReport) parts.push('التقرير المفصل')
+  return parts.length > 0 ? `تشمل: ${parts.join(' + ')}` : pkg.name
+}

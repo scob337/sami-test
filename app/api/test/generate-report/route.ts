@@ -1,163 +1,158 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import OpenAI from 'openai'
-
+import { REPORT_OUTPUT_SCHEMA } from '@/lib/ai-prompts'
+import { resolveAiPrompts } from '@/lib/ai-prompt-service'
 import { PERSONALITY_DETAILED_DATA } from '@/lib/constants/personality-data'
 
 export async function POST(request: Request) {
   try {
-    const { attemptId, testId, userData, answers } = await request.json()
-    console.log('[GENERATE_REPORT] Start:', { attemptId, testId, hasAnswers: !!answers })
+    const { attemptId, testId, userData, answers, reportType = 'free', reportMode = 'free' } = await request.json()
+    console.log('[GENERATE_REPORT] Start:', { attemptId, testId, reportType, reportMode })
 
     if (!attemptId || !testId) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
-    // 0. Fetch the actual user from DB for accurate name
+    // 0. Fetch the actual user and attempt
     const attempt = await prisma.attempt.findUnique({
       where: { id: parseInt(attemptId) },
-      include: { user: true }
+      include: { user: true, test: true }
     })
-    const realUserName = attempt?.user?.name || 'المبدع'
 
-    // 1. Fetch Expert Prompt for this test
-    const isNumericTestId = /^\d+$/.test(testId);
-    let targetTestId = parseInt(testId);
-    
-    if (!isNumericTestId) {
-      const test = await prisma.test.findUnique({
-        where: { slug: testId },
-        select: { id: true }
-      });
-      if (test) targetTestId = test.id;
+    if (!attempt) {
+      return NextResponse.json({ error: 'Attempt not found' }, { status: 404 })
     }
 
-    const expertPrompt = await prisma.aiPrompt.findFirst({
-      where: { testId: targetTestId }
-    })
+    const realUserName = attempt.user?.name || 'المبدع'
 
-    // 1b. Fetch the actual result to get personality patterns
+    // 1. Fetch the actual result to get personality patterns and scores
     const testResult = await prisma.result.findUnique({
       where: { attemptId: parseInt(attemptId) }
     })
 
-    const primaryPattern = testResult?.primaryPattern || 'WISE'
-    const secondaryPattern = testResult?.secondaryPattern || 'OPEN'
+    if (!testResult) {
+      return NextResponse.json({ error: 'Test result not found' }, { status: 404 })
+    }
+
+    const primaryPattern = testResult.primaryPattern
+    const secondaryPattern = testResult.secondaryPattern
+    const scores = testResult.scoresJson as Record<string, number>
 
     const primaryData = PERSONALITY_DETAILED_DATA[primaryPattern] || {}
-    const secondaryData = PERSONALITY_DETAILED_DATA[secondaryPattern] || {}
+    const secondaryData = secondaryPattern ? (PERSONALITY_DETAILED_DATA[secondaryPattern] || {}) : {}
 
-    const patternContext = `
-النمط الأساسي: ${primaryData.name || primaryPattern}
-الوصف: ${primaryData.description || ''}
-نقاط القوة: ${primaryData.strengths || ''}
-نقاط الضعف: ${primaryData.weaknesses || ''}
+    // 2. Prepare Input JSON for AI
+    const inputJson = {
+      report_mode: reportMode,
+      report_type: reportType,
+      primary_type: primaryData.name || primaryPattern,
+      secondary_type: secondaryData.name || secondaryPattern || null,
+      type_scores: scores,
+      user_name: realUserName,
+      report_context: `نتيجة اختبار شخصية بعنوان: ${attempt.test.name}`,
+    }
 
-النمط الثانوي: ${secondaryData.name || secondaryPattern}
-الوصف: ${secondaryData.description || ''}
-نقاط القوة: ${secondaryData.strengths || ''}
-`
-
-    const systemPrompt = expertPrompt?.systemPrompt || 'أنت خبير في تحليل الشخصية...'
-    const reportRules = expertPrompt?.reportRules || '1. ابدأ بترحيب...'
-
-    // 2. Format answers for the prompt
+    // 3. Format answers for context
     const formattedAnswers = answers?.map((a: any) => {
       return `السؤال: ${a.questionText || 'ID:' + a.questionId}\nالإجابة: ${a.optionText || 'ID:' + a.optionId}`
     }).join('\n\n')
 
-    // 3. Generate report with OpenAI (ChatGPT)
+    const resolvedTestId =
+      typeof testId === 'string' && !isNaN(parseInt(testId, 10))
+        ? parseInt(testId, 10)
+        : attempt.testId
+
+    const aiPrompts = await resolveAiPrompts(resolvedTestId)
+    const typePrompt =
+      aiPrompts.typePrompts[reportType] ||
+      aiPrompts.typePrompts.free ||
+      ''
+
+    const userPrompt = `
+بيانات المدخلات (Input JSON):
+${JSON.stringify(inputJson, null, 2)}
+
+إجابات المستخدم التفصيلية:
+${formattedAnswers}
+
+الرجاء كتابة التقرير باللغة العربية بناءً على البيانات أعلاه واتباع هيكل الـ Output Schema المحدد:
+${aiPrompts.outputSchemaHint}
+`
+
+    // 4. Generate report with OpenAI
     const openai = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY || ''
     })
     
-    // Primary model: gpt-4o, Fallback: gpt-4o-mini
     let modelName = 'gpt-4o'
     console.log('[GENERATE_REPORT] Calling ChatGPT:', modelName)
 
-    const userPrompt = `
-بيانات المستخدم:
-الاسم: ${realUserName}
-الجنس: ${userData?.user_metadata?.gender || 'غير معروف'}
-
-تحليل الأنماط المكتشفة:
-${patternContext}
-
-نتائج الاختبار التفصيلية (إجابات المستخدم):
-${formattedAnswers}
-
-الرجاء كتابة التقرير باللغة العربية بشكل احترافي ومنسق بناءً على الأنماط والبيانات المذكورة أعلاه.
-`
-
-    let generatedReport = ''
+    let reportData = null
     try {
       const completion = await openai.chat.completions.create({
         model: modelName,
         messages: [
-          { role: 'system', content: `${systemPrompt}\n\nقواعد التقرير المطلوبة:\n${reportRules}` },
+          { role: 'system', content: aiPrompts.systemPrompt + '\n' + typePrompt },
           { role: 'user', content: userPrompt }
         ],
+        response_format: { type: 'json_object' },
         temperature: 0.7,
       })
-      generatedReport = completion.choices[0]?.message?.content || ''
+      
+      const content = completion.choices[0]?.message?.content || '{}'
+      reportData = JSON.parse(content)
       console.log('[GENERATE_REPORT] ChatGPT Success:', modelName)
     } catch (err: any) {
       console.error(`[GENERATE_REPORT] ChatGPT ${modelName} failed:`, err.message)
+      // Fallback to gpt-4o-mini
       modelName = 'gpt-4o-mini'
-      try {
-        const fallbackCompletion = await openai.chat.completions.create({
-          model: modelName,
-          messages: [
-            { role: 'system', content: `${systemPrompt}\n\nقواعد التقرير المطلوبة:\n${reportRules}` },
-            { role: 'user', content: userPrompt }
-          ],
-          temperature: 0.7,
-        })
-        generatedReport = fallbackCompletion.choices[0]?.message?.content || ''
-        console.log('[GENERATE_REPORT] ChatGPT Success (Fallback):', modelName)
-      } catch (fallbackErr: any) {
-        console.error(`[GENERATE_REPORT] ChatGPT ${modelName} fallback also failed:`, fallbackErr.message)
-        throw fallbackErr
-      }
+      const fallbackCompletion = await openai.chat.completions.create({
+        model: modelName,
+        messages: [
+          { role: 'system', content: aiPrompts.systemPrompt + '\n' + typePrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.7,
+      })
+      const content = fallbackCompletion.choices[0]?.message?.content || '{}'
+      reportData = JSON.parse(content)
     }
 
-    // 4. Save report to DB
-    const result = await prisma.result.findUnique({
-      where: { attemptId: parseInt(attemptId) }
+    // 5. Save report to DB
+    const existingReport = await prisma.report.findUnique({
+      where: { resultId: testResult.id }
     })
 
-    if (result) {
-      // Check if report already exists to update it or create a new one
-      const existingReport = await prisma.report.findUnique({
-        where: { resultId: result.id }
+    if (existingReport) {
+      await prisma.report.update({
+        where: { id: existingReport.id },
+        data: { 
+          reportData: reportData as any,
+          reportText: reportData.opening_insight || '' // Fallback text
+        }
       })
-
-      if (existingReport) {
-        await prisma.report.update({
-          where: { id: existingReport.id },
-          data: { reportText: generatedReport }
-        })
-      } else {
-        await prisma.report.create({
-          data: {
-            resultId: result.id,
-            reportText: generatedReport,
-          }
-        })
-      }
+    } else {
+      await prisma.report.create({
+        data: {
+          resultId: testResult.id,
+          reportData: reportData as any,
+          reportText: reportData.opening_insight || ''
+        }
+      })
     }
 
     return NextResponse.json({ 
       success: true, 
-      report: generatedReport 
+      report: reportData 
     })
 
   } catch (error: any) {
     console.error('[GENERATE_REPORT] Global Error:', error)
     return NextResponse.json({ 
       error: 'Internal Server Error', 
-      details: error.message,
-      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      details: error.message
     }, { status: 500 })
   }
 }

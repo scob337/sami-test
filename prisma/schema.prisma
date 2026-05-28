@@ -28,19 +28,40 @@ model User {
   courses          UserCourse[]
   episodeProgress  UserEpisodeProgress[]
   notifications    UserNotification[]
+  subscriptions    Subscription[]
+  scenarioRequests ScenarioRequest[]
 }
 
 model Book {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String?
   filePdf     String
-  price       Float     @default(0)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  slug        String    @unique
-  payments    Payment[]
-  tests       Test[]
+  price          Float @default(0) // باقة الكتاب + التقرير
+  reportPrice    Float @default(0) // سعر التقرير / الاختبار المدفوع
+  bookOnlyPrice  Float @default(0) // سعر الكتاب فقط (0 = حساب تلقائي)
+  isActive       Boolean @default(true)
+  createdAt   DateTime @default(now())
+  slug        String   @unique
+
+  // Landing Page Fields
+  heroTitle       String?
+  heroSubtitle    String?
+  expertName      String? @default("الخبير سامي")
+  heroDescription String?
+  heroImage       String? // Preview image for hero
+
+  features       Json? // [{title, description}]
+  audience       Json? // [{title, description}]
+  steps          Json? // [{title, description}]
+  assistant      Json? // {title, description, examplePos, exampleNeg, labels: []}
+  bookDetails    Json? // {image, points: []}
+  pricingPlans   Json? // [{name, price, oldPrice, features: [], isFeatured, badge}]
+  ctaTitle       String?
+  ctaDescription String?
+
+  payments Payment[]
+  tests    Test[]
 }
 
 model Test {
@@ -148,7 +169,8 @@ model Result {
 model Report {
   id         Int      @id @default(autoincrement())
   resultId   Int      @unique
-  reportText String
+  reportText String?
+  reportData Json?
   createdAt  DateTime @default(now())
   result     Result   @relation(fields: [resultId], references: [id], onDelete: Cascade)
 }
@@ -164,11 +186,15 @@ model Payment {
   courseId       Int?
   discountCodeId Int?
   testId         Int?
+  productId      Int?
+  subscriptionId Int?
   attempt        Attempt?      @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   book           Book?         @relation(fields: [bookId], references: [id], onDelete: Cascade)
   course         Course?       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   discountCode   DiscountCode? @relation(fields: [discountCodeId], references: [id])
   test           Test?         @relation(fields: [testId], references: [id], onDelete: Cascade)
+  product        Product?      @relation(fields: [productId], references: [id])
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id])
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -343,4 +369,71 @@ enum AttemptStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+model WeeklyContent {
+  id             Int      @id @default(autoincrement())
+  weekTitle      String
+  heroText       String
+  mainExample    String
+  sentenceOfWeek String
+  offerText      String?
+  ctaText        String
+  startDate      DateTime
+  endDate        DateTime
+  status         String   @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SentenceLibrary {
+  id            Int      @id @default(autoincrement())
+  content       String
+  category      String // MARRIAGE, WORK, KIDS, APOLOGY, etc.
+  suitableFor   String // JSON array or comma separated PatternTypes
+  unsuitableFor String?
+  whenToUse     String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  type        String // REPORT, BOOK_REPORT, ASSISTANT_SUB
+  price       Float
+  oldPrice    Float?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  payments    Payment[]
+}
+
+model Subscription {
+  id        Int       @id @default(autoincrement())
+  userId    Int
+  planType  String // MONTHLY, YEARLY
+  status    String    @default("ACTIVE") // ACTIVE, CANCELLED, EXPIRED
+  startDate DateTime  @default(now())
+  endDate   DateTime
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments  Payment[]
+}
+
+model ScenarioRequest {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  situation       String
+  relationship    String // HUSBAND, WIFE, BOSS, etc.
+  userType        String // PatternType
+  otherType       String? // PatternType
+  analysis        String?
+  mistake         String?
+  sentenceToSay   String?
+  sentenceToAvoid String?
+  actionStep      String?
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

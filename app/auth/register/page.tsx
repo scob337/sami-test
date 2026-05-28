@@ -11,7 +11,6 @@ import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { useAuthStore } from '@/lib/store/auth-store'
 import { cn } from '@/lib/utils'
-import { Header as Navbar } from '@/components/layout/header'
 import { Eye, EyeOff } from 'lucide-react'
 
 import { useSearchParams } from 'next/navigation'
@@ -69,66 +68,66 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A1A3B] flex flex-col font-sans selection:bg-blue-500/30" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans selection:bg-primary/30" dir="rtl">
       <div className="flex-1 flex items-center justify-center p-6 sm:p-12 relative overflow-hidden">
         {/* Background Decorations */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
 
-        <div className="w-full max-w-[550px] bg-white dark:bg-[#112240]/80 backdrop-blur-xl rounded-[32px] border border-white/5 shadow-2xl p-10 relative z-10">
+        <div className="w-full max-w-[550px] bg-card/95 backdrop-blur-xl rounded-[32px] border border-border/70 shadow-2xl shadow-black/10 p-10 relative z-10">
           <div className="text-center mb-10">
-            <h1 className="text-4xl font-black text-white tracking-tight mb-3">ابدأ رحلتك معنا</h1>
-            <p className="text-slate-400 font-medium">اكتشف أعماق شخصيتك واحصل على تقارير احترافية</p>
+            <h1 className="text-4xl font-black text-foreground tracking-tight mb-3">ابدأ رحلتك معنا</h1>
+            <p className="text-muted-foreground font-medium">اكتشف أعماق شخصيتك واحصل على تقارير احترافية</p>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-black text-slate-300 mr-2 uppercase tracking-widest">الاسم الكامل *</label>
+              <label className="text-sm font-black text-foreground/85 mr-2 uppercase tracking-widest">الاسم الكامل *</label>
               <Input
                 placeholder="أدخل اسمك الثلاثي"
                 {...register('fullName')}
                 disabled={isLoading}
                 dir="auto"
-                className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
+                className="h-16 sm:h-14 px-6 bg-background border-border rounded-2xl focus:ring-2 focus:ring-primary/30 focus:border-primary/60 text-foreground placeholder:text-muted-foreground text-xl sm:text-lg font-bold transition-all"
               />
               {errors.fullName && (
-                <p className="text-red-400 text-xs mt-1 font-bold">{errors.fullName.message}</p>
+                <p className="text-destructive text-xs mt-1 font-bold">{errors.fullName.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-black text-slate-300 mr-2 uppercase tracking-widest">رقم الهاتف الجوال *</label>
+              <label className="text-sm font-black text-foreground/85 mr-2 uppercase tracking-widest">رقم الهاتف الجوال *</label>
               <Input
                 type="tel"
                 placeholder="05xxxxxxxx"
                 {...register('phone')}
                 disabled={isLoading}
                 dir="auto"
-                className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
+                className="h-16 sm:h-14 px-6 bg-background border-border rounded-2xl focus:ring-2 focus:ring-primary/30 focus:border-primary/60 text-foreground placeholder:text-muted-foreground text-xl sm:text-lg font-bold transition-all"
               />
               {errors.phone && (
-                <p className="text-red-400 text-xs mt-1 font-bold">{errors.phone.message}</p>
+                <p className="text-destructive text-xs mt-1 font-bold">{errors.phone.message}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-black text-slate-300 mr-2 uppercase tracking-widest">البريد الإلكتروني (اختياري)</label>
+              <label className="text-sm font-black text-foreground/85 mr-2 uppercase tracking-widest">البريد الإلكتروني (اختياري)</label>
               <Input
                 type="email"
                 placeholder="example@mail.com"
                 {...register('email')}
                 disabled={isLoading}
                 dir="auto"
-                className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all"
+                className="h-16 sm:h-14 px-6 bg-background border-border rounded-2xl focus:ring-2 focus:ring-primary/30 focus:border-primary/60 text-foreground placeholder:text-muted-foreground text-xl sm:text-lg font-bold transition-all"
               />
               {errors.email && (
-                <p className="text-red-400 text-xs mt-1 font-bold">{errors.email.message}</p>
+                <p className="text-destructive text-xs mt-1 font-bold">{errors.email.message}</p>
               )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-sm font-black text-slate-300 mr-2 uppercase tracking-widest">كلمة المرور</label>
+                <label className="text-sm font-black text-foreground/85 mr-2 uppercase tracking-widest">كلمة المرور</label>
                 <div className="relative group">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -136,22 +135,22 @@ export default function RegisterPage() {
                     {...register('password')}
                     disabled={isLoading}
                     dir="auto"
-                    className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all pr-12"
+                    className="h-16 sm:h-14 px-6 bg-background border-border rounded-2xl focus:ring-2 focus:ring-primary/30 focus:border-primary/60 text-foreground placeholder:text-muted-foreground text-xl sm:text-lg font-bold transition-all pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-red-400 text-xs mt-1 font-bold">{errors.password.message}</p>
+                  <p className="text-destructive text-xs mt-1 font-bold">{errors.password.message}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-black text-slate-300 mr-2 uppercase tracking-widest">تأكيد الكلمة</label>
+                <label className="text-sm font-black text-foreground/85 mr-2 uppercase tracking-widest">تأكيد الكلمة</label>
                 <div className="relative group">
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
@@ -159,18 +158,18 @@ export default function RegisterPage() {
                     {...register('confirmPassword')}
                     disabled={isLoading}
                     dir="auto"
-                    className="h-16 sm:h-14 px-6 bg-white/5 border-white/10 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 text-white placeholder:text-slate-500 text-xl sm:text-lg font-bold transition-all pr-12"
+                    className="h-16 sm:h-14 px-6 bg-background border-border rounded-2xl focus:ring-2 focus:ring-primary/30 focus:border-primary/60 text-foreground placeholder:text-muted-foreground text-xl sm:text-lg font-bold transition-all pr-12"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-red-400 text-xs mt-1 font-bold">{errors.confirmPassword.message}</p>
+                  <p className="text-destructive text-xs mt-1 font-bold">{errors.confirmPassword.message}</p>
                 )}
               </div>
             </div>
@@ -181,8 +180,8 @@ export default function RegisterPage() {
               className={cn(
                 "w-full h-16 mt-6 font-black text-lg rounded-2xl transition-all shadow-xl",
                 isLoading 
-                  ? "bg-slate-700 text-white/50 cursor-not-allowed" 
-                  : "bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-blue-500/20 active:scale-[0.98]"
+                  ? "bg-muted text-muted-foreground cursor-not-allowed" 
+                  : "bg-gradient-to-r from-primary to-accent hover:brightness-110 text-primary-foreground shadow-primary/30 active:scale-[0.98]"
               )}
             >
               {isLoading ? (
@@ -197,11 +196,11 @@ export default function RegisterPage() {
           </form>
 
           <div className="mt-10 text-center">
-            <p className="text-slate-400 font-bold">
+            <p className="text-muted-foreground font-bold">
               لديك حساب بالفعل؟{' '}
               <a 
                 href={`/auth/login${callbackUrl ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ''}`} 
-                className="text-blue-400 hover:text-blue-300 underline underline-offset-8 transition-colors"
+                className="text-primary hover:text-primary/80 underline underline-offset-8 transition-colors"
               >
                 سجل دخولك هنا
               </a>

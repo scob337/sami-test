@@ -1,5 +1,6 @@
 import { Section } from '@/components/layout/section'
 import { Container } from '@/components/layout/container'
+import { HeroSection } from '@/components/layout/hero-section'
 import { Sparkles, Lock, Timer, BarChart3, Video } from 'lucide-react'
 
 export default function FeaturesPage() {
@@ -13,22 +14,23 @@ export default function FeaturesPage() {
   ]
 
   return (
-    <main className="min-h-screen pt-24 pb-16 bg-[#0A1A3B] text-white" dir="rtl">
-      <Section size="lg">
+    <main className="min-h-screen pb-16 bg-background text-foreground" dir="rtl">
+      <HeroSection 
+        title="مميزات 7Types"
+        description="نقدم لك مجموعة متكاملة من الأدوات لفهم شخصيتك وتطوير ذاتك."
+        badge="مميزاتنا"
+      />
+
+      <Section size="lg" className="pt-0">
         <Container>
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-black mb-6">مميزات 7Types</h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">نقدم لك مجموعة متكاملة من الأدوات لفهم شخصيتك وتطوير ذاتك.</p>
-          </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, i) => (
-              <div key={i} className="bg-white/5 p-10 rounded-3xl border border-white/10 hover:border-blue-500/30 transition-all group">
+              <div key={i} className="bg-card dark:bg-white/5 p-10 rounded-3xl border border-border dark:border-white/10 hover:border-primary/50 transition-all shadow-sm group">
                 <div className="mb-6 flex items-center justify-center w-12 h-12">
                    <feature.icon className={`w-12 h-12 ${feature.color} group-hover:scale-110 transition-transform`} />
                 </div>
                 <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-slate-400 leading-relaxed font-medium">{feature.desc}</p>
+                <p className="text-muted-foreground leading-relaxed font-medium">{feature.desc}</p>
               </div>
             ))}
           </div>

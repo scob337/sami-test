@@ -83,9 +83,9 @@ export default function DeepNavyDashboard() {
   // Memoized Stats
   const userStats = useMemo(() => {
     return [
-      { label: 'الاختبارات', value: attempts.length, icon: ClipboardList, color: 'text-blue-400', bg: 'bg-blue-400/10' },
-      { label: 'الكتب الرقمية', value: books.length, icon: BookOpen, color: 'text-purple-400', bg: 'bg-purple-400/10' },
-      { label: 'التقارير السابقة', value: attempts.filter((a: any) => a.reportGenerated).length, icon: Award, color: 'text-amber-400', bg: 'bg-amber-400/10' },
+      { label: 'الاختبارات', value: attempts.length, icon: ClipboardList, color: 'text-primary', bg: 'bg-primary/15' },
+      { label: 'الكتب الرقمية', value: books.length, icon: BookOpen, color: 'text-[#674611]', bg: 'bg-[#fff4df]' },
+      { label: 'التقارير السابقة', value: attempts.filter((a: any) => a.reportGenerated).length, icon: Award, color: 'text-[var(--brand-green)]', bg: 'bg-[var(--brand-green)]/10' },
     ]
   }, [attempts, books])
 
@@ -137,28 +137,35 @@ export default function DeepNavyDashboard() {
 
   if (loading || (!authUser && !isLoadingData)) {
     return (
-      <div className="min-h-screen bg-[#0A1A3B] flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" className="text-blue-500" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <LoadingSpinner size="lg" className="text-primary" />
       </div>
     )
   }
 
   if (isLoadingData) {
     return (
-      <div className="min-h-screen bg-[#0A1A3B] flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" className="text-blue-500" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <LoadingSpinner size="lg" className="text-primary" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A1A3B] text-slate-900 dark:text-white font-sans overflow-x-hidden selection:bg-blue-500/30" dir="rtl">
+    <div
+      className="min-h-screen text-foreground font-sans overflow-x-hidden selection:bg-primary/30"
+      style={{
+        background:
+          'radial-gradient(circle at 80% 0%, rgba(231, 191, 103, 0.18), transparent 32%), radial-gradient(circle at 10% 12%, rgba(180, 135, 53, 0.12), transparent 26%), var(--brand-bg)',
+      }}
+      dir="rtl"
+    >
 
       {/* Hero Header Section */}
-      <section className="relative pt-32 pb-20 overflow-hidden bg-gradient-to-b from-blue-50 to-slate-50 dark:from-[#0A1A3B] dark:to-[#112240]">
-        <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none">
-          <div className="absolute top-20 right-10 w-96 h-96 bg-blue-600 rounded-full blur-[150px]" />
-          <div className="absolute bottom-10 left-10 w-80 h-80 bg-purple-600 rounded-full blur-[150px]" />
+      <section className="relative pt-32 pb-16 overflow-hidden border-b border-border bg-[rgba(255,250,243,0.75)] backdrop-blur-sm">
+        <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none">
+          <div className="absolute top-20 right-10 w-96 h-96 bg-primary/30 rounded-full blur-[150px]" />
+          <div className="absolute bottom-10 left-10 w-80 h-80 bg-accent/25 rounded-full blur-[150px]" />
         </div>
 
         <Container>
@@ -169,26 +176,43 @@ export default function DeepNavyDashboard() {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-4"
               >
-                <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-2xl shadow-blue-500/20 group relative overflow-hidden">
-                  <div className="w-full h-full bg-slate-50 dark:bg-[#112240] rounded-[24px] flex items-center justify-center font-black text-3xl overflow-hidden">
+                <div className="w-20 h-20 rounded-[28px] bg-gradient-to-br from-primary to-accent p-1 shadow-2xl shadow-primary/20 group relative overflow-hidden">
+                  <div className="w-full h-full bg-card rounded-[24px] flex items-center justify-center font-black text-3xl overflow-hidden">
                     {dbUser?.avatarUrl ? (
                       <img src={dbUser.avatarUrl} alt={dbUser.name} className="w-full h-full object-cover" />
                     ) : (
-                      dbUser?.name?.charAt(0).toUpperCase() || 'U'
+                      <span className="text-primary">{dbUser?.name?.charAt(0).toUpperCase() || 'U'}</span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-4xl font-black tracking-tight leading-tight">
+                  <h1 className="text-4xl font-black tracking-tight leading-tight text-foreground">
                     أهلاً بك، {dbUser?.name?.split(' ')[0]}
                   </h1>
-                  <p className="text-slate-400 font-medium text-lg mt-1 italic opacity-80">
+                  <p className="text-muted-foreground font-medium text-lg mt-1 italic opacity-80">
                     مستعد لاكتشاف أبعاد جديدة لشخصيتك اليوم؟
                   </p>
                 </div>
               </motion.div>
 
-              <div className="flex gap-2 p-1.5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-x-auto scrollbar-hide no-scrollbar flex-nowrap min-w-full">
+              {/* إحصائيات سريعة */}
+              <div className="grid grid-cols-3 gap-3">
+                {userStats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className={cn(
+                      'rounded-2xl border border-border p-4 text-center shadow-sm bg-card',
+                      stat.bg
+                    )}
+                  >
+                    <stat.icon className={cn('w-6 h-6 mx-auto mb-2', stat.color)} />
+                    <div className="text-2xl font-black text-foreground">{stat.value}</div>
+                    <div className="text-xs font-bold text-muted-foreground mt-1">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 p-1.5 bg-[#fffaf3] border border-border rounded-2xl overflow-x-auto scrollbar-hide no-scrollbar flex-nowrap min-w-full shadow-sm">
                 {[
                   { id: 'overview', name: 'نظرة عامة', icon: Zap },
                   { id: 'courses', name: 'دوراتي', icon: BookOpen },
@@ -200,7 +224,9 @@ export default function DeepNavyDashboard() {
                     onClick={() => setActiveTab(tab.id)}
                     className={cn(
                       "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap shrink-0",
-                      activeTab === tab.id ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/5"
+                      activeTab === tab.id
+                        ? 'bg-gradient-to-br from-primary to-accent text-[#1b1207] shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-[#fff4df]'
                     )}
                   >
                     <tab.icon className="w-4 h-4" />
@@ -214,19 +240,19 @@ export default function DeepNavyDashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-gradient-to-br from-blue-600 to-blue-500 p-8 rounded-[40px] shadow-2xl shadow-blue-500/10 w-full lg:w-[400px] relative group overflow-hidden"
+              className="bg-gradient-to-br from-[var(--brand-dark)] to-[#5a3d15] p-8 rounded-[40px] shadow-[var(--brand-shadow)] w-full lg:w-[400px] relative group overflow-hidden"
             >
               <Zap className="absolute -top-4 -right-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
-              <div className="relative z-10 space-y-4">
+              <div className="relative z-10 space-y-4 text-white">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black text-white">تحليل سريع متاح</h3>
-                  <Award className="w-6 h-6 text-white/50" />
+                  <h3 className="text-xl font-black">تحليل سريع متاح</h3>
+                  <Award className="w-6 h-6 opacity-50" />
                 </div>
-                <p className="text-white/80 font-medium leading-relaxed">
+                <p className="opacity-90 font-medium leading-relaxed">
                   لديك وصول حالي لـ {attempts.length} نماذج اختبار جديدة. ابدأ الآن للحصول على تقريرك.
                 </p>
                 <Link href="/test-library" className="block">
-                  <Button className="w-full h-14 bg-white text-blue-600 hover:bg-slate-50 font-black text-lg rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center gap-2">
+                  <Button className="w-full h-14 bg-gradient-to-br from-primary to-accent text-[#1b1207] hover:opacity-95 font-black text-lg rounded-2xl shadow-lg transition-transform active:scale-95 flex items-center gap-2 border-none">
                     <Target className="w-5 h-5" />
                     ابدأ اختبار جديد
                   </Button>
@@ -247,39 +273,39 @@ export default function DeepNavyDashboard() {
               {activeTab === 'overview' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   {/* Previous Attempts Card */}
-                  <div className="bg-white dark:bg-[#112240] rounded-[40px] border border-slate-200 dark:border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
+                  <div className="bg-card rounded-[40px] border border-border shadow-[var(--brand-shadow)] p-8 sm:p-10 space-y-8">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-2xl font-black tracking-tight">آخر محاولات الاختبار</h2>
-                        <p className="text-slate-500 font-medium mt-1">تتبع رحلة تطور شخصيتك عبر الزمن</p>
+                        <h2 className="text-2xl font-black tracking-tight text-foreground">آخر محاولات الاختبار</h2>
+                        <p className="text-muted-foreground font-medium mt-1">تتبع رحلة تطور شخصيتك عبر الزمن</p>
                       </div>
-                      <History className="w-8 h-8 text-blue-500/30" />
+                      <History className="w-8 h-8 text-primary/20" />
                     </div>
 
                     <div className="space-y-4">
                       {attempts.length === 0 ? (
-                        <div className="py-12 flex flex-col items-center text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                          <Clock className="w-12 h-12 text-slate-600" />
-                          <p className="text-slate-400 font-bold">لم تقم بإجراء أي اختبارات بعد</p>
+                        <div className="py-12 flex flex-col items-center text-center space-y-4 bg-[#fff8ea] rounded-3xl border border-dashed border-border">
+                          <Clock className="w-12 h-12 text-muted-foreground/50" />
+                          <p className="text-muted-foreground font-bold">لم تقم بإجراء أي اختبارات بعد</p>
                         </div>
                       ) : (
                         attempts.map((attempt: any, index: number) => (
-                          <div key={`${attempt.id}-${index}`} className="group bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 p-6 rounded-3xl transition-all flex items-center justify-between gap-6">
+                          <div key={`${attempt.id}-${index}`} className="group bg-[#fffaf3] hover:bg-[#fff4df] border border-border p-6 rounded-3xl transition-all flex items-center justify-between gap-6">
                             <div className="flex items-center gap-5">
-                              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                                <CheckCircle2 className="w-7 h-7 text-blue-400" />
+                              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                <CheckCircle2 className="w-7 h-7 text-primary" />
                               </div>
                               <div>
-                                <div className="text-lg font-black">{attempt.test?.name}</div>
-                                <div className="text-sm text-slate-500 font-medium">{new Date(attempt.createdAt).toLocaleDateString('ar-SA')}</div>
+                                <div className="text-lg font-black text-foreground">{attempt.test?.name}</div>
+                                <div className="text-sm text-muted-foreground font-medium">{new Date(attempt.createdAt).toLocaleDateString('ar-SA')}</div>
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
-                              <Badge className={cn("h-8 px-4 rounded-xl font-black text-xs", attempt.payment?.status === 'COMPLETED' ? "bg-emerald-500/20 text-emerald-400 border-none" : "bg-amber-500/20 text-amber-400 border-none")}>
+                              <Badge className={cn("h-8 px-4 rounded-xl font-black text-xs border-none", attempt.payment?.status === 'COMPLETED' ? "bg-[var(--brand-green)]/15 text-[var(--brand-green)]" : "bg-primary/15 text-primary")}>
                                 {attempt.payment?.status === 'COMPLETED' ? 'مكتمل الدفع' : 'في انتظار الدفع'}
                               </Badge>
                               <Link href={`/results?attemptId=${attempt.id}`}>
-                                <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl bg-white/5 hover:bg-blue-500 hover:text-white transition-all">
+                                <Button variant="ghost" size="icon" className="w-12 h-12 rounded-xl bg-background border border-border hover:bg-primary hover:text-primary-foreground transition-all">
                                   <ChevronLeft className="w-6 h-6" />
                                 </Button>
                               </Link>
@@ -291,37 +317,37 @@ export default function DeepNavyDashboard() {
                   </div>
 
                   {/* Purchased Books Card */}
-                  <div className="bg-white dark:bg-[#112240] rounded-[40px] border border-slate-200 dark:border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
+                  <div className="bg-card rounded-[40px] border border-border shadow-[var(--brand-shadow)] p-8 sm:p-10 space-y-8">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h2 className="text-2xl font-black tracking-tight">مكتبتي الرقمية</h2>
-                        <p className="text-slate-500 font-medium mt-1">الكتب والمصادر التي قمت باقتنائها</p>
+                        <h2 className="text-2xl font-black tracking-tight text-foreground">مكتبتي الرقمية</h2>
+                        <p className="text-muted-foreground font-medium mt-1">الكتب والمصادر التي قمت باقتنائها</p>
                       </div>
-                      <ShoppingBag className="w-8 h-8 text-purple-500/30" />
+                      <ShoppingBag className="w-8 h-8 text-accent/20" />
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-6">
                       {books.length === 0 ? (
-                        <div className="sm:col-span-2 py-12 flex flex-col items-center text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                          <BookOpen className="w-12 h-12 text-slate-600" />
-                          <p className="text-slate-400 font-bold">لا توجد كتب مشتراة حتى الآن</p>
+                        <div className="sm:col-span-2 py-12 flex flex-col items-center text-center space-y-4 bg-muted/30 rounded-3xl border border-dashed border-border">
+                          <BookOpen className="w-12 h-12 text-muted-foreground/50" />
+                          <p className="text-muted-foreground font-bold">لا توجد كتب مشتراة حتى الآن</p>
                           <Link href="/test-library">
-                            <Button variant="link" className="text-blue-400 font-black">تصفح المتجر الآن</Button>
+                            <Button variant="link" className="text-primary font-black">تصفح المتجر الآن</Button>
                           </Link>
                         </div>
                       ) : (
                         books.map((book: any, index: number) => (
-                          <div key={`${book.id}-${index}`} className="bg-white/5 border border-white/5 p-6 rounded-3xl hover:border-purple-500/30 transition-all flex flex-col gap-5">
+                          <div key={`${book.id}-${index}`} className="bg-muted/20 border border-border p-6 rounded-3xl hover:border-primary/30 transition-all flex flex-col gap-5">
                             <div className="flex items-center gap-4">
-                              <div className="w-14 h-20 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0 border border-white/5 shadow-inner">
-                                <BookOpen className="w-8 h-8 text-purple-400" />
+                              <div className="w-14 h-20 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-border shadow-inner">
+                                <BookOpen className="w-8 h-8 text-primary" />
                               </div>
                               <div>
-                                <div className="font-black text-lg line-clamp-1">{book.title}</div>
-                                <div className="text-xs text-slate-500 font-medium uppercase tracking-widest mt-1">نسخة رقمية (PDF)</div>
+                                <div className="font-black text-lg line-clamp-1 text-foreground">{book.title}</div>
+                                <div className="text-xs text-muted-foreground font-medium uppercase tracking-widest mt-1">نسخة رقمية (PDF)</div>
                               </div>
                             </div>
-                            <Button className="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl border border-white/10 font-bold flex items-center gap-2">
+                            <Button className="w-full h-12 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl border border-primary/20 font-bold flex items-center gap-2">
                               <Download className="w-4 h-4" />
                               تحميل الكتاب
                             </Button>
@@ -335,20 +361,20 @@ export default function DeepNavyDashboard() {
 
               {activeTab === 'courses' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="bg-slate-50 dark:bg-[#112240] rounded-[40px] border border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
-                    <h2 className="text-2xl font-black tracking-tight">كورساتي المشترك بها</h2>
+                  <div className="bg-card rounded-[40px] border border-border shadow-[var(--brand-shadow)] p-8 sm:p-10 space-y-8">
+                    <h2 className="text-2xl font-black tracking-tight text-foreground">كورساتي المشترك بها</h2>
                     <div className="grid sm:grid-cols-2 gap-6">
                       {enrolledCourses.length === 0 ? (
-                        <div className="sm:col-span-2 py-12 text-center text-slate-500 font-bold">لم تشترك في أي كورسات بعد</div>
+                        <div className="sm:col-span-2 py-12 text-center text-muted-foreground font-bold bg-muted/20 rounded-3xl border border-dashed border-border">لم تشترك في أي كورسات بعد</div>
                       ) : (
                         enrolledCourses.map((course: any, index: number) => (
                           <Link key={`${course.id}-${index}`} href={`/courses/${course.slug || course.id}`}>
-                            <div className="bg-white/5 border border-white/5 p-4 rounded-3xl group hover:border-blue-500/30 transition-all">
-                              <div className="aspect-video rounded-2xl overflow-hidden mb-4">
+                            <div className="bg-muted/20 border border-border p-4 rounded-3xl group hover:border-primary/30 transition-all">
+                              <div className="aspect-video rounded-2xl overflow-hidden mb-4 border border-border">
                                 <img src={course.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
                               </div>
-                              <h3 className="font-black text-lg mb-2">{course.title}</h3>
-                              <Button className="w-full bg-blue-600 rounded-xl font-bold">متابعة التعلم</Button>
+                              <h3 className="font-black text-lg mb-4 text-foreground">{course.title}</h3>
+                              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-bold">متابعة التعلم</Button>
                             </div>
                           </Link>
                         ))
@@ -360,26 +386,26 @@ export default function DeepNavyDashboard() {
 
               {activeTab === 'payments' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="bg-slate-50 dark:bg-[#112240] rounded-[40px] border border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
-                    <h2 className="text-2xl font-black tracking-tight">سجل المدفوعات والفواتير</h2>
+                  <div className="bg-card rounded-[40px] border border-border shadow-[var(--brand-shadow)] p-8 sm:p-10 space-y-8">
+                    <h2 className="text-2xl font-black tracking-tight text-foreground">سجل المدفوعات والفواتير</h2>
                     <div className="space-y-4">
                       {payments.length === 0 ? (
-                        <div className="py-12 text-center text-slate-500 font-bold">لا توجد عمليات دفع مسجلة</div>
+                        <div className="py-12 text-center text-muted-foreground font-bold bg-muted/20 rounded-3xl border border-dashed border-border">لا توجد عمليات دفع مسجلة</div>
                       ) : (
                         payments.map((p: any, index: number) => (
-                          <div key={`${p.id}-${index}`} className="bg-white/5 border border-white/5 p-6 rounded-3xl flex items-center justify-between">
+                          <div key={`${p.id}-${index}`} className="bg-muted/20 border border-border p-6 rounded-3xl flex items-center justify-between">
                             <div className="flex items-center gap-4">
                               <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                                <CreditCard className="w-6 h-6 text-emerald-400" />
+                                <CreditCard className="w-6 h-6 text-emerald-500" />
                               </div>
                               <div>
-                                <div className="font-black">{p.course?.title || p.book?.title || 'خدمة متنوعة'}</div>
-                                <div className="text-xs text-slate-500">{new Date(p.createdAt).toLocaleDateString('ar-SA')}</div>
+                                <div className="font-black text-foreground">{p.course?.title || p.book?.title || 'خدمة متنوعة'}</div>
+                                <div className="text-xs text-muted-foreground">{new Date(p.createdAt).toLocaleDateString('ar-SA')}</div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-black text-emerald-400">{p.amount} ر.س</div>
-                              <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest">{p.status}</div>
+                              <div className="font-black text-emerald-500">{p.amount} ر.س</div>
+                              <div className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">{p.status}</div>
                             </div>
                           </div>
                         ))
@@ -391,21 +417,21 @@ export default function DeepNavyDashboard() {
 
               {activeTab === 'notifications' && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="bg-slate-50 dark:bg-[#112240] rounded-[40px] border border-white/5 shadow-2xl p-8 sm:p-10 space-y-8">
-                    <h2 className="text-2xl font-black tracking-tight">مركز الإشعارات</h2>
+                  <div className="bg-card rounded-[40px] border border-border shadow-[var(--brand-shadow)] p-8 sm:p-10 space-y-8">
+                    <h2 className="text-2xl font-black tracking-tight text-foreground">مركز الإشعارات</h2>
                     <div className="space-y-4">
                       {notifications.length === 0 ? (
-                        <div className="py-12 text-center text-slate-500 font-bold">لا توجد إشعارات جديدة</div>
+                        <div className="py-12 text-center text-muted-foreground font-bold bg-muted/20 rounded-3xl border border-dashed border-border">لا توجد إشعارات جديدة</div>
                       ) : (
                         notifications.map((n: any, index: number) => (
-                          <div key={`${n.id}-${index}`} className="p-6 bg-white/5 border border-white/5 rounded-3xl flex gap-4">
-                            <div className={cn("w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center", n.notification?.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400')}>
+                          <div key={`${n.id}-${index}`} className="p-6 bg-muted/20 border border-border rounded-3xl flex gap-4">
+                            <div className={cn("w-12 h-12 rounded-2xl shrink-0 flex items-center justify-center", n.notification?.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-primary/10 text-primary')}>
                               <BellIcon className="w-6 h-6" />
                             </div>
                             <div className="space-y-1">
-                              <h4 className="font-black">{n.notification?.title}</h4>
-                              <p className="text-sm text-slate-400 font-medium leading-relaxed">{n.notification?.content}</p>
-                              <div className="text-[10px] text-slate-600 font-bold mt-2">{new Date(n.createdAt).toLocaleDateString('ar-SA')}</div>
+                              <h4 className="font-black text-foreground">{n.notification?.title}</h4>
+                              <p className="text-sm text-muted-foreground font-medium leading-relaxed">{n.notification?.content}</p>
+                              <div className="text-[10px] text-muted-foreground/60 font-bold mt-2">{new Date(n.createdAt).toLocaleDateString('ar-SA')}</div>
                             </div>
                           </div>
                         ))
@@ -418,35 +444,35 @@ export default function DeepNavyDashboard() {
 
             {/* Left Column: Quick Actions & Profile */}
             <div className="space-y-8">
-              <Card className="bg-slate-50 dark:bg-[#112240] border-white/5 rounded-[40px] p-8 shadow-2xl space-y-8 overflow-hidden relative">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-3xl rounded-full" />
+              <Card className="bg-card border-border rounded-[40px] p-8 shadow-[var(--brand-shadow)] space-y-8 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full" />
 
                 <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center">
-                    <UserIcon className="w-6 h-6 text-blue-400" />
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <UserIcon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-black tracking-tight">الملف الشخصي</h3>
+                  <h3 className="text-2xl font-black tracking-tight text-foreground">الملف الشخصي</h3>
                 </div>
 
                 <div className="space-y-6 relative z-10">
-                  <div className="p-5 bg-white/5 rounded-2xl border border-white/5 space-y-4">
+                  <div className="p-5 bg-muted/30 rounded-2xl border border-border space-y-4">
                     <div className="space-y-1">
-                      <div className="text-[10px] font-black text-slate-300 uppercase tracking-[2px]">الاسم بالكامل</div>
-                      <div className="font-black text-lg dark:text-slate-500">{dbUser?.name}</div>
+                      <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[2px]">الاسم بالكامل</div>
+                      <div className="font-black text-lg text-foreground">{dbUser?.name}</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">رقم الجوال</div>
-                      <div className="font-bold dark:text-slate-300 tracking-wider" dir="ltr">{dbUser?.phone || '---'}</div>
+                      <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[2px]">رقم الجوال</div>
+                      <div className="font-bold text-foreground tracking-wider" dir="ltr">{dbUser?.phone || '---'}</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-[10px] font-black text-slate-500 uppercase tracking-[2px]">البريد الإلكتروني</div>
-                      <div className="font-bold text-slate-700 dark:text-slate-300 italic opacity-80">{dbUser?.email || 'لم يتم الربط'}</div>
+                      <div className="text-[10px] font-black text-muted-foreground uppercase tracking-[2px]">البريد الإلكتروني</div>
+                      <div className="font-bold text-muted-foreground italic opacity-80">{dbUser?.email || 'لم يتم الربط'}</div>
                     </div>
                   </div>
 
                   <Button
                     onClick={handleOpenEdit}
-                    className="w-full h-14 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-slate-200 dark:hover:bg-white text-slate-900 dark:text-white dark:hover:text-[#0A1A3B] font-black text-lg rounded-2xl transition-all flex items-center gap-2"
+                    className="w-full h-14 bg-background border border-border hover:bg-muted text-foreground font-black text-lg rounded-2xl transition-all flex items-center gap-2"
                   >
                     <Edit3 className="w-5 h-5" />
                     تعديل البيانات
@@ -463,38 +489,38 @@ export default function DeepNavyDashboard() {
 
       {/* Modern Redesigned Dialog */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-[#112240] border-none shadow-2xl rounded-[32px] overflow-hidden p-0" dir="rtl">
-          <div className="bg-slate-50 dark:bg-[#15283c] p-8 text-slate-900 dark:text-white">
+        <DialogContent className="max-w-2xl bg-card border border-border shadow-2xl rounded-[32px] overflow-hidden p-0" dir="rtl">
+          <div className="bg-muted/50 p-8 text-foreground">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-slate-200 dark:bg-white/10 flex items-center justify-center backdrop-blur-sm">
-                <Edit3 className="w-6 h-6 text-[#ff5722]" />
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center backdrop-blur-sm">
+                <Edit3 className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <DialogTitle className="text-2xl font-black tracking-tight">تطوير ملفك التعريفي</DialogTitle>
-                <DialogDescription className="text-slate-500 dark:text-white/60 font-medium mt-1">قم بتعديل بياناتك المسجلة لدينا</DialogDescription>
+                <DialogDescription className="text-muted-foreground font-medium mt-1">قم بتعديل بياناتك المسجلة لدينا</DialogDescription>
               </div>
             </div>
           </div>
 
           <div className="p-8 space-y-6">
             <div className="space-y-2">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الاسم الثلاثي *</Label>
+              <Label className="text-xs font-black text-muted-foreground uppercase tracking-widest mr-2">الاسم الثلاثي *</Label>
               <Input
                 value={editName}
                 onChange={e => setEditName(e.target.value)}
                 dir="auto"
-                className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50"
+                className="h-14 px-6 bg-background border-border rounded-2xl text-foreground font-bold text-lg focus:ring-primary/30"
               />
             </div>
 
             <div className="space-y-4">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الصورة الشخصية</Label>
-              <div className="flex items-center gap-6 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
-                <div className="w-20 h-20 rounded-2xl bg-slate-200 dark:bg-white/10 flex items-center justify-center overflow-hidden border-2 border-slate-200 dark:border-white/10">
+              <Label className="text-xs font-black text-muted-foreground uppercase tracking-widest mr-2">الصورة الشخصية</Label>
+              <div className="flex items-center gap-6 p-4 bg-muted/20 rounded-2xl border border-border">
+                <div className="w-20 h-20 rounded-2xl bg-background flex items-center justify-center overflow-hidden border-2 border-border">
                   {editAvatar ? (
                     <img src={editAvatar} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <UserIcon className="w-8 h-8 text-slate-500" />
+                    <UserIcon className="w-8 h-8 text-muted-foreground" />
                   )}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -529,32 +555,32 @@ export default function DeepNavyDashboard() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-10 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                    className="h-10 rounded-xl bg-background hover:bg-muted border-border text-foreground"
                     onClick={() => fileInputRef.current?.click()}
                   >
                     تغيير الصورة
                   </Button>
-                  <p className="text-[10px] text-slate-500">JPG, PNG أو GIF. بحد أقصى 2MB.</p>
+                  <p className="text-[10px] text-muted-foreground">JPG, PNG أو GIF. بحد أقصى 2MB.</p>
                 </div>
               </div>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الجوال</Label>
+                <Label className="text-xs font-black text-muted-foreground uppercase tracking-widest mr-2">الجوال</Label>
                 <Input
                   value={editPhone}
                   onChange={e => setEditPhone(e.target.value)}
                   dir="auto"
-                  className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50"
+                  className="h-14 px-6 bg-background border-border rounded-2xl text-foreground font-bold text-lg focus:ring-primary/30"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-black text-slate-400 uppercase tracking-widest mr-2">الإيميل</Label>
+                <Label className="text-xs font-black text-muted-foreground uppercase tracking-widest mr-2">الإيميل</Label>
                 <Input
                   value={editEmail}
                   onChange={e => setEditEmail(e.target.value)}
-                  className="h-14 px-6 bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-blue-500/50"
+                  className="h-14 px-6 bg-background border-border rounded-2xl text-foreground font-bold text-lg focus:ring-primary/30"
                 />
               </div>
             </div>
@@ -564,14 +590,14 @@ export default function DeepNavyDashboard() {
             <Button
               onClick={handleUpdateProfile}
               disabled={isUpdating}
-              className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-[#ff5722] hover:bg-[#e64a19] text-white font-black shadow-xl shadow-orange-500/20"
+              className="w-full sm:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black shadow-xl shadow-primary/20"
             >
               {isUpdating ? <LoadingSpinner size="sm" /> : 'تـأكيد الـتعديل'}
             </Button>
             <Button
               variant="ghost"
               onClick={() => setIsEditModalOpen(false)}
-              className="w-full sm:w-auto h-14 px-8 rounded-2xl text-slate-400 font-bold hover:bg-white/5"
+              className="w-full sm:w-auto h-14 px-8 rounded-2xl text-muted-foreground font-bold hover:bg-muted"
             >
               إلغاء
             </Button>

@@ -83,17 +83,17 @@ export function CustomPaymentForm({
 
   return (
     <div className="space-y-6">
-      <div className="relative min-h-[300px] w-full bg-white/[0.02] border border-white/5 rounded-[32px] p-2 overflow-hidden">
+      <div className="relative min-h-[300px] w-full bg-white border border-border rounded-2xl p-2 overflow-hidden">
         {isLoading && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#050B1A]/80 backdrop-blur-sm gap-4">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/90 backdrop-blur-sm gap-4">
             <LoadingSpinner size="lg" />
-            <p className="text-slate-400 font-bold animate-pulse">جاري تحميل بوابة الدفع...</p>
+            <p className="text-muted-foreground font-bold animate-pulse">جاري تحميل بوابة الدفع...</p>
           </div>
         )}
         <div className="mysr-form !w-full !max-w-none"></div>
       </div>
       
-      <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold justify-center opacity-60">
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold justify-center opacity-70">
         <Lock className="w-3 h-3" />
         <span>تشفير SSL آمن بالكامل عبر Moyasar</span>
       </div>

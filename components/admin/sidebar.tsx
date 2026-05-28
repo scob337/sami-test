@@ -24,7 +24,7 @@ const menuItems = [
   { icon: BookOpen, label: 'إدارة الكتب', href: '/admin/books' },
   { icon: ClipboardList, label: 'إدارة الاختبارات', href: '/admin/tests' },
   { icon: HelpCircle, label: 'إدارة الأسئلة', href: '/admin/questions' },
-  { icon: MessageSquare, label: 'إدارة التقارير والخبراء', href: '/admin/prompts' },
+  { icon: MessageSquare, label: 'برومبت التقارير (AI)', href: '/admin/prompts' },
   { icon: MessageSquare, label: 'دعم العملاء', href: '/admin/support' },
   { icon: typeof Bell !== 'undefined' ? Bell : MessageSquare, label: 'بث الإشعارات', href: '/admin/notifications' },
   { icon: Users, label: 'إدارة المستخدمين', href: '/admin/users' },

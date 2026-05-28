@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Book, Check, X, CreditCard, Link as LinkIcon, FileText, Upload, FileUp, AlertCircle } from 'lucide-react'
+import { Book, Check, X, CreditCard, FileText, Upload, FileUp, AlertCircle, Sparkles } from 'lucide-react'
+import { buildPricingPlansFromBookPrices } from '@/lib/book-pricing'
 import { useUploadStore } from '@/lib/store/upload-store'
 import { Progress } from '@/components/ui/progress'
 
@@ -30,7 +31,30 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
   const [description, setDescription] = useState(editBook?.description ?? '')
   const [filePdf, setFilePdf] = useState(editBook?.filePdf ?? '')
   const [price, setPrice] = useState(editBook?.price?.toString() ?? '0')
+  const [reportPrice, setReportPrice] = useState(
+    String((editBook as { reportPrice?: number })?.reportPrice ?? '')
+  )
+  const [bookOnlyPrice, setBookOnlyPrice] = useState(
+    String((editBook as { bookOnlyPrice?: number })?.bookOnlyPrice ?? '')
+  )
   const [isActive, setIsActive] = useState(editBook?.isActive ?? true)
+  
+  // Landing Page States
+  const [heroTitle, setHeroTitle] = useState((editBook as any)?.heroTitle ?? '')
+  const [heroSubtitle, setHeroSubtitle] = useState((editBook as any)?.heroSubtitle ?? '')
+  const [heroDescription, setHeroDescription] = useState((editBook as any)?.heroDescription ?? '')
+  const [heroImage, setHeroImage] = useState((editBook as any)?.heroImage ?? '')
+  const [expertName, setExpertName] = useState((editBook as any)?.expertName ?? 'الخبير سامي')
+  
+  const [features, setFeatures] = useState<any[]>((editBook as any)?.features ?? [])
+  const [audience, setAudience] = useState<any[]>((editBook as any)?.audience ?? [])
+  const [steps, setSteps] = useState<any[]>((editBook as any)?.steps ?? [])
+  const [assistant, setAssistant] = useState<any>((editBook as any)?.assistant ?? { title: '', description: '', examplePos: '', exampleNeg: '', labels: [] })
+  const [bookDetails, setBookDetails] = useState<any>((editBook as any)?.bookDetails ?? { image: '', points: [] })
+  const [pricingPlans, setPricingPlans] = useState<any[]>((editBook as any)?.pricingPlans ?? [])
+  const [ctaTitle, setCtaTitle] = useState((editBook as any)?.ctaTitle ?? '')
+  const [ctaDescription, setCtaDescription] = useState((editBook as any)?.ctaDescription ?? '')
+
   const [isSaving, setIsSaving] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -43,7 +67,24 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
     setDescription(editBook?.description ?? '')
     setFilePdf(editBook?.filePdf ?? '')
     setPrice(editBook?.price?.toString() ?? '0')
+    setReportPrice(String((editBook as { reportPrice?: number })?.reportPrice ?? ''))
+    setBookOnlyPrice(String((editBook as { bookOnlyPrice?: number })?.bookOnlyPrice ?? ''))
     setIsActive(editBook?.isActive ?? true)
+    
+    setHeroTitle((editBook as any)?.heroTitle ?? '')
+    setHeroSubtitle((editBook as any)?.heroSubtitle ?? '')
+    setHeroDescription((editBook as any)?.heroDescription ?? '')
+    setHeroImage((editBook as any)?.heroImage ?? '')
+    setExpertName((editBook as any)?.expertName ?? 'الخبير سامي')
+    setFeatures((editBook as any)?.features ?? [])
+    setAudience((editBook as any)?.audience ?? [])
+    setSteps((editBook as any)?.steps ?? [])
+    setAssistant((editBook as any)?.assistant ?? { title: '', description: '', examplePos: '', exampleNeg: '', labels: [] })
+    setBookDetails((editBook as any)?.bookDetails ?? { image: '', points: [] })
+    setPricingPlans((editBook as any)?.pricingPlans ?? [])
+    setCtaTitle((editBook as any)?.ctaTitle ?? '')
+    setCtaDescription((editBook as any)?.ctaDescription ?? '')
+
     setCurrentUploadId(null)
   }, [editBook, open])
 
@@ -89,12 +130,38 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
 
     try {
       setIsSaving(true)
+      const parsedPrice = parseFloat(price) || 0
+      const parsedReport = parseFloat(reportPrice) || 0
+      const parsedBookOnly = parseFloat(bookOnlyPrice) || 0
+      const syncedPlans = buildPricingPlansFromBookPrices({
+        title,
+        price: parsedPrice,
+        reportPrice: parsedReport,
+        bookOnlyPrice: parsedBookOnly,
+        hasActiveTest: true,
+      })
+
       const payload = {
         title,
         description,
         filePdf,
-        price: parseFloat(price) || 0,
+        price: parsedPrice,
+        reportPrice: parsedReport,
+        bookOnlyPrice: parsedBookOnly,
         isActive,
+        heroSubtitle,
+        heroTitle,
+        heroDescription,
+        heroImage,
+        expertName,
+        features,
+        audience,
+        steps,
+        assistant,
+        bookDetails,
+        pricingPlans: syncedPlans,
+        ctaTitle,
+        ctaDescription
       }
 
       const url = editBook ? `/api/admin/books/${editBook.id}` : '/api/admin/books'
@@ -164,32 +231,70 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-6">
-            <div className="space-y-2.5">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">السعر (ر.س)</Label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none group-focus-within:text-[#ff5722] text-slate-300 transition-colors">
-                  <CreditCard className="w-5 h-5" />
-                </div>
+          {/* التسعير والباقات */}
+          <div className="rounded-3xl border-2 border-[#e8d9c5] bg-gradient-to-br from-[#fffaf3] to-[#fff8ea] p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-black text-lg text-slate-800">التسعير والباقات</h3>
+                <p className="text-sm font-medium text-slate-500">
+                  تُطبَّق تلقائياً على الصفحة الرئيسية والدفع
+                </p>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs font-black text-[#674611]">الكتاب + التقرير (ر.س)</Label>
                 <Input
                   type="number"
+                  min={0}
                   value={price}
-                  onChange={e => setPrice(e.target.value)}
-                  placeholder="0.00"
-                  className="text-right h-14 pr-14 rounded-2xl bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 focus:border-[#ff5722]/50 font-bold text-lg transition-all"
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="39"
+                  className="h-12 rounded-xl font-bold border-[#e8d9c5] bg-white"
+                  dir="ltr"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-black text-[#674611]">سعر التقرير / الاختبار (ر.س)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={reportPrice}
+                  onChange={(e) => setReportPrice(e.target.value)}
+                  placeholder="اتركه فارغاً للحساب التلقائي"
+                  className="h-12 rounded-xl font-bold border-[#e8d9c5] bg-white"
+                  dir="ltr"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-black text-[#674611]">الكتاب فقط (ر.س)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={bookOnlyPrice}
+                  onChange={(e) => setBookOnlyPrice(e.target.value)}
+                  placeholder="اتركه فارغاً للحساب التلقائي"
+                  className="h-12 rounded-xl font-bold border-[#e8d9c5] bg-white"
                   dir="ltr"
                 />
               </div>
             </div>
+            <p className="text-xs font-bold text-slate-500 leading-relaxed">
+              عند الحفظ تُحدَّث باقات العرض (مجاني، تقرير، كتاب+تقرير، كتاب فقط) وفق هذه الأسعار.
+            </p>
+          </div>
 
-            <div className="space-y-2.5">
-              <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">حالة الكتاب</Label>
-              <div className="flex items-center justify-between h-14 px-6 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 rounded-2xl transition-all">
-                <span className={`text-sm font-black ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
-                  {isActive ? 'نشط حالياً' : 'معطّل'}
-                </span>
-                <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500" />
-              </div>
+          <div className="space-y-2.5">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">حالة الكتاب</Label>
+            <div className="flex items-center justify-between h-14 px-6 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700/50 rounded-2xl transition-all">
+              <span className={`text-sm font-black ${isActive ? 'text-emerald-500' : 'text-slate-400'}`}>
+                {isActive ? 'نشط حالياً' : 'معطّل'}
+              </span>
+              <Switch checked={isActive} onCheckedChange={setIsActive} className="data-[state=checked]:bg-emerald-500" />
             </div>
           </div>
 

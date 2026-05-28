@@ -29,14 +29,19 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { title, description, filePdf, price, isActive, slug } = body
+    const { 
+      title, description, filePdf, price, reportPrice, bookOnlyPrice, isActive, slug,
+      heroSubtitle, heroTitle, heroDescription, heroImage, expertName,
+      features, audience, steps, assistant, bookDetails, pricingPlans,
+      ctaTitle, ctaDescription
+    } = body
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
     }
 
     const isNumericId = /^\d+$/.test(id)
-    const book = await (prisma as any).book.update({
+    const book = await prisma.book.update({
       where: isNumericId ? { id: parseInt(id) } : { slug: id },
       data: {
         title,
@@ -44,7 +49,22 @@ export async function PUT(
         description: description ?? null,
         filePdf: filePdf ?? '',
         price: price ?? 0,
+        reportPrice: reportPrice ?? 0,
+        bookOnlyPrice: bookOnlyPrice ?? 0,
         isActive: isActive ?? true,
+        heroSubtitle,
+        heroTitle,
+        heroDescription,
+        heroImage,
+        expertName,
+        features: features || [],
+        audience: audience || [],
+        steps: steps || [],
+        assistant: assistant || {},
+        bookDetails: bookDetails || {},
+        pricingPlans: pricingPlans || [],
+        ctaTitle,
+        ctaDescription
       },
     })
 

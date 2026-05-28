@@ -11,7 +11,7 @@ export default async function AuthLayout({
   try {
     const session = await getSession()
     if (session?.id) {
-      redirect('/dashboard')
+      redirect(session.isAdmin ? '/admin/dashboard' : '/dashboard')
     }
   } catch (err) {
     const e = err as any

@@ -20,17 +20,40 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { title, filePdf } = body
+    const { 
+      title, filePdf, description, price, reportPrice, bookOnlyPrice, isActive, slug,
+      heroSubtitle, heroTitle, heroDescription, heroImage, expertName,
+      features, audience, steps, assistant, bookDetails, pricingPlans,
+      ctaTitle, ctaDescription
+    } = body
 
     if (!title || !filePdf) {
       return NextResponse.json({ error: 'Missing required data' }, { status: 400 })
     }
 
-    const book = await (prisma as any).book.create({
+    const book = await prisma.book.create({
       data: {
         title,
-        slug: slugify(title),
+        slug: slug || slugify(title),
+        description,
         filePdf,
+        price: parseFloat(price) || 0,
+        reportPrice: parseFloat(reportPrice) || 0,
+        bookOnlyPrice: parseFloat(bookOnlyPrice) || 0,
+        isActive: isActive !== undefined ? isActive : true,
+        heroSubtitle,
+        heroTitle,
+        heroDescription,
+        heroImage,
+        expertName,
+        features: features || [],
+        audience: audience || [],
+        steps: steps || [],
+        assistant: assistant || {},
+        bookDetails: bookDetails || {},
+        pricingPlans: pricingPlans || [],
+        ctaTitle,
+        ctaDescription
       }
     })
 

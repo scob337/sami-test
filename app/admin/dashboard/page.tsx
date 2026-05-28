@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 import { fetcher } from '@/lib/fetcher'
 import { 
-  Users, BookOpen, ClipboardList, CreditCard, Plus, ExternalLink
+  Users, BookOpen, ClipboardList, CreditCard, Plus, ExternalLink, MessageSquare
 } from 'lucide-react'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
@@ -90,6 +90,65 @@ export default function AdminDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <a
+          href="/admin/books"
+          className="flex items-center gap-4 p-6 rounded-3xl border-2 border-[#e8d9c5] bg-gradient-to-br from-[#fffaf3] to-[#fff8ea] hover:shadow-md transition-all"
+        >
+          <BookOpen className="w-10 h-10 text-primary shrink-0" />
+          <div>
+            <h3 className="font-black text-slate-800">إدارة الكتاب والتسعير</h3>
+            <p className="text-sm font-medium text-slate-500 mt-1">
+              إضافة كتاب، سعر الاختبار، والباقات
+            </p>
+          </div>
+        </a>
+        <a
+          href="/admin/prompts"
+          className="flex items-center gap-4 p-6 rounded-3xl border-2 border-[#e8d9c5] bg-gradient-to-br from-[#fffaf3] to-[#fff8ea] hover:shadow-md transition-all"
+        >
+          <MessageSquare className="w-10 h-10 text-primary shrink-0" />
+          <div>
+            <h3 className="font-black text-slate-800">برومبت التقارير (AI)</h3>
+            <p className="text-sm font-medium text-slate-500 mt-1">
+              تعديل تعليمات الذكاء الاصطناعي من لوحة التحكم
+            </p>
+          </div>
+        </a>
+      </div>
+
+      {/* تصفح الموقع العام — للأدمن فقط عند الحاجة */}
+      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+        <div className="flex items-center gap-2 mb-4">
+          <ExternalLink className="w-5 h-5 text-[#ff5722]" />
+          <h3 className="text-lg font-black text-slate-800">تصفح الموقع العام</h3>
+        </div>
+        <p className="text-sm text-slate-500 font-medium mb-4">
+          صفحات الزوار (الهبوط، الكتب، الاختبارات) — للمعاينة فقط
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { label: 'صفحة الهبوط (معاينة)', href: '/?preview=1' },
+            { label: 'مكتبة الاختبارات', href: '/test-library' },
+            { label: 'الكتب', href: '/books' },
+            { label: 'الكورسات', href: '/courses' },
+            { label: 'حول الخدمة', href: '/about' },
+            { label: 'المميزات', href: '/features' },
+          ].map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-50 text-slate-700 border border-slate-200 hover:border-[#ff5722] hover:text-[#ff5722] transition-colors"
+            >
+              {link.label}
+              <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+            </a>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -204,7 +263,7 @@ export default function AdminDashboard() {
   )
 }
 
-function StatCard({ title, value, icon: Icon, color, trend }: any) {
+function StatCard({ title, value, icon: Icon, color, trend }: anyا) {
   return (
     <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden group hover:shadow-md transition-all">
       <CardContent className="p-6">

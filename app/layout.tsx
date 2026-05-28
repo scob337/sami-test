@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Cairo } from 'next/font/google'
 import { SupportButton } from '@/components/chat/SupportButton'
 import { NotificationToast } from '@/components/notifications/NotificationToast'
 import { Toaster } from 'sonner'
@@ -67,15 +68,18 @@ export const metadata: Metadata = {
   manifest: '/site.webmanifest',
 }
 
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-cairo',
+  display: 'swap',
+})
+
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1a1a2e' },
-  ],
-  colorScheme: 'light dark',
+  themeColor: '#f7f2ea',
+  colorScheme: 'light',
 }
 
 export default function RootLayout({
@@ -87,13 +91,13 @@ export default function RootLayout({
     <html
       lang="ar"
       suppressHydrationWarning
-      className="antialiased"
+      className={cn('antialiased', cairo.variable)}
       dir="rtl"
     >
       <head>
         <meta name="google-site-verification" content="gDWBh4IxFs8bIqbDHDvMHqrBAb0zLFju5kHupaiQ-_U" />
         <meta charSet="utf-8" />
-        <meta name="theme-color" content="#3B82F6" />
+        <meta name="theme-color" content="#f7f2ea" />
       </head>
       <body
         className="font-cairo antialiased bg-background text-foreground min-h-screen relative overflow-x-hidden selection:bg-primary/30 selection:text-primary-foreground"
@@ -101,8 +105,9 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          forcedTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {/* SEO Structured Data */}
@@ -160,3 +165,4 @@ export default function RootLayout({
 import { NavbarWrapper } from '@/components/layout/navbar-wrapper'
 import { Footer } from '@/components/layout/footer'
 import { JsonLd } from '@/components/seo/JsonLd'
+import { cn } from '@/lib/utils'

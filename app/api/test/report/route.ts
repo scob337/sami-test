@@ -61,7 +61,31 @@ export async function GET(request: Request) {
 
     // If not paid, only return a partial report
     if (!isPaid) {
-      const partialText = report.reportText.substring(0, 500) + '...'
+      // If we have structured data, limit it for free view
+      if (report.reportData) {
+        const fullData = report.reportData as any
+        const partialData = {
+          title: fullData.title,
+          subtitle: fullData.subtitle,
+          opening_insight: fullData.opening_insight,
+          primary_type: fullData.primary_type,
+          secondary_type: fullData.secondary_type,
+          strengths: fullData.strengths?.slice(0, 1),
+          challenges: fullData.challenges?.slice(0, 1),
+          recommended_paid_report: fullData.recommended_paid_report,
+          soft_cta: fullData.soft_cta,
+          report_mode: 'free'
+        }
+        return NextResponse.json({ 
+          ...report, 
+          reportData: partialData,
+          reportText: fullData.opening_insight || '',
+          isPartial: true,
+          isPaid: false
+        })
+      }
+
+      const partialText = (report.reportText || '').substring(0, 500) + '...'
       return NextResponse.json({ 
         ...report, 
         reportText: partialText, 

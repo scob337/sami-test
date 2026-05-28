@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>اعرف شخصيتك | الكتاب والاختبار</title>
+  <meta name="description" content="اختبار مجاني يساعدك على اكتشاف شخصيتك من بين الشخصيات السبعة، ثم فهم نفسك والآخرين في العلاقات والعمل والنقاش والقرارات اليومية.">
+  <meta property="og:title" content="اعرف شخصيتك | الكتاب والاختبار">
+  <meta property="og:description" content="اكتشف شخصيتك الأقرب، وافهم لماذا تختلف مع الناس رغم أن النية طيبة.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#111111">
+
+  <!--
+  ============================================================
+  Meta Pixel
+  ============================================================
+  استبدل YOUR_PIXEL_ID برقم البكسل الحقيقي من Meta Events Manager.
+  يمكن أيضًا ترك هذا الكود للمبرمج لوضعه عبر Google Tag Manager.
+  -->
+  <script>
+    window.SAMI_PIXEL_ENABLED = false; // غيّرها إلى true بعد تركيب البكسل الحقيقي
+    window.SAMI_PIXEL_ID = "YOUR_PIXEL_ID";
+  </script>
+
+  <script>
+    if (window.SAMI_PIXEL_ENABLED && window.SAMI_PIXEL_ID !== "YOUR_PIXEL_ID") {
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', window.SAMI_PIXEL_ID);
+      fbq('track', 'PageView');
+    }
+  </script>
+
+  <style>
+    :root{
+      --bg:#f7f3eb;
+      --card:#fffaf2;
+      --text:#171717;
+      --muted:#6b6257;
+      --gold:#b8924a;
+      --gold2:#d8bd7a;
+      --dark:#111111;
+      --line:#e6dccd;
+      --soft:#efe4d2;
+      --success:#1f7a4d;
+      --danger:#9d3a2f;
+      --shadow: 0 22px 70px rgba(17,17,17,.12);
+      --radius: 28px;
+      --radius-sm: 18px;
+      --max: 1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: "Tajawal","Cairo","Segoe UI",Tahoma,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 80% 0%, rgba(216,189,122,.26), transparent 32%),
+        radial-gradient(circle at 10% 12%, rgba(184,146,74,.18), transparent 26%),
+        var(--bg);
+      color:var(--text);
+      line-height:1.85;
+    }
+    a{color:inherit;text-decoration:none}
+    button,input,select{font-family:inherit}
+    .container{width:min(var(--max), calc(100% - 34px)); margin-inline:auto}
+    .topbar{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(18px);
+      background:rgba(247,243,235,.82);
+      border-bottom:1px solid rgba(230,220,205,.75);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 0;
+      gap:18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.5px
+    }
+    .brand-mark{
+      width:42px;height:42px;border-radius:50%;
+      background:linear-gradient(145deg,var(--dark),#3a2d15);
+      display:grid;place-items:center;color:var(--gold2);
+      box-shadow:0 10px 30px rgba(0,0,0,.16);
+      font-weight:900;
+    }
+    .nav-links{display:flex;gap:22px;color:var(--muted);font-weight:700;font-size:14px}
+    .nav-cta{
+      display:flex; gap:10px; align-items:center
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      min-height:48px; padding:0 22px; border-radius:999px;
+      border:1px solid transparent; cursor:pointer; font-weight:900;
+      transition:.25s ease; white-space:nowrap;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,#111,#3d3016);
+      color:#fff;
+      box-shadow:0 18px 45px rgba(17,17,17,.18);
+    }
+    .btn-primary:hover{transform:translateY(-2px); box-shadow:0 22px 55px rgba(17,17,17,.24)}
+    .btn-secondary{
+      background:rgba(255,250,242,.72);
+      border-color:var(--line);
+      color:var(--text);
+    }
+    .btn-secondary:hover{background:#fff}
+    .btn-gold{
+      background:linear-gradient(135deg,var(--gold),var(--gold2));
+      color:#171717;
+      box-shadow:0 16px 42px rgba(184,146,74,.26)
+    }
+    .hero{
+      padding:72px 0 54px;
+      position:relative;
+      overflow:hidden;
+    }
+    .hero-grid{
+      display:grid; grid-template-columns: 1.12fr .88fr; gap:44px; align-items:center;
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:9px;
+      background:rgba(255,250,242,.72);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:7px 14px;
+      color:#5d4a25;
+      font-weight:900;
+      font-size:14px;
+      margin-bottom:20px;
+    }
+    h1{
+      font-size:clamp(38px, 5vw, 72px);
+      line-height:1.18;
+      margin:0 0 18px;
+      letter-spacing:-1.8px;
+    }
+    .hero p.lead{
+      color:var(--muted);
+      font-size:clamp(18px, 2.1vw, 23px);
+      margin:0 0 28px;
+      max-width:780px;
+    }
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}
+    .trust-row{
+      display:flex;flex-wrap:wrap;gap:12px;margin-top:22px;color:#5f564b;font-weight:800;font-size:14px
+    }
+    .trust-row span{
+      padding:8px 12px;background:rgba(255,250,242,.6);border:1px solid var(--line);border-radius:999px
+    }
+    .book-card{
+      position:relative;
+      background:linear-gradient(145deg,rgba(255,250,242,.9),rgba(239,228,210,.9));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:28px;
+      min-height:560px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .book-card:before{
+      content:""; position:absolute; inset:auto -80px -120px auto;
+      width:320px;height:320px;border-radius:50%;
+      background:rgba(184,146,74,.18);
+    }
+
+    .real-cover{
+      width:min(420px, 96%);
+      height:auto;
+      max-height:730px;
+      object-fit:contain;
+      border-radius:18px;
+      display:block;
+      box-shadow:0 30px 75px rgba(0,0,0,.14);
+      border:1px solid #eee7dc;
+      background:#fff;
+      image-rendering:auto;
+    }
+    .real-cover.small-cover{
+      width:min(330px, 96%);
+      max-height:590px;
+      justify-self:center;
+      transform:none;
+    }
+
+.book-cover{
+      width:min(330px, 88%);
+      aspect-ratio: .68 / 1;
+      background:
+        linear-gradient(180deg,#ffffff 0%,#f7f7f7 100%);
+      border:1px solid #e9e2d7;
+      border-radius:16px;
+      box-shadow:0 28px 65px rgba(0,0,0,.2), inset -10px 0 20px rgba(0,0,0,.06);
+      position:relative;
+      padding:34px 28px;
+      display:flex;flex-direction:column;align-items:center;text-align:center;
+      transform:rotate(-2deg);
+    }
+    .book-cover .small{font-weight:800;color:#6b6257;font-size:14px;margin-bottom:22px}
+    .book-cover .title{font-size:34px;line-height:1.35;font-weight:950;letter-spacing:-1px;margin-top:12px}
+    .book-cover .sub{font-size:16px;color:#5c5c5c;margin-top:14px;font-weight:800}
+    .compass{
+      width:128px;height:128px;border-radius:50%;
+      border:2px solid #111; display:grid;place-items:center;margin:16px auto;
+      position:relative;
+    }
+    .compass:before,.compass:after{
+      content:"";position:absolute;background:#111;left:50%;top:12px;bottom:12px;width:2px;transform:translateX(-50%)
+    }
+    .compass:after{transform:translateX(-50%) rotate(90deg)}
+    .compass span{
+      width:48px;height:48px;border-radius:50%;background:#111;color:#d8bd7a;display:grid;place-items:center;font-weight:900;z-index:2
+    }
+    .author{margin-top:auto;color:#111;font-weight:900}
+    .section{padding:74px 0}
+    .section-title{
+      max-width:760px;margin:0 auto 34px;text-align:center
+    }
+    .section-title h2{
+      margin:0 0 12px;
+      font-size:clamp(28px,3.8vw,48px);
+      line-height:1.3;
+      letter-spacing:-1px
+    }
+    .section-title p{margin:0;color:var(--muted);font-size:18px}
+    .cards{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:18px
+    }
+    .card{
+      background:rgba(255,250,242,.8);
+      border:1px solid var(--line);
+      border-radius:var(--radius-sm);
+      padding:24px;
+      box-shadow:0 12px 35px rgba(17,17,17,.06);
+    }
+    .card h3{margin:0 0 8px;font-size:22px}
+    .card p{margin:0;color:var(--muted)}
+    .num{
+      width:42px;height:42px;border-radius:50%;
+      background:#111;color:#fff;display:grid;place-items:center;font-weight:900;margin-bottom:14px
+    }
+    .quiz-wrap{
+      background:linear-gradient(145deg,#111,#2b2418);
+      color:#fff;
+      border-radius:36px;
+      padding:34px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      position:relative;
+    }
+    .quiz-wrap:before{
+      content:"";position:absolute;inset:-120px auto auto -120px;width:280px;height:280px;background:rgba(216,189,122,.18);border-radius:50%
+    }
+    .quiz-head{
+      display:flex;justify-content:space-between;gap:20px;align-items:flex-start;position:relative;z-index:1
+    }
+    .quiz-head h2{font-size:36px;line-height:1.3;margin:0 0 8px}
+    .quiz-head p{margin:0;color:#d6d0c7}
+    .progress{
+      height:10px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden;margin:26px 0;position:relative;z-index:1
+    }
+    .progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:.25s ease}
+    .question-box{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:24px;
+      padding:24px;
+      position:relative;z-index:1;
+    }
+    .question-title{font-size:24px;font-weight:900;margin-bottom:18px}
+    .answers{display:grid;gap:10px}
+    .answer{
+      width:100%;
+      text-align:right;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      border-radius:16px;
+      padding:14px 16px;
+      cursor:pointer;
+      transition:.18s ease;
+      font-size:16px;
+      line-height:1.7;
+    }
+    .answer:hover,.answer.selected{
+      background:rgba(216,189,122,.22);
+      border-color:rgba(216,189,122,.72);
+      transform:translateY(-1px)
+    }
+    .quiz-actions{
+      display:flex;justify-content:space-between;gap:12px;margin-top:20px;position:relative;z-index:1;flex-wrap:wrap
+    }
+    .result{
+      display:none;
+      background:rgba(255,250,242,.96);
+      color:#171717;
+      border-radius:28px;
+      padding:28px;
+      margin-top:22px;
+      position:relative;z-index:2
+    }
+    .result.show{display:block}
+    .result-badge{
+      display:inline-flex;
+      background:#111;color:#fff;border-radius:999px;padding:7px 14px;font-weight:900;margin-bottom:12px
+    }
+    .result h3{font-size:34px;margin:0 0 8px}
+    .result p{color:#5e554a;margin:0 0 12px}
+    .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .result-mini{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}
+    .result-mini strong{display:block;margin-bottom:6px}
+    .types-grid{
+      display:grid;grid-template-columns:repeat(7,1fr);gap:12px
+    }
+    .type-pill{
+      background:rgba(255,250,242,.86);
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:18px 12px;
+      text-align:center;
+      font-weight:900;
+      box-shadow:0 10px 28px rgba(17,17,17,.05);
+    }
+    .type-pill small{display:block;color:var(--muted);font-weight:800;margin-top:4px}
+    .book-section{
+      background:#111;color:#fff;border-radius:36px;padding:36px;display:grid;grid-template-columns:.9fr 1.1fr;gap:28px;align-items:center
+    }
+    .book-section p{color:#d5d0c8}
+    .features{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
+    .feature{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:16px}
+    .pricing{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:18px
+    }
+    .price-card{
+      background:rgba(255,250,242,.85);
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:26px;
+      position:relative;
+      box-shadow:0 16px 44px rgba(17,17,17,.06);
+    }
+    .price-card.highlight{
+      border-color:rgba(184,146,74,.65);
+      transform:translateY(-8px);
+      box-shadow:0 28px 68px rgba(184,146,74,.18);
+    }
+    .tag{
+      position:absolute;top:16px;left:16px;background:#111;color:#fff;border-radius:999px;padding:5px 12px;font-weight:900;font-size:12px
+    }
+    .price{font-size:42px;font-weight:950;letter-spacing:-1px;margin:12px 0}
+    .old{color:#8b8176;text-decoration:line-through;font-size:18px;margin-inline-start:8px}
+    .price-card ul{padding:0 20px 0 0;margin:16px 0;color:#5f564b}
+    .faq{display:grid;gap:12px;max-width:900px;margin:auto}
+    .faq details{
+      background:rgba(255,250,242,.85);border:1px solid var(--line);border-radius:18px;padding:18px 20px
+    }
+    .faq summary{font-weight:900;cursor:pointer}
+    .faq p{color:var(--muted);margin:10px 0 0}
+    footer{
+      padding:34px 0;border-top:1px solid var(--line);color:var(--muted);font-weight:700
+    }
+    .footer-grid{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .dev-note{
+      background:#fff7e6;border:1px dashed #bd9246;color:#584117;border-radius:16px;padding:14px 18px;margin-top:18px;font-size:14px
+    }
+
+    @media (max-width: 950px){
+      .hero-grid,.book-section{grid-template-columns:1fr}
+      .cards,.pricing,.result-grid{grid-template-columns:1fr}
+      .types-grid{grid-template-columns:repeat(2,1fr)}
+      .nav-links{display:none}
+      .book-card{min-height:440px}
+      .quiz-head{display:block}
+      .features{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="#home" aria-label="العودة للرئيسية">
+        <span class="brand-mark">٧</span>
+        <span>اعرف شخصيتك</span>
+      </a>
+      <nav class="nav-links" aria-label="روابط الموقع">
+        <a href="#quiz">الاختبار</a>
+        <a href="#types">الشخصيات السبعة</a>
+        <a href="#book">الكتاب</a>
+        <a href="#pricing">الباقات</a>
+        <a href="#faq">الأسئلة</a>
+      </nav>
+      <div class="nav-cta">
+        <a class="btn btn-secondary" href="#book" data-track="ViewContent" data-content="book_nav">الكتاب</a>
+        <a class="btn btn-primary" href="#quiz" data-track="Lead" data-content="start_test_nav">ابدأ الاختبار</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">اختبار مجاني مع تجربة الكتاب، فهم أعمق لنفسك والآخرين</div>
+          <h1>افهم شخصيتك أولًا، ثم افهم لماذا يختلف الناس معك رغم أن النية طيبة.</h1>
+          <p class="lead">
+            اختبار بسيط يساعدك على اكتشاف شخصيتك الأقرب من بين الشخصيات السبعة، ثم يفتح لك بابًا لفهم طريقة تفكيرك، ردود فعلك، علاقاتك، ونقاشاتك اليومية.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#quiz" data-track="Lead" data-content="start_test_hero">ابدأ الاختبار المجاني</a>
+            <a class="btn btn-secondary" href="#journey">كيف تعمل الرحلة؟</a>
+          </div>
+          <div class="trust-row">
+            <span>لا توجد إجابة صحيحة أو خاطئة</span>
+            <span>أسئلة من الحياة اليومية</span>
+            <span>نتيجة مختصرة مجانية</span>
+          </div>
+        </div>
+
+        <div class="book-card" aria-label="غلاف كتاب اعرف شخصيتك">
+          <img class="real-cover" src="book-cover-clear.png" alt="غلاف كتاب اعرف شخصيتك، الشخصيات السبعة لفهم نفسك والآخرين">
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="journey">
+      <div class="container">
+        <div class="section-title">
+          <h2>الموقع لا يبيع لك كتابًا أولًا، بل يساعدك تفهم نفسك.</h2>
+          <p>بعد النتيجة، يظهر الكتاب كخطوة طبيعية لمن يريد فهم الشخصيات بعمق أكبر.</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="num">1</div>
+            <h3>ابدأ بالاختبار</h3>
+            <p>أسئلة قصيرة من مواقف يومية تكشف طريقة رد فعلك الطبيعية.</p>
+          </div>
+          <div class="card">
+            <div class="num">2</div>
+            <h3>شاهد نتيجتك</h3>
+            <p>تحصل على وصف مختصر لشخصيتك، نقطة قوة، تحدي، ونصيحة عملية.</p>
+          </div>
+          <div class="card">
+            <div class="num">3</div>
+            <h3>افهم الصورة كاملة</h3>
+            <p>الكتاب يشرح الشخصيات السبعة وكيف تتعامل معها في الحياة والعمل والعلاقات.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="quiz">
+      <div class="container">
+        <div class="quiz-wrap">
+          <div class="quiz-head">
+            <div>
+              <h2>اختبار الشخصيات السبعة</h2>
+              <p>أجب بعفوية. اختر الرد الأقرب لطريقتك الطبيعية في المواقف اليومية.</p>
+            </div>
+            <button class="btn btn-gold" id="restartQuiz" type="button">إعادة الاختبار</button>
+          </div>
+
+          <div class="progress" aria-label="تقدم الاختبار">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+
+          <div class="question-box" id="questionBox">
+            <div class="question-title" id="questionTitle"></div>
+            <div class="answers" id="answers"></div>
+          </div>
+
+          <div class="quiz-actions">
+            <button class="btn btn-secondary" id="prevBtn" type="button">السابق</button>
+            <button class="btn btn-gold" id="nextBtn" type="button">التالي</button>
+          </div>
+
+          <div class="result" id="resultBox">
+            <span class="result-badge">نتيجتك المجانية</span>
+            <h3 id="resultName"></h3>
+            <p id="resultDesc"></p>
+            <div class="result-grid">
+              <div class="result-mini">
+                <strong>نقطة قوة</strong>
+                <span id="resultStrength"></span>
+              </div>
+              <div class="result-mini">
+                <strong>تحدي محتمل</strong>
+                <span id="resultChallenge"></span>
+              </div>
+              <div class="result-mini">
+                <strong>نصيحة عملية</strong>
+                <span id="resultTip"></span>
+              </div>
+            </div>
+            <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+              <a class="btn btn-primary" href="#book" data-track="ViewContent" data-content="book_after_result">أريد فهم الشخصيات السبعة</a>
+              <a class="btn btn-secondary" href="#pricing" data-track="ViewContent" data-content="pricing_after_result">شاهد الباقات</a>
+            </div>
+            <div class="dev-note">
+              للمبرمج: عند ظهور هذه النتيجة يتم إطلاق حدث ResultViewed، وعند انتهاء الاختبار يتم إطلاق CompleteRegistration.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="types">
+      <div class="container">
+        <div class="section-title">
+          <h2>الشخصيات السبعة</h2>
+          <p>ليست أسماء للتصنيف، بل مفاتيح لفهم طريقة التفكير والاستجابة والتواصل.</p>
+        </div>
+        <div class="types-grid">
+          <div class="type-pill">الحازمة<small>وضوح وحسم</small></div>
+          <div class="type-pill">المدققة<small>حذر وتفاصيل</small></div>
+          <div class="type-pill">الهادئة<small>اتزان وتجنب صدام</small></div>
+          <div class="type-pill">الحكيمة<small>جمع وتهدئة</small></div>
+          <div class="type-pill">العفوية<small>صدق وبساطة</small></div>
+          <div class="type-pill">المنفتحة<small>حضور وتفاعل</small></div>
+          <div class="type-pill">المفكرة<small>تحليل وفهم</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="book">
+      <div class="container">
+        <div class="book-section">
+          <img class="real-cover small-cover" src="book-cover-clear.png" alt="غلاف كتاب اعرف شخصيتك، الشخصيات السبعة لفهم نفسك والآخرين">
+          <div>
+            <h2 style="font-size:42px;line-height:1.25;margin:0 0 14px">بعد أن عرفت شخصيتك، حان الوقت أن تفهم الشخصيات من حولك.</h2>
+            <p>
+              الاختبار يكشف لك الباب الأول، والكتاب يعطيك الدليل العملي لفهم هذا الباب وما حوله. ستعرف كيف تفكر كل شخصية، كيف تناقشها، كيف تقنعها، وكيف تتعامل معها في الزواج والعمل والعائلة والأصدقاء.
+            </p>
+            <div class="features">
+              <div class="feature">كيف يرى كل نوع الحياة؟</div>
+              <div class="feature">كيف تناقش دون أن تخسر العلاقة؟</div>
+              <div class="feature">كيف تقنع كل شخصية؟</div>
+              <div class="feature">تطبيقات في الزواج والعمل والعائلة</div>
+            </div>
+            <div style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap">
+              <a class="btn btn-gold" href="#pricing" data-track="ViewContent" data-content="pricing_book_section">اشتر الكتاب مع الاختبار</a>
+              <a class="btn btn-secondary" href="#faq">اقرأ الأسئلة الشائعة</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing">
+      <div class="container">
+        <div class="section-title">
+          <h2>ابدأ بالاختبار، ثم امتلك الكتاب مع نتيجتك</h2>
+          <p>الاختبار هو الباب الأول، والكتاب هو الدليل العملي الذي يشرح لك كيف تفهم نفسك والآخرين في الحياة اليومية.</p>
+        </div>
+
+        <div class="pricing">
+          <div class="price-card">
+            <h3>التجربة المجانية</h3>
+            <div class="price">0 ر.س</div>
+            <p>مناسبة لمن يريد تجربة الاختبار ورؤية النتيجة المختصرة قبل شراء الكتاب.</p>
+            <ul>
+              <li>اختبار الشخصيات السبعة</li>
+              <li>نتيجة مختصرة فورية</li>
+              <li>نقطة قوة وتحدي ونصيحة</li>
+              <li>رابط للانتقال إلى الكتاب بعد النتيجة</li>
+            </ul>
+            <a class="btn btn-secondary" href="#quiz" data-track="Lead" data-content="free_test_plan">ابدأ الاختبار المجاني</a>
+          </div>
+
+          <div class="price-card highlight">
+            <span class="tag">الخيار الأساسي</span>
+            <h3>الكتاب الرقمي + الاختبار</h3>
+            <div class="price">36 ر.س <span class="old">99 ر.س</span></div>
+            <p>أفضل بداية لمن يريد فهم نتيجته، ثم فهم الشخصيات السبعة بطريقة عملية.</p>
+            <ul>
+              <li>الكتاب الرقمي الكامل</li>
+              <li>اختبار الشخصيات السبعة</li>
+              <li>نتيجة مختصرة مرتبطة بالكتاب</li>
+              <li>أمثلة في الزواج والعمل والعائلة</li>
+              <li>طرق النقاش والإقناع لكل شخصية</li>
+            </ul>
+            <a class="btn btn-primary checkout-btn" href="#" data-product="digital_book_with_test" data-price="36">اشتر الكتاب مع الاختبار</a>
+          </div>
+
+          <div class="price-card">
+            <h3>الكتاب + الاختبار + التقرير</h3>
+            <div class="price">39 ر.س <span class="old">149 ر.س</span></div>
+            <p>لمن يريد تجربة أعمق تشمل الكتاب، الاختبار، وتقريرًا شخصيًا يشرح النتيجة بتفصيل أكبر.</p>
+            <ul>
+              <li>الكتاب الرقمي الكامل</li>
+              <li>اختبار الشخصيات السبعة</li>
+              <li>تقرير شخصي موسّع</li>
+              <li>تحليل الشخصية في العلاقات والعمل</li>
+              <li>خطوات تطوير عملية حسب النتيجة</li>
+            </ul>
+            <a class="btn btn-secondary checkout-btn" href="#" data-product="book_test_full_report" data-price="39">اشتر الباقة الكاملة</a>
+          </div>
+        </div>
+
+        <div class="dev-note">
+          للمبرمج: أزرار الشراء الحالية تجريبية. عند الضغط يتم إطلاق InitiateCheckout. بعد نجاح الدفع فقط يتم إطلاق Purchase حسب الباقة المختارة.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="section-title">
+          <h2>أسئلة شائعة</h2>
+          <p>إجابات مختصرة تساعد الزائر على اتخاذ قراره بدون ضغط مباشر.</p>
+        </div>
+
+        <div class="faq">
+          <details open>
+            <summary>هل الاختبار تشخيص نفسي؟</summary>
+            <p>لا. الاختبار أداة فهم ذاتي وتطوير تواصل، وليس تشخيصًا طبيًا أو نفسيًا.</p>
+          </details>
+          <details>
+            <summary>هل النتيجة تصنفني في قالب واحد؟</summary>
+            <p>لا. النتيجة تعطيك الشخصية الأقرب لطريقتك المعتادة، وقد يظهر لديك نمط ثانوي في مواقف معينة.</p>
+          </details>
+          <details>
+            <summary>ما الفرق بين الاختبار والكتاب؟</summary>
+            <p>الاختبار يعطيك بداية مختصرة. الكتاب يشرح الشخصيات السبعة وكيف تتعامل معها في مواقف الحياة اليومية.</p>
+          </details>
+          <details>
+            <summary>هل يناسب الكتاب العلاقات والعمل؟</summary>
+            <p>نعم. الكتاب يربط الشخصيات بمواقف الزواج، العمل، الأصدقاء، العائلة، النقاش، الإقناع، واتخاذ القرار.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-grid">
+      <div>© <span id="year"></span> اعرف شخصيتك. جميع الحقوق محفوظة.</div>
+      <div>اختبار مجاني، كتاب تطبيقي، تقرير شخصي اختياري.</div>
+    </div>
+  </footer>
+
+  <script>
+    const pixelEvent = (eventName, params = {}) => {
+      console.log("Pixel Event:", eventName, params);
+      if (window.SAMI_PIXEL_ENABLED && typeof fbq === "function") {
+        const standardEvents = ["PageView","ViewContent","Lead","CompleteRegistration","InitiateCheckout","Purchase"];
+        if (standardEvents.includes(eventName)) {
+          fbq("track", eventName, params);
+        } else {
+          fbq("trackCustom", eventName, params);
+        }
+      }
+    };
+
+    document.querySelectorAll("[data-track]").forEach(el => {
+      el.addEventListener("click", () => {
+        pixelEvent(el.dataset.track, {content_name: el.dataset.content || "site_click"});
+      });
+    });
+
+    const types = {
+      hazim: {
+        name:"الشخصية الحازمة",
+        desc:"تميل للوضوح والحسم، وتحب أن تكون الأمور مباشرة بلا لف ودوران. قوتك في اتخاذ القرار، وتحديك أن لا يصل وضوحك للآخرين كقسوة.",
+        strength:"الحسم والقيادة وتحويل الفوضى إلى قرار.",
+        challenge:"قد تتسرع في الحكم أو تبدو جافًا دون أن تقصد.",
+        tip:"قبل القرار، أضف جملة تقدير قصيرة. الوضوح مع التقدير أقوى من الوضوح وحده."
+      },
+      modaqqiq: {
+        name:"الشخصية المدققة",
+        desc:"تنتبه للتفاصيل وتبحث عن الثغرات قبل أن تتحمس. قوتك في حماية القرارات من التسرع، وتحديك أن لا يتحول الحرص إلى قلق زائد.",
+        strength:"دقة الملاحظة، الحذر، التخطيط، وكشف المخاطر.",
+        challenge:"قد تغرق في التفاصيل أو تتأخر في الثقة بالآخرين.",
+        tip:"اسأل عن أهم ثلاثة مخاطر فقط، ثم قرر الخطوة التالية بدل انتظار اكتمال الصورة بالكامل."
+      },
+      hadi: {
+        name:"الشخصية الهادئة",
+        desc:"تميل للاتزان وتجنب الصدام، وتحب أن يبقى الجو مستقرًا. قوتك في الاحتواء، وتحديك أن لا تسكت حتى يتراكم داخلك التعب.",
+        strength:"التحمل، الاستماع، التعاون، وتهدئة الأجواء.",
+        challenge:"قد تقول نعم وأنت لا تستطيع، أو تؤجل الرفض حتى تتعب.",
+        tip:"تعلّم جملة رفض لطيفة وواضحة، مثل: أقدر طلبك، لكن لا أستطيع الآن."
+      },
+      hakeem: {
+        name:"الشخصية الحكيمة",
+        desc:"تحاول فهم جميع الأطراف قبل الحكم، وتبحث عن حل يحفظ المعنى والعلاقة. قوتك في جمع الناس، وتحديك أن لا تتأخر في الحسم.",
+        strength:"فهم الصورة الكاملة وجمع الآراء في حل متوازن.",
+        challenge:"قد تتردد لأنك ترى كل زاوية وكل احتمال.",
+        tip:"حدد وقتًا للتفكير، ثم أعلن قرارًا واضحًا يحفظ أهم قيمة في الموقف."
+      },
+      afawi: {
+        name:"الشخصية العفوية",
+        desc:"صادق وبسيط وقريب من الناس. تقول ما في قلبك بسرعة، وقوتك في نقاء النية، وتحديك أن الكلمة الطيبة قد تصل أحيانًا بطريقة جارحة.",
+        strength:"الصدق، البساطة، حسن الظن، وسرعة التسامح.",
+        challenge:"قد تمزح أو تتكلم بعفوية في وقت لا يناسب الطرف الآخر.",
+        tip:"قبل المزاح أو التعليق، اسأل نفسك: هل هذا الكلام مناسب أمام الناس أم الأفضل أقوله على انفراد؟"
+      },
+      monfateh: {
+        name:"الشخصية المنفتحة",
+        desc:"تحب التفاعل والحضور وتعرف كيف تصنع جوًا جميلًا حولك. قوتك في التأثير الاجتماعي، وتحديك أن لا تربط قيمتك بتفاعل الآخرين.",
+        strength:"الحضور، التأثير، الذكاء الاجتماعي، وتحريك الأجواء.",
+        challenge:"قد تتأثر عندما لا تجد التفاعل أو التقدير المتوقع.",
+        tip:"استمتع بحضورك، لكن لا تجعل صمت الآخرين حكمًا على قيمتك."
+      },
+      mofakker: {
+        name:"الشخصية المفكرة",
+        desc:"لا تستعجل القبول أو الرفض، بل تحب أن تفهم الطريق قبل أن تمشي فيه. قوتك في التحليل، وتحديك أن لا يقرأ الناس صمتك كبرود.",
+        strength:"التحليل، العمق، ربط الأفكار، وحماية القرار من الاندفاع.",
+        challenge:"قد تسكت طويلًا فيظن الآخرون أنك غير مهتم.",
+        tip:"قل: أحتاج أفكر قليلًا، حتى يعرف الآخرون أن صمتك تفكير وليس رفضًا."
+      }
+    };
+
+    const questions = [
+      {
+        q:"إذا انتقدك شخص أمام الآخرين، ما رد فعلك الأقرب؟",
+        a:[
+          ["أرد بوضوح وأوقفه عند حده.", "hazim"],
+          ["أراجع كلامه وأبحث: هل عنده نقطة صحيحة؟", "modaqqiq"],
+          ["أسكت في اللحظة حتى لا يكبر الموقف.", "hadi"],
+          ["أحاول أفهم قصده ثم أختار ردًا يحفظ الموقف.", "hakeem"],
+          ["أقول له بعفوية: ليه كذا؟ يمكن تضايقت.", "afawi"],
+          ["أخفف الجو بكلمة وأحاول أستعيد حضوري.", "monfateh"],
+          ["أراقب الموقف وأرد لاحقًا بعد ما أرتب أفكاري.", "mofakker"]
+        ]
+      },
+      {
+        q:"عندما يعرض عليك شخص فكرة جديدة، ماذا تفعل غالبًا؟",
+        a:[
+          ["أسأل عن القرار المطلوب والنتيجة المتوقعة.", "hazim"],
+          ["أطلب التفاصيل والمخاطر والخطوات.", "modaqqiq"],
+          ["أسمع بهدوء ولا أعترض بسرعة.", "hadi"],
+          ["أوازن بين الفكرة والناس المتأثرين بها.", "hakeem"],
+          ["أتحمس إذا حسّيتها جميلة وقريبة من القلب.", "afawi"],
+          ["أفكر كيف نقدمها للناس ونخليهم يتفاعلون.", "monfateh"],
+          ["أحللها من الداخل: هل منطقها صحيح؟", "mofakker"]
+        ]
+      },
+      {
+        q:"في اجتماع عائلي، حصل خلاف بسيط. كيف تميل للتصرف؟",
+        a:[
+          ["أحسم الموضوع حتى لا يطول.", "hazim"],
+          ["أوضح النقاط التي سببت الخلاف.", "modaqqiq"],
+          ["أحاول ألا أزيد التوتر وأبقى هادئًا.", "hadi"],
+          ["أقرب وجهات النظر وأبحث عن حل يرضي الجميع.", "hakeem"],
+          ["أقول كلمة بسيطة من القلب تكسر الحدة.", "afawi"],
+          ["أغير الجو وأعيد الضحك للمجلس.", "monfateh"],
+          ["أسكت وأفهم سبب الخلاف قبل أن أتكلم.", "mofakker"]
+        ]
+      },
+      {
+        q:"إذا طلب منك أحدهم قرارًا سريعًا، ماذا يحدث داخلك؟",
+        a:[
+          ["أفضل القرار الواضح الآن بدل التردد.", "hazim"],
+          ["أتضايق إذا لم تكن التفاصيل كاملة.", "modaqqiq"],
+          ["أوافق أحيانًا حتى لا أحرج الطرف الآخر.", "hadi"],
+          ["أحتاج لحظة أوازن فيها الأثر على الجميع.", "hakeem"],
+          ["أقرر حسب شعوري وارتياحي للموقف.", "afawi"],
+          ["أقرر إذا شعرت أن الفكرة جميلة ومؤثرة.", "monfateh"],
+          ["أحتاج وقتًا أفكر، لا أحب القرار تحت الضغط.", "mofakker"]
+        ]
+      },
+      {
+        q:"عندما يخطئ شخص قريب منك، ما طريقتك الأقرب؟",
+        a:[
+          ["أواجهه مباشرة لأن الخطأ يحتاج وضوحًا.", "hazim"],
+          ["أشرح له أين الخطأ بالتحديد.", "modaqqiq"],
+          ["أتردد في مواجهته حتى لا أجرحه.", "hadi"],
+          ["أختار وقتًا مناسبًا وأتكلم بطريقة تحفظ العلاقة.", "hakeem"],
+          ["أعاتبه من قلبي ثم أصفى بسرعة.", "afawi"],
+          ["أستخدم أسلوبًا لطيفًا حتى يتقبلني.", "monfateh"],
+          ["أحلل سبب الخطأ قبل أن أحكم عليه.", "mofakker"]
+        ]
+      },
+      {
+        q:"ما أكثر شيء يضايقك في التعامل مع الناس؟",
+        a:[
+          ["التردد وعدم الوضوح.", "hazim"],
+          ["العشوائية وقلة التفاصيل.", "modaqqiq"],
+          ["الصدام ورفع الصوت.", "hadi"],
+          ["الظلم وسوء الفهم.", "hakeem"],
+          ["سوء الظن وتفسير الكلام بقسوة.", "afawi"],
+          ["التجاهل وعدم التفاعل.", "monfateh"],
+          ["السطحية والقفز للنتائج.", "mofakker"]
+        ]
+      },
+      {
+        q:"عندما تدخل مشروعًا جديدًا، ما أول ما تبحث عنه؟",
+        a:[
+          ["الهدف، المسؤوليات، والقرار النهائي.", "hazim"],
+          ["الأرقام، المخاطر، الخطة، والضمانات.", "modaqqiq"],
+          ["هل أقدر أشارك بدون ضغط كبير؟", "hadi"],
+          ["هل المشروع متوازن ومفيد للناس؟", "hakeem"],
+          ["هل أشعر أنه قريب مني وممتع؟", "afawi"],
+          ["هل له قصة وحضور وفرصة انتشار؟", "monfateh"],
+          ["هل الفكرة منطقية وقابلة للبناء؟", "mofakker"]
+        ]
+      }
+    ];
+
+    let current = 0;
+    let answersState = new Array(questions.length).fill(null);
+    let halfProgressSent = false;
+    const questionTitle = document.getElementById("questionTitle");
+    const answersEl = document.getElementById("answers");
+    const progressBar = document.getElementById("progressBar");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartQuiz");
+    const resultBox = document.getElementById("resultBox");
+
+    function renderQuestion(){
+      resultBox.classList.remove("show");
+      const item = questions[current];
+      questionTitle.textContent = `${current + 1}. ${item.q}`;
+      answersEl.innerHTML = "";
+      item.a.forEach(([text, type], index) => {
+        const btn = document.createElement("button");
+        btn.className = "answer" + (answersState[current]?.index === index ? " selected" : "");
+        btn.type = "button";
+        btn.textContent = text;
+        btn.addEventListener("click", () => {
+          answersState[current] = {index, type};
+          document.querySelectorAll(".answer").forEach(x => x.classList.remove("selected"));
+          btn.classList.add("selected");
+          pixelEvent("QuestionAnswered", {question_number: current + 1, selected_type: type});
+        });
+        answersEl.appendChild(btn);
+      });
+      progressBar.style.width = `${(current / questions.length) * 100}%`;
+      prevBtn.style.visibility = current === 0 ? "hidden" : "visible";
+      nextBtn.textContent = current === questions.length - 1 ? "عرض النتيجة" : "التالي";
+    }
+
+    function showResult(){
+      const scores = {};
+      Object.keys(types).forEach(k => scores[k] = 0);
+      answersState.forEach(ans => {
+        if(ans) scores[ans.type] += 1;
+      });
+      const winner = Object.entries(scores).sort((a,b) => b[1] - a[1])[0][0];
+      const result = types[winner];
+      document.getElementById("resultName").textContent = result.name;
+      document.getElementById("resultDesc").textContent = result.desc;
+      document.getElementById("resultStrength").textContent = result.strength;
+      document.getElementById("resultChallenge").textContent = result.challenge;
+      document.getElementById("resultTip").textContent = result.tip;
+      progressBar.style.width = "100%";
+      resultBox.classList.add("show");
+      resultBox.scrollIntoView({behavior:"smooth", block:"center"});
+      pixelEvent("CompleteRegistration", {content_name:"personality_test_completed", result_type:winner});
+      pixelEvent("ResultViewed", {result_type:winner});
+    }
+
+    nextBtn.addEventListener("click", () => {
+      if(!answersState[current]){
+        alert("اختر الإجابة الأقرب لك قبل الانتقال.");
+        return;
+      }
+      if(current >= Math.floor(questions.length / 2) && !halfProgressSent){
+        halfProgressSent = true;
+        pixelEvent("TestProgress", {progress:"50_percent"});
+      }
+      if(current < questions.length - 1){
+        current++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if(current > 0){
+        current--;
+        renderQuestion();
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      current = 0;
+      answersState = new Array(questions.length).fill(null);
+      halfProgressSent = false;
+      renderQuestion();
+      pixelEvent("StartTest", {source:"restart"});
+    });
+
+    document.querySelectorAll(".checkout-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const product = btn.dataset.product;
+        const price = Number(btn.dataset.price || 0);
+        pixelEvent("InitiateCheckout", {
+          content_name: product,
+          value: price,
+          currency: "SAR"
+        });
+        alert("هذا زر تجريبي للمبرمج. يتم ربطه لاحقًا ببوابة الدفع. تم إطلاق حدث InitiateCheckout للكتاب مع الاختبار.");
+      });
+    });
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    renderQuestion();
+    pixelEvent("ViewContent", {content_name:"home_loaded"});
+  </script>
+
+  <!--
+  ============================================================
+  تعليمات مهمة للمبرمج
+  ============================================================
+  1. ركب Google Tag Manager على كل صفحات الموقع.
+  2. ركب Meta Pixel من GTM أو فعّل الكود الموجود في head.
+  3. الأحداث الموجودة حاليًا:
+     PageView
+     ViewContent
+     Lead
+     StartTest
+     QuestionAnswered
+     TestProgress
+     CompleteRegistration
+     ResultViewed
+     InitiateCheckout
+     Purchase, يتم إطلاقه فقط في صفحة نجاح الدفع بعد الدفع الحقيقي.
+  4. لا تطلق Purchase عند الضغط على زر الشراء.
+  5. اربط أزرار checkout ببوابة الدفع.
+  6. بعد نجاح الدفع، أنشئ صفحة success.html أو مسار /success وأطلق:
+     pixelEvent("Purchase", {value: 10, currency: "SAR", content_name: "digital_book"});
+  7. يفضل إرسال نتيجة الاختبار إلى السيرفر إذا كان سيتم إنشاء تقرير كامل مدفوع.
+  -->
+
+  <!--
+  تم استبدال الغلاف بالصورة الجديدة وحفظه كـ PNG محسّن.
+  نسخة المعاينة index-embedded-cover.html تحتوي الصورة مدمجة داخل HTML لتقليل مشكلة عدم ظهور الصورة أو ضغط الملفات.
+  الأسعار بعد الخصم:
+  الكتاب الرقمي + الاختبار = 36 ر.س بدل 99 ر.س
+  الكتاب + الاختبار + التقرير = 39 ر.س بدل 149 ر.س
+  -->
+
+</body>
+</html>

@@ -55,7 +55,8 @@ Thumbs.db
 *~
 
 # Project specific
-/scripts/temp/
+.scripts
+.temp
 /public/uploads/
 *.sql.bak
 .vercel

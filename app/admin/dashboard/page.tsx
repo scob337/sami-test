@@ -51,7 +51,7 @@ export default function AdminDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
-        <LoadingSpinner size="lg" />
+        <LoadingSpinner size="md" />
       </div>
     )
   }
@@ -67,26 +67,26 @@ export default function AdminDashboard() {
       {/* Title Area */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">لوحة التحكم</h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium">مرحباً بك في نظام إدارة الاختبارات الشخصية</p>
+          <h2 className="text-2xl font-black text-foreground tracking-tight">لوحة التحكم</h2>
+          <p className="text-muted-foreground text-sm mt-1 font-medium">مرحباً بك في نظام إدارة الاختبارات الشخصية</p>
         </div>
       </div>
 
       {/* Row 1: Real Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'المستخدمين', value: stats?.users || 0, icon: Users, color: '#ff9800', bg: 'bg-orange-50' },
-          { label: 'الكتب', value: stats?.books || 0, icon: BookOpen, color: '#03a9f4', bg: 'bg-blue-50' },
-          { label: 'الاختبارات', value: stats?.tests || 0, icon: ClipboardList, color: '#8bc34a', bg: 'bg-green-50' },
-          { label: 'المبيعات', value: `£${stats?.sales || 0}`, icon: CreditCard, color: '#e91e63', bg: 'bg-pink-50' },
+          { label: 'المستخدمين', value: stats?.users || 0, icon: Users, color: 'text-primary', bg: 'bg-primary/10' },
+          { label: 'الكتب', value: stats?.books || 0, icon: BookOpen, color: 'text-[#674611]', bg: 'bg-[#fff4df]' },
+          { label: 'الاختبارات', value: stats?.tests || 0, icon: ClipboardList, color: 'text-[var(--brand-green)]', bg: 'bg-[var(--brand-green)]/10' },
+          { label: 'المبيعات', value: `${stats?.sales || 0} ر.س`, icon: CreditCard, color: 'text-accent', bg: 'bg-accent/15' },
         ].map((card) => (
-          <div key={card.label} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-5 hover:shadow-md transition-shadow group">
-            <div className={`w-14 h-14 rounded-2xl ${card.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-              <card.icon className="w-7 h-7" style={{ color: card.color }} />
+          <div key={card.label} className="bg-card p-6 rounded-2xl shadow-sm border border-border flex items-center gap-5 hover:shadow-md transition-shadow group">
+            <div className={cn('w-14 h-14 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform', card.bg)}>
+              <card.icon className={cn('w-7 h-7', card.color)} />
             </div>
             <div>
-              <div className="text-sm font-bold text-slate-400 uppercase tracking-wider">{card.label}</div>
-              <div className="text-3xl font-black text-slate-800">{card.value}</div>
+              <div className="text-sm font-bold text-muted-foreground uppercase tracking-wider">{card.label}</div>
+              <div className="text-3xl font-black text-foreground">{card.value}</div>
             </div>
           </div>
         ))}
@@ -120,12 +120,12 @@ export default function AdminDashboard() {
       </div>
 
       {/* تصفح الموقع العام — للأدمن فقط عند الحاجة */}
-      <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+      <div className="bg-card p-6 rounded-3xl shadow-sm border border-border">
         <div className="flex items-center gap-2 mb-4">
-          <ExternalLink className="w-5 h-5 text-[#ff5722]" />
-          <h3 className="text-lg font-black text-slate-800">تصفح الموقع العام</h3>
+          <ExternalLink className="w-5 h-5 text-primary" />
+          <h3 className="text-lg font-black text-foreground">تصفح الموقع العام</h3>
         </div>
-        <p className="text-sm text-slate-500 font-medium mb-4">
+        <p className="text-sm text-muted-foreground font-medium mb-4">
           صفحات الزوار (الهبوط، الكتب، الاختبارات) — للمعاينة فقط
         </p>
         <div className="flex flex-wrap gap-2">
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-50 text-slate-700 border border-slate-200 hover:border-[#ff5722] hover:text-[#ff5722] transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-bold bg-muted/30 text-foreground border border-border hover:border-primary hover:text-primary transition-colors"
             >
               {link.label}
               <ExternalLink className="w-3.5 h-3.5 opacity-60" />
@@ -153,10 +153,10 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Dynamic Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+        <div className="lg:col-span-2 bg-card p-8 rounded-3xl shadow-sm border border-border">
           <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-black text-slate-800">إحصائيات المستخدمين الجدد</h3>
-            <span className="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase tracking-widest">آخر 6 أشهر</span>
+            <h3 className="text-xl font-black text-foreground">إحصائيات المستخدمين الجدد</h3>
+            <span className="text-xs font-bold text-muted-foreground bg-muted/30 px-3 py-1 rounded-full uppercase tracking-widest">آخر 6 أشهر</span>
           </div>
           <div className="h-[350px] w-full" dir="ltr">
             <ResponsiveContainer width="100%" height="100%">
@@ -198,63 +198,63 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Activity / Users */}
-        <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden">
+        <Card className="border border-border shadow-sm bg-card rounded-[24px] overflow-hidden">
         <CardContent className="p-6">
-          <h3 className="text-sm font-bold text-[#64748b] dark:text-slate-400 mb-4">آخر المستخدمين المنضمين</h3>
+          <h3 className="text-sm font-bold text-muted-foreground mb-4">آخر المستخدمين المنضمين</h3>
           <div className="space-y-4">
             {recentUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-700">
+              <div key={user.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/30 transition-colors border border-transparent hover:border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#15283c] flex items-center justify-center text-white text-xs font-bold">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
                     {user.name?.[0] || 'U'}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[#1e293b] dark:text-slate-200">{user.name}</p>
-                    <p className="text-xs text-[#64748b] dark:text-slate-400">{user.email}</p>
+                    <p className="text-sm font-bold text-foreground">{user.name}</p>
+                    <p className="text-xs text-muted-foreground">{user.email}</p>
                   </div>
                 </div>
                 <div className="text-left">
-                  <p className="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider">{new Date(user.createdAt).toLocaleDateString('ar-SA')}</p>
-                  <p className="text-xs font-bold text-[#ff5722]">{user._count.attempts} محاولات</p>
+                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">{new Date(user.createdAt).toLocaleDateString('ar-SA')}</p>
+                  <p className="text-xs font-bold text-primary">{user._count.attempts} محاولات</p>
                 </div>
               </div>
             ))}
           </div>
-          <Button variant="ghost" className="w-full mt-6 text-[#15283c] dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl" onClick={() => (window.location.href = '/admin/users')}>
+          <Button variant="ghost" className="w-full mt-6 text-foreground font-bold hover:bg-muted/50 rounded-xl" onClick={() => (window.location.href = '/admin/users')}>
             عرض جميع المستخدمين
           </Button>
         </CardContent>
       </Card>
       
-      <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden">
-        <CardHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
+      <Card className="border border-border shadow-sm bg-card rounded-[24px] overflow-hidden">
+        <CardHeader className="border-b border-border pb-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-950/30 flex items-center justify-center">
-              <Plus className="w-4 h-4 text-[#ff5722]" />
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-primary" />
             </div>
-            <h2 className="text-lg font-black text-[#1e293b] dark:text-slate-200">إجراءات سريعة</h2>
+            <h2 className="text-lg font-black text-foreground">إجراءات سريعة</h2>
           </div>
         </CardHeader>
         <CardContent className="p-6 grid grid-cols-2 gap-4">
           <Button 
             variant="outline" 
-            className="h-24 flex flex-col gap-2 rounded-2xl border-slate-100 dark:border-slate-800 hover:border-[#ff5722] hover:bg-orange-50/50 dark:hover:bg-orange-950/10 group transition-all"
+            className="h-24 flex flex-col gap-2 rounded-2xl border-border hover:border-primary hover:bg-primary/5 group transition-all"
             onClick={() => (window.location.href = '/admin/tests')}
           >
-            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-[#ff5722] group-hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-all">
               <Plus className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold text-[#64748b] group-hover:text-[#ff5722]">اختبار جديد</span>
+            <span className="text-xs font-bold text-muted-foreground group-hover:text-primary">اختبار جديد</span>
           </Button>
           <Button 
             variant="outline" 
-            className="h-24 flex flex-col gap-2 rounded-2xl border-slate-100 dark:border-slate-800 hover:border-[#15283c] hover:bg-slate-50 dark:hover:bg-slate-800/50 group transition-all"
+            className="h-24 flex flex-col gap-2 rounded-2xl border-border hover:border-accent hover:bg-accent/5 group transition-all"
             onClick={() => (window.location.href = '/admin/books')}
           >
-            <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-[#15283c] group-hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-accent group-hover:text-accent-foreground transition-all">
               <Plus className="w-5 h-5" />
             </div>
-            <span className="text-xs font-bold text-[#64748b] group-hover:text-[#15283c]">كتاب جديد</span>
+            <span className="text-xs font-bold text-muted-foreground group-hover:text-accent">كتاب جديد</span>
           </Button>
         </CardContent>
       </Card>
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
   )
 }
 
-function StatCard({ title, value, icon: Icon, color, trend }: anyا) {
+function StatCard({ title, value, icon: Icon, color, trend }: any) {
   return (
     <Card className="border-none shadow-sm bg-white dark:bg-slate-900 rounded-[24px] overflow-hidden group hover:shadow-md transition-all">
       <CardContent className="p-6">

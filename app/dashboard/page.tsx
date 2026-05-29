@@ -138,7 +138,7 @@ export default function DeepNavyDashboard() {
   if (loading || (!authUser && !isLoadingData)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" className="text-primary" />
+        <LoadingSpinner size="md" className="text-primary" />
       </div>
     )
   }
@@ -146,7 +146,7 @@ export default function DeepNavyDashboard() {
   if (isLoadingData) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <LoadingSpinner size="lg" className="text-primary" />
+        <LoadingSpinner size="md" className="text-primary" />
       </div>
     )
   }

@@ -58,6 +58,8 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
   const [isSaving, setIsSaving] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const coverImageInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingCover, setIsUploadingCover] = useState(false)
   const { addUpload, uploads } = useUploadStore()
   const [currentUploadId, setCurrentUploadId] = useState<string | null>(null)
   const activeUpload = currentUploadId ? uploads[currentUploadId] : null
@@ -94,6 +96,31 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
       setFilePdf(activeUpload.url)
     }
   }, [activeUpload?.status, activeUpload?.url])
+
+  const handleCoverImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      toast.error('يرجى اختيار ملف صورة صالح')
+      return
+    }
+    try {
+      setIsUploadingCover(true)
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('bucket', 'covers')
+      const res = await fetch('/api/user/upload', { method: 'POST', body: formData })
+      if (!res.ok) throw new Error('Upload failed')
+      const data = await res.json()
+      setHeroImage(data.url)
+      toast.success('تم رفع الغلاف بنجاح')
+    } catch {
+      toast.error('فشل رفع الغلاف')
+    } finally {
+      setIsUploadingCover(false)
+      if (coverImageInputRef.current) coverImageInputRef.current.value = ''
+    }
+  }
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -205,6 +232,64 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6">
+          {/* Cover Image Upload */}
+          <div className="space-y-3">
+            <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">غلاف الكتاب (صورة العرض)</Label>
+            <input
+              type="file"
+              ref={coverImageInputRef}
+              onChange={handleCoverImageChange}
+              accept="image/*"
+              className="hidden"
+            />
+            <div className="flex items-center gap-5 p-5 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-slate-100 dark:border-slate-700/50">
+              {/* Preview */}
+              <div className="w-20 h-28 rounded-xl bg-white dark:bg-slate-900 shadow border border-border flex items-center justify-center overflow-hidden shrink-0">
+                {heroImage ? (
+                  <img src={heroImage} alt="غلاف" className="w-full h-full object-cover" />
+                ) : (
+                  <Book className="w-8 h-8 text-slate-300" />
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                  {heroImage ? 'تم رفع الغلاف ✓' : 'لم يتم رفع غلاف بعد'}
+                </p>
+                <p className="text-xs text-slate-400">JPG, PNG, WebP. يُعرض في بطاقة الكتاب بلوحة التحكم والمتجر.</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={() => coverImageInputRef.current?.click()}
+                    disabled={isUploadingCover}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 text-sm font-black text-slate-600 dark:text-slate-300 hover:border-[#ff5722] hover:text-[#ff5722] transition-all disabled:opacity-50"
+                  >
+                    {isUploadingCover ? (
+                      <>
+                        <LoadingSpinner size="sm" />
+                        <span>جاري الرفع...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4" />
+                        <span>{heroImage ? 'تغيير الغلاف' : 'رفع غلاف'}</span>
+                      </>
+                    )}
+                  </button>
+                  {heroImage && (
+                    <button
+                      type="button"
+                      onClick={() => setHeroImage('')}
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-destructive transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      حذف
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-2.5">
             <Label className="text-xs font-black text-slate-400 uppercase tracking-[2px] mr-2">عنوان الكتاب *</Label>
             <div className="relative group">

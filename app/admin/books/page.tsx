@@ -25,6 +25,7 @@ interface Book {
   title: string
   description?: string | null
   filePdf: string
+  heroImage?: string | null
   price: number
   isActive: boolean
   createdAt: string
@@ -99,7 +100,7 @@ export default function BooksPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-24"><LoadingSpinner size="lg" /></div>
+        <div className="flex items-center justify-center py-24"><LoadingSpinner size="md" /></div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((book) => (
@@ -109,10 +110,18 @@ export default function BooksPage() {
             >
               {/* Book Cover Area */}
               <div className="relative h-48 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center overflow-hidden border-b border-border/30">
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-blue-500/5 to-blue-500/15" />
-                <div className="w-24 h-32 rounded-xl bg-white dark:bg-slate-900 shadow-lg border border-border flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-700" />
-                </div>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/5 to-primary/15" />
+                {book.heroImage ? (
+                  <img
+                    src={book.heroImage}
+                    alt={book.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-24 h-32 rounded-xl bg-white dark:bg-slate-900 shadow-lg border border-border flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <BookOpen className="w-10 h-10 text-slate-300 dark:text-slate-700" />
+                  </div>
+                )}
                 <div className="absolute top-3 right-3">
                   <Badge
                     variant="secondary"

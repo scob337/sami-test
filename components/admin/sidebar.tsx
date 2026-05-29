@@ -47,7 +47,7 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
   }
 
   return (
-    <aside className={cn("w-72 bg-[#15283c] text-white h-full flex flex-col z-50", className)} dir="rtl">
+    <aside className={cn("w-72 bg-accent/10  text-[#0000] h-full flex flex-col z-50", className)} dir="rtl">
       {/* Profile Section */}
       {/* <div className="p-6 bg-[#1a334d] mb-6 border-b border-white/5">
         <div className="flex items-center gap-4">
@@ -75,7 +75,7 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
         {menuItems.map((item) => {
           const isActive = pathname === item.href
           const isSupport = item.href === '/admin/support'
-          
+
           return (
             <Link
               key={item.href}
@@ -85,7 +85,7 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
                 "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
                 isActive
                   ? "bg-[#ff5722] text-white shadow-xl shadow-orange-500/20"
-                  : "text-[#99abb4] hover:bg-[#214162] hover:text-white"
+                  : "text-black hover:bg-[#ff5722] hover:text-white"
               )}
             >
               <item.icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-white" : "text-[#ffa726]")} />
@@ -96,9 +96,9 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
                 </span>
               )}
               {isActive && (
-                <motion.div 
+                <motion.div
                   layoutId="active-nav-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full" 
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full"
                 />
               )}
             </Link>
@@ -107,12 +107,12 @@ export function Sidebar({ className, onItemClick }: { className?: string; onItem
       </nav>
 
       <div className="p-6 mt-auto border-t border-white/5">
-        <button 
+        <button
           onClick={handleLogout}
-          className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-[#99abb4] hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border-2 border-transparent transition-all duration-300 group"
+          className="flex items-center gap-4 px-5 py-4 w-full rounded-2xl text-[#99abb4] text-white bg-red-500/10 order-red-500/20 border-2 border-transparent transition-all duration-300 group"
         >
-          <LogOut className="w-5 h-5 text-[#ff9800] group-hover:text-red-500" />
-          <span className="text-[15px] font-black tracking-tight group-hover:text-red-500">خروج آمن</span>
+          <LogOut className="w-5 h-5 text-[#ff9800] text-red-500" />
+          <span className="text-[15px] font-black tracking-tight text-red-500">خروج آمن</span>
         </button>
       </div>
     </aside>

@@ -14,7 +14,7 @@ export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <header className="h-[75px] bg-[#1d3550] flex items-center justify-between sticky top-0 z-40 shadow-md">
+    <header className="h-[75px] bg-accent/10  flex items-center justify-between sticky top-0 z-40 shadow-md">
       {/* Left Area: Toggle & Logo */}
       <div className="flex items-center h-full">
         <button

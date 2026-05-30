@@ -189,6 +189,8 @@ function CheckoutContent() {
           code: codeToUse,
           userId: user?.id,
           courseId: type === 'course' ? id : null,
+          bookId: type === 'book' || type === 'package' || type === 'test' ? (bookId || id) : null,
+          testId: type === 'test' ? id : selectedTestId || null,
         }),
       })
       const data = await res.json()
@@ -419,6 +421,6 @@ function buildPackageDescription(pkg: BookPackage): string {
   const parts: string[] = []
   if (pkg.includesBook) parts.push('الكتاب')
   if (pkg.includesTest) parts.push('الاختبار')
-  if (pkg.includesReport) parts.push('التقرير المفصل')
+  if (pkg.includesReport) parts.push('تقرير شخصيتك المفصل')
   return parts.length > 0 ? `تشمل: ${parts.join(' + ')}` : pkg.name
 }

@@ -22,14 +22,15 @@ export async function POST(req: Request) {
     if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const body = await req.json()
-    const { code, discount, type, expiresAt, isActive, courseId } = body
+    const { code, discount, type, expiresAt, isActive, courseId, bookId } = body
 
     const newCode = await (prisma as any).discountCode.create({
       data: {
-        code,
+        code: code.toUpperCase(),
         discount: parseFloat(discount),
         type: type || 'PERCENT',
         courseId: courseId ? parseInt(courseId) : null,
+        bookId: bookId ? parseInt(bookId) : null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         isActive: isActive ?? true
       }
@@ -37,6 +38,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(newCode)
   } catch (error) {
+    console.error('Error creating discount code:', error)
     return new NextResponse('Internal Error', { status: 500 })
   }
 }

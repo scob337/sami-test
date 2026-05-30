@@ -11,7 +11,12 @@ export async function GET(
     const isNumericId = /^\d+$/.test(id)
     const book = await (prisma as any).book.findFirst({
       where: isNumericId ? { id: parseInt(id) } : { slug: id },
-      include: { tests: true },
+      include: { 
+        tests: true,
+        discountCodes: {
+          orderBy: { createdAt: 'desc' }
+        }
+      },
     })
     if (!book) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -66,6 +71,7 @@ export async function PUT(
         ctaTitle,
         ctaDescription
       },
+      include: { discountCodes: true, tests: true }
     })
 
     return NextResponse.json(book)
@@ -73,6 +79,13 @@ export async function PUT(
     console.error('Error updating book:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return PUT(request, { params })
 }
 
 export async function DELETE(

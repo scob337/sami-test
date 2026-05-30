@@ -179,6 +179,31 @@ export function LandingPage({ book }: { book: LandingBook | null }) {
         </div>
       </section>
 
+      {/* Impact */}
+      <section id="impact" className="py-16 md:py-20 bg-[rgba(255,250,243,0.5)]">
+        <div className="container max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-8">
+            <h2 className="text-2xl md:text-4xl font-black mb-4">ماذا سيغير هذا في حياتك؟</h2>
+            <p className="text-muted-foreground font-bold text-lg leading-relaxed">
+              بعد قراءة الكتاب ستعرف:
+            </p>
+          </div>
+          <div className="grid gap-4 max-w-3xl mx-auto text-right">
+            {[
+              'كيف تتكلم مع الشخص الحساس دون أن تجرحه.',
+              'كيف تناقش الحازم دون صدام.',
+              'كيف تفهم الصامت دون أن تظلمه.',
+              'كيف تتعامل مع المدقق دون أن تتعب منه.',
+              'كيف تقرأ غضب الناس وصمتهم وردودهم بطريقة أعدل.',
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-border bg-white p-5 text-lg font-bold shadow-sm">
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* How */}
       <section id="how" className="py-16 md:py-20">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6">
@@ -245,7 +270,7 @@ export function LandingPage({ book }: { book: LandingBook | null }) {
                 ))}
               </ul>
               <Link href="#plans" className="btn-gold inline-flex">
-                احصل على الكتاب مع التقرير
+                احصل على الباقة الكاملة: الاختبار، التقرير، والكتاب
               </Link>
             </div>
           </div>
@@ -257,7 +282,7 @@ export function LandingPage({ book }: { book: LandingBook | null }) {
         <div className="container max-w-6xl mx-auto px-4 sm:px-6">
           <div className="rounded-[38px] border border-border bg-card p-8 md:p-10 text-center shadow-[var(--brand-shadow)]">
             <h2 className="text-xl md:text-3xl font-black leading-snug mb-4">
-              هذه ليست صفحة تبيع كتابًا فقط، هذه صفحة تبدأ بسؤال داخل الزائر.
+              هذا الكتاب لا يعطيك اسم شخصيتك فقط، بل يشرح لك كيف تظهر شخصيتك في بيتك، عملك، علاقاتك، وطريقة نقاشك.، هذه صفحة تبدأ بسؤال داخل الزائر.
             </h2>
             <p className="text-muted-foreground font-bold text-lg max-w-3xl mx-auto leading-relaxed">
               لماذا أفهم بعض الناس بسرعة، وأتعب مع آخرين؟ عندما يشعر الزائر أن السؤال يخصه، يصبح

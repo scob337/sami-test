@@ -36,7 +36,7 @@ export function buildPricingPlansFromBookPrices(input: {
   plans.push(
     {
       packageId: 'book-report',
-      name: 'الكتاب مع التقرير',
+      name: 'الباقة الكاملة: الاختبار، التقرير، والكتاب',
       price: bundlePrice,
       oldPrice: Math.round(bundlePrice * 1.75),
       features: [
@@ -54,7 +54,7 @@ export function buildPricingPlansFromBookPrices(input: {
     },
     {
       packageId: 'book-only',
-      name: 'الكتاب فقط',
+      name: 'كتاب الشخصيات السبعة فقط',
       price: bookOnly,
       oldPrice: Math.round(bookOnly * 1.35),
       features: [
@@ -73,7 +73,7 @@ export function buildPricingPlansFromBookPrices(input: {
   if (reportOnly > 0 && input.hasActiveTest !== false) {
     plans.splice(1, 0, {
       packageId: 'report-only',
-      name: 'التقرير المفصل',
+      name: 'تقرير شخصيتك المفصل' ,
       price: reportOnly,
       oldPrice: Math.round(reportOnly * 1.4),
       features: [

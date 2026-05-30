@@ -26,12 +26,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'كود الخصم غير مفعل' }, { status: 400 })
     }
 
+    // Check if code is restricted to a specific course
     if (discountCode.courseId) {
       if (!courseId) {
         return NextResponse.json({ error: 'كود الخصم هذا مخصص لكورس معين' }, { status: 400 })
       }
       if (parseInt(courseId) !== discountCode.courseId) {
         return NextResponse.json({ error: 'كود الخصم غير صالح لهذا الكورس' }, { status: 400 })
+      }
+    }
+
+    // Check if code is restricted to a specific book
+    if (discountCode.bookId) {
+      if (!bookId) {
+        return NextResponse.json({ error: 'كود الخصم هذا مخصص لكتاب معين' }, { status: 400 })
+      }
+      if (parseInt(bookId) !== discountCode.bookId) {
+        return NextResponse.json({ error: 'كود الخصم غير صالح لهذا الكتاب' }, { status: 400 })
       }
     }
 

@@ -6,7 +6,7 @@ import { fetcher } from '@/lib/fetcher'
 import { 
   Plus, MoreVertical, Edit, Trash2, BookOpen, 
   FileText, Download, Upload, Search, ShoppingBag,
-  CheckCircle2, XCircle
+  CheckCircle2, XCircle, Tag
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { BookFormModal } from '@/components/admin/book-form-modal'
 import { ConfirmDeleteDialog } from '@/components/admin/confirm-delete-dialog'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 interface Book {
   id: number
@@ -155,6 +156,14 @@ export default function BooksPage() {
                         className="flex items-center gap-2.5 cursor-pointer py-3 text-[#15283c] dark:text-slate-200 font-bold focus:bg-slate-50 dark:focus:bg-slate-800"
                       >
                         <Edit className="w-4 h-4 text-[#ff5722]" /> تعديل بيانات الكتاب
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link 
+                          href={`/admin/books/${book.id}/edit`}
+                          className="flex items-center gap-2.5 cursor-pointer py-3 text-[#15283c] dark:text-slate-200 font-bold focus:bg-slate-50 dark:focus:bg-slate-800"
+                        >
+                          <Tag className="w-4 h-4 text-blue-500" /> إدارة أكواد الخصم
+                        </Link>
                       </DropdownMenuItem>
                       {book.filePdf && (
                         <DropdownMenuItem asChild>

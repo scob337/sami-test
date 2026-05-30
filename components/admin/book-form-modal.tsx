@@ -356,7 +356,7 @@ export function BookFormModal({ open, onClose, onSuccess, editBook }: BookFormMo
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-black text-[#674611]">الكتاب فقط (ر.س)</Label>
+                <Label className="text-xs font-black text-[#674611]">كتاب الشخصيات السبعة فقط (ر.س)</Label>
                 <Input
                   type="number"
                   min={0}

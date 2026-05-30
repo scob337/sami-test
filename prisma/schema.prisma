@@ -39,7 +39,7 @@ model Book {
   filePdf     String
   price          Float @default(0) // باقة الكتاب + التقرير
   reportPrice    Float @default(0) // سعر التقرير / الاختبار المدفوع
-  bookOnlyPrice  Float @default(0) // سعر الكتاب فقط (0 = حساب تلقائي)
+  bookOnlyPrice  Float @default(0) // سعر كتاب الشخصيات السبعة فقط (0 = حساب تلقائي)
   isActive       Boolean @default(true)
   createdAt   DateTime @default(now())
   slug        String   @unique
@@ -60,8 +60,9 @@ model Book {
   ctaTitle       String?
   ctaDescription String?
 
-  payments Payment[]
-  tests    Test[]
+  payments      Payment[]
+  tests         Test[]
+  discountCodes DiscountCode[]
 }
 
 model Test {
@@ -334,10 +335,12 @@ model DiscountCode {
   discount  Float
   type      String    @default("PERCENT")
   courseId  Int?
+  bookId    Int?
   isActive  Boolean   @default(true)
   expiresAt DateTime?
   createdAt DateTime  @default(now())
   course    Course?   @relation(fields: [courseId], references: [id])
+  book      Book?     @relation(fields: [bookId], references: [id], onDelete: Cascade)
   payments  Payment[]
 }
 

@@ -1,7 +1,6 @@
 'use client'
 
-import { Mail, Phone, MapPin, Zap, Heart } from 'lucide-react'
-import { Button } from '../ui/button'
+import {  Heart } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
@@ -10,7 +9,6 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
   const pathname = usePathname()
 
-  // Hide footer on dashboard page and dashboard subpaths
   if (pathname?.startsWith('/admin/dashboard')) return null
 
   return (

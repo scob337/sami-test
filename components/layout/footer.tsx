@@ -10,8 +10,8 @@ export function Footer() {
   const currentYear = new Date().getFullYear()
   const pathname = usePathname()
 
-  // Hide footer on dashboard page
-  if (pathname === '/dashboard') return null
+  // Hide footer on dashboard page and dashboard subpaths
+  if (pathname?.startsWith('/admin/dashboard')) return null
 
   return (
     <footer className="relative bg-[rgba(255,250,243,0.9)] backdrop-blur-xl border-t border-border pt-16 pb-12 overflow-hidden w-full">

@@ -135,20 +135,22 @@ export default function DeepNavyDashboard() {
     }
   }
 
-  if (loading || (!authUser && !isLoadingData)) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <LoadingSpinner size="md" className="text-primary" />
+  const LoadingScreen = (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-xl rounded-[32px] border border-border/50 bg-card/95 p-8 shadow-2xl shadow-primary/10 text-center backdrop-blur-xl">
+        <LoadingSpinner size="lg" className="mx-auto text-primary" />
+        <p className="mt-6 text-xl font-black text-foreground">جاري تحميل لوحة التحكم</p>
+        <p className="mt-2 text-sm text-muted-foreground">انتظر لحظة فقط، سنجهز بياناتك الآن.</p>
       </div>
-    )
+    </div>
+  )
+
+  if (loading || (!authUser && !isLoadingData)) {
+    return LoadingScreen
   }
 
   if (isLoadingData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-        <LoadingSpinner size="md" className="text-primary" />
-      </div>
-    )
+    return LoadingScreen
   }
 
   return (

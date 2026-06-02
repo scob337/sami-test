@@ -71,7 +71,7 @@ function CheckoutContent() {
   const finalPrice = useMemo(() => {
     if (!item) return 0
     if (!appliedDiscount) return item.price
-    if (appliedDiscount.type === 'PERCENTAGE') {
+    if (appliedDiscount.type === 'PERCENTAGE' || appliedDiscount.type === 'PERCENT') {
       return item.price * (1 - appliedDiscount.amount / 100)
     }
     return Math.max(0, item.price - appliedDiscount.amount)

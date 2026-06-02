@@ -16,8 +16,9 @@ interface BookPageProps {
 export default async function BookLandingPage({ params }: BookPageProps) {
   const { slug } = await params
   
+  const decodedSlug = decodeURIComponent(slug)
   const book = await prisma.book.findUnique({
-    where: { slug, isActive: true },
+    where: { slug: decodedSlug, isActive: true },
     include: { tests: true }
   })
 

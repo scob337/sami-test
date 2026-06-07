@@ -33,16 +33,16 @@ model User {
 }
 
 model Book {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  filePdf     String
-  price          Float @default(0) // باقة الكتاب + التقرير
-  reportPrice    Float @default(0) // سعر التقرير / الاختبار المدفوع
-  bookOnlyPrice  Float @default(0) // سعر كتاب الشخصيات السبعة فقط (0 = حساب تلقائي)
-  isActive       Boolean @default(true)
-  createdAt   DateTime @default(now())
-  slug        String   @unique
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  filePdf       String
+  price         Float    @default(0) // باقة الكتاب + التقرير
+  reportPrice   Float    @default(0) // سعر التقرير / الاختبار المدفوع
+  bookOnlyPrice Float    @default(0) // سعر كتاب الشخصيات السبعة فقط (0 = حساب تلقائي)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  slug          String   @unique
 
   // Landing Page Fields
   heroTitle       String?
@@ -66,21 +66,22 @@ model Book {
 }
 
 model Test {
-  id             Int        @id @default(autoincrement())
+  id             Int            @id @default(autoincrement())
   name           String
   bookId         Int
-  isActive       Boolean    @default(true)
-  createdAt      DateTime   @default(now())
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
   description    String?
   seoDescription String?
   seoKeywords    String?
   seoTitle       String?
-  slug           String     @unique
+  slug           String         @unique
   aiPrompts      AiPrompt[]
   attempts       Attempt[]
   payments       Payment[]
   questions      Question[]
-  book           Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  discountCodes  DiscountCode[]
+  book           Book           @relation(fields: [bookId], references: [id], onDelete: Cascade)
 }
 
 model AiPrompt {
@@ -336,11 +337,13 @@ model DiscountCode {
   type      String    @default("PERCENT")
   courseId  Int?
   bookId    Int?
+  testId    Int?
   isActive  Boolean   @default(true)
   expiresAt DateTime?
   createdAt DateTime  @default(now())
   course    Course?   @relation(fields: [courseId], references: [id])
   book      Book?     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  test      Test?     @relation(fields: [testId], references: [id], onDelete: Cascade)
   payments  Payment[]
 }
 

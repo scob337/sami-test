@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
     formats: ['image/avif', 'image/webp'],
   },
+  optimizeFonts: false,
   reactStrictMode: true,
   experimental: {
     serverActions: {

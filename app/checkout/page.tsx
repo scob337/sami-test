@@ -189,8 +189,8 @@ function CheckoutContent() {
           code: codeToUse,
           userId: user?.id,
           courseId: type === 'course' ? id : null,
-          bookId: type === 'book' || type === 'package' || type === 'test' ? (bookId || id) : null,
-          testId: type === 'test' ? id : selectedTestId || null,
+          bookId: type === 'test' ? item?.data?.attempt?.test?.bookId : (type === 'book' || type === 'package' ? (bookId || id) : null),
+          testId: type === 'test' ? item?.data?.attempt?.testId : selectedTestId || null,
         }),
       })
       const data = await res.json()

@@ -46,6 +46,16 @@ export async function POST(req: Request) {
       }
     }
 
+    // Check if code is restricted to a specific test
+    if (discountCode.testId) {
+      if (!testId) {
+        return NextResponse.json({ error: 'كود الخصم هذا مخصص لاختبار معين' }, { status: 400 })
+      }
+      if (parseInt(testId) !== discountCode.testId) {
+        return NextResponse.json({ error: 'كود الخصم غير صالح لهذا الاختبار' }, { status: 400 })
+      }
+    }
+
     return NextResponse.json({
       id: discountCode.id,
       amount: discountCode.discount,

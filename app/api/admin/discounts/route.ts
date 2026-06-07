@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     if (!user || !user.isAdmin) return new NextResponse('Forbidden', { status: 403 })
 
     const body = await req.json()
-    const { code, discount, type, expiresAt, isActive, courseId, bookId } = body
+    const { code, discount, type, expiresAt, isActive, courseId, bookId, testId } = body
 
     const newCode = await (prisma as any).discountCode.create({
       data: {
@@ -31,6 +31,7 @@ export async function POST(req: Request) {
         type: type || 'PERCENT',
         courseId: courseId ? parseInt(courseId) : null,
         bookId: bookId ? parseInt(bookId) : null,
+        testId: testId ? parseInt(testId) : null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         isActive: isActive ?? true
       }

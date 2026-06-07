@@ -13,7 +13,8 @@ import {
   Users,
   Settings,
   LogOut,
-  Bell
+  Bell,
+  Tag
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
@@ -22,6 +23,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: 'لوحة التحكم', href: '/admin/dashboard' },
   { icon: BookOpen, label: 'إدارة الكورسات', href: '/admin/courses' },
   { icon: BookOpen, label: 'إدارة الكتب', href: '/admin/books' },
+  { icon: Tag, label: 'أكواد الخصم', href: '/admin/discounts' },
   { icon: ClipboardList, label: 'إدارة الاختبارات', href: '/admin/tests' },
   { icon: HelpCircle, label: 'إدارة الأسئلة', href: '/admin/questions' },
   { icon: MessageSquare, label: 'برومبت التقارير (AI)', href: '/admin/prompts' },

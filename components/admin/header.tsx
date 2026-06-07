@@ -19,7 +19,7 @@ export function Header() {
       <div className="flex items-center h-full">
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="w-[75px] h-full bg-[#ff5722] flex items-center justify-center text-white hover:bg-[#e64a19] transition-colors lg:hidden"
+          className="w-[75px] h-full bg-[#ff5722] flex items-center justify-center text-white hover:bg-[#e64a19] transition-colors"
         >
           <Menu className="w-6 h-6" />
         </button>

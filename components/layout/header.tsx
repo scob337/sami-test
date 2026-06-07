@@ -57,18 +57,7 @@ export function Header() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1 p-1 rounded-2xl">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-bold text-foreground hover:bg-secondary/50 px-5 py-2.5 rounded-xl transition-all relative group cursor-pointer"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
+          {/* Desktop Navigation (Hidden, using Drawer instead as requested) */}
 
           {/* Auth Buttons */}
           <div className="flex items-center gap-3">
@@ -199,9 +188,9 @@ export function Header() {
               </div>
             )}
 
-            {/* Mobile Menu Toggle */}
+            {/* Menu Toggle */}
             <button
-              className="lg:hidden p-3  rounded-2xl transition-colors border border-border/50 cursor-pointer"
+              className="p-3 rounded-2xl transition-colors border border-border/50 cursor-pointer hover:bg-primary/10"
               onClick={() => setIsOpen(!isOpen)}
             >
               <Menu className="w-6 h-6 text-foreground" />
@@ -210,47 +199,87 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Side Navigation Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden border-b border-border/50 bg-background/95 backdrop-blur-xl overflow-hidden shadow-2xl"
-          >
-            <div className="p-6 flex flex-col gap-3">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-lg font-bold text-foreground hover:bg-secondary/60 p-4 rounded-xl transition-all"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              {user && (
-                <Link
-                  href={user.isAdmin ? "/admin" : "/dashboard"}
-                  className="text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground p-4 rounded-xl transition-all"
-                  onClick={() => setIsOpen(false)}
-                >
-                  لوحة التحكم
-                </Link>
-              )}
-              {!user && (
-                <div className="grid grid-cols-2 gap-4 mt-4 pt-6 border-t border-border/50">
-                  <Link href="/auth/login" className="w-full" onClick={() => setIsOpen(false)}>
-                    <Button variant="outline" className="w-full h-14 rounded-2xl font-bold border-2 border-border">دخول</Button>
-                  </Link>
-                  <Link href="/auth/register" className="w-full" onClick={() => setIsOpen(false)}>
-                    <Button className="w-full h-14 rounded-2xl font-black bg-primary text-primary-foreground shadow-lg shadow-primary/20">سجل الآن</Button>
-                  </Link>
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            />
+            {/* Drawer */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(e, { offset, velocity }) => {
+                // Since dir="rtl", swiping to the right means positive offset.x
+                if (offset.x > 100 || velocity.x > 500) {
+                  setIsOpen(false)
+                }
+              }}
+              className="fixed top-0 right-0 h-full w-4/5 sm:w-[350px] bg-background border-l border-border/50 shadow-2xl z-[101] overflow-y-auto flex flex-col"
+              dir="rtl"
+            >
+              <div className="p-6 flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-8">
+                  <img src="/Logo.png" alt="7Types" className="h-8 w-auto" />
+                  <button onClick={() => setIsOpen(false)} className="p-2 bg-muted/50 rounded-full hover:bg-muted text-muted-foreground">
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-              )}
-            </div>
-          </motion.div>
+                
+                <div className="flex flex-col gap-2 flex-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className="text-lg font-bold text-foreground hover:bg-secondary/60 p-4 rounded-xl transition-all"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  
+                  {user ? (
+                    <div className="mt-8 pt-6 border-t border-border/50 flex flex-col gap-3">
+                      <Link
+                        href={user.isAdmin ? "/admin" : "/dashboard"}
+                        className="text-lg text-center font-bold bg-primary hover:bg-primary/90 text-primary-foreground p-4 rounded-xl transition-all shadow-md"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        لوحة التحكم
+                      </Link>
+                      <Button
+                        variant="outline"
+                        onClick={() => { handleLogout(); setIsOpen(false) }}
+                        className="text-lg font-bold p-4 h-auto rounded-xl border-border text-rose-500 hover:text-rose-600 hover:bg-rose-50"
+                      >
+                        تسجيل الخروج
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="mt-auto pt-6 border-t border-border/50 flex flex-col gap-3">
+                      <Link href="/auth/login" className="w-full" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full h-14 text-lg rounded-2xl font-bold border-2 border-border hover:bg-muted">دخول</Button>
+                      </Link>
+                      <Link href="/auth/register" className="w-full" onClick={() => setIsOpen(false)}>
+                        <Button className="w-full h-14 rounded-2xl text-lg font-black bg-primary text-primary-foreground shadow-lg shadow-primary/20">سجل الآن</Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </nav>
